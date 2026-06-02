@@ -18,5 +18,10 @@ ShellRoot {
     NotificationPopup {
         targetWindow: mainBarWindow
     }
+
+    IdleManager {
+        id: globalIdle
+        enabled: true
+    }
     // LockScreen { visible: algumSinalDeBloqueio }
 }

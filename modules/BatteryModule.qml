@@ -25,7 +25,7 @@ Text {
             return criticalColor;
         if (realPercentage <= 30)
             return warningColor;
-        return normalColor;
+        return colorNormal;
     }
 
     text: {
