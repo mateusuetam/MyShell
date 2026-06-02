@@ -6,11 +6,14 @@ import "components"
 ShellRoot {
     id: shellScope
 
+    Wallpaper {
+        screen: Quickshell.screens[0]
+    }
+
     MainBar {
         screen: Quickshell.screens[0]
     }
 
-    // Wallpaper { screen: Quickshell.screens[0] }
     // NotificationCenter {}
     // LockScreen { visible: algumSinalDeBloqueio }
 }
