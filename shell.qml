@@ -1,10 +1,19 @@
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import "components"
+import "components/lockscreen"
 
 ShellRoot {
     id: shellScope
+
+    IpcHandler {
+        target: "lock_manager"
+        function lock(): void {
+            globalIdle.lockScreen();
+        }
+    }
 
     Wallpaper {
         screen: Quickshell.screens[0]
@@ -22,6 +31,10 @@ ShellRoot {
     IdleManager {
         id: globalIdle
         enabled: true
+        lockTarget: nativeLock
     }
-    // LockScreen { visible: algumSinalDeBloqueio }
+
+    LockScreen {
+        id: nativeLock
+    }
 }

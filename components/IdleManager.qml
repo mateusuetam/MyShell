@@ -7,11 +7,7 @@ Item {
     id: idleManager
 
     property bool enabled: true
-
-    Process {
-        id: lockProcess
-        command: ["swaylock", "-f"]
-    }
+    property var lockTarget: null
 
     Process {
         id: screenProcess
@@ -19,7 +15,9 @@ Item {
     }
 
     function lockScreen() {
-        lockProcess.startDetached();
+        if (lockTarget != null) {
+            lockTarget.activateLock();
+        }
     }
 
     function turnOffMonitors() {
@@ -33,9 +31,8 @@ Item {
         respectInhibitors: true
 
         onIsIdleChanged: {
-            if (isIdle) {
+            if (isIdle)
                 idleManager.lockScreen();
-            }
         }
     }
 
@@ -46,9 +43,8 @@ Item {
         respectInhibitors: true
 
         onIsIdleChanged: {
-            if (isIdle) {
+            if (isIdle)
                 idleManager.turnOffMonitors();
-            }
         }
     }
 }
