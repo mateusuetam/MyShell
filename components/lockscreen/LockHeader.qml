@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../theme"
 
 ColumnLayout {
     Layout.fillWidth: true
@@ -7,15 +8,15 @@ ColumnLayout {
 
     Text {
         text: "MU-TH-UR 6000 // INTERFACE DE SESSÃO SEGURA"
-        font.family: "JetBrainsMono Nerd Font"
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
         font.bold: true
-        color: "#7c6f64"
+        color: Theme.hoverColor
     }
 
     Rectangle {
         Layout.fillWidth: true
-        height: 1
-        color: "#3c3836"
+        implicitHeight: 1
+        color: Theme.hoverColor
     }
 }

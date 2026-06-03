@@ -1,6 +1,5 @@
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQml.Models
-import Quickshell
 import Quickshell.Services.SystemTray
 
 Item {
@@ -31,11 +30,12 @@ Item {
                 height: 20
                 anchors.verticalCenter: parent.verticalCenter
 
-                readonly property var trayItem: modelData
+                required property var modelData
+                readonly property var trayItem: trayItemDelegate.modelData
 
                 Image {
                     anchors.fill: parent
-                    source: trayItem && trayItem.icon ? trayItem.icon : ""
+                    source: trayItemDelegate.trayItem && trayItemDelegate.trayItem.icon ? trayItemDelegate.trayItem.icon : ""
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                 }
@@ -46,14 +46,14 @@ Item {
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                     onClicked: mouse => {
-                        if (!trayItem)
+                        if (!trayItemDelegate.trayItem)
                             return;
 
                         if (mouse.button === Qt.LeftButton) {
-                            trayItem.activate();
+                            trayItemDelegate.trayItem.activate();
                         } else if (mouse.button === Qt.RightButton) {
-                            if (trayItem.hasMenu && trayItem.menu) {
-                                customMenu.menuModel = trayItem.menu;
+                            if (trayItemDelegate.trayItem.hasMenu && trayItemDelegate.trayItem.menu) {
+                                customMenu.menuModel = trayItemDelegate.trayItem.menu;
                                 var windowPos = trayItemDelegate.mapToItem(null, 0, trayItemDelegate.height);
                                 customMenu.anchor.window = trayModule.parentWindow;
                                 customMenu.anchor.rect.x = windowPos.x - (customMenu.implicitWidth / 2) + (trayItemDelegate.width / 2);

@@ -1,14 +1,13 @@
 import QtQuick
 import Quickshell
+import "../components/theme"
 
 Text {
     id: clockModule
 
-    readonly property string textColor: "#ebdbb2"
-
-    font.family: "JetBrainsMono Nerd Font Propo"
-    font.pixelSize: 14
-    color: clockModule.textColor
+    font.family: Theme.fontFamily
+    font.pixelSize: Theme.fontSize
+    color: Theme.textColor
     anchors.verticalCenter: parent.verticalCenter
 
     SystemClock {

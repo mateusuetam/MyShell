@@ -1,14 +1,11 @@
 import QtQuick
 import Quickshell.Io
 import Quickshell.Bluetooth
+import "../components/theme"
 
 Item {
     id: bluetoothModule
 
-    readonly property string textColor: "#ebdbb2"
-    readonly property string offColor: "#fb4934"
-    readonly property string unpairedColor: "#a89984"
-    readonly property string pairedColor: "#83a598"
     readonly property bool isBluetoothOn: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
 
     implicitWidth: bluetoothText.implicitWidth
@@ -51,27 +48,27 @@ Item {
 
     Text {
         id: bluetoothText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
         anchors.verticalCenter: parent.verticalCenter
 
         textFormat: Text.RichText
 
         color: {
             if (!bluetoothModule.isBluetoothOn) {
-                return bluetoothModule.offColor;
+                return Theme.warmColor;
             }
 
             var dev = bluetoothModule.getConnectedDevice();
             if (!dev) {
-                return bluetoothModule.unpairedColor;
+                return Theme.unfocusedColor;
             }
 
-            return bluetoothModule.pairedColor;
+            return Theme.connectedColor;
         }
 
         text: {
-            var prefix = `<span style="color: ${bluetoothModule.textColor};">bt:</span>`;
+            var prefix = `<span style="color: ${Theme.textColor};">bt:</span>`;
 
             if (!bluetoothModule.isBluetoothOn) {
                 return `${prefix} off`;

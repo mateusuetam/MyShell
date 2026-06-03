@@ -1,10 +1,9 @@
 import QtQuick
 import Quickshell.Io
+import "../components/theme"
 
 Item {
     id: clipboardModule
-
-    readonly property string clipboardColor: "#b16286"
 
     implicitWidth: clipText.implicitWidth
     implicitHeight: 30
@@ -35,9 +34,9 @@ Item {
 
     Text {
         id: clipText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
-        color: clipboardModule.clipboardColor
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
+        color: Theme.uniqueColor
         anchors.verticalCenter: parent.verticalCenter
         text: "clipboard"
     }

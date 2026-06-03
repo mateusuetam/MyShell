@@ -1,10 +1,9 @@
 import QtQuick
 import Quickshell.Io
+import "../components/theme"
 
 Item {
     id: powermenuModule
-
-    readonly property string powerColor: "#fb4934"
 
     implicitWidth: powerText.implicitWidth
     implicitHeight: 30
@@ -24,10 +23,10 @@ Item {
 
     Text {
         id: powerText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
-        color: powermenuModule.powerColor
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
+        color: Theme.warmColor
         anchors.verticalCenter: parent.verticalCenter
-        text: "power"
+        text: "-SESS-"
     }
 }

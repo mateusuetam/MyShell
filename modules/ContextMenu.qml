@@ -1,5 +1,7 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import "../components/theme"
 
 PopupWindow {
     id: menuPopup
@@ -10,12 +12,6 @@ PopupWindow {
     implicitHeight: menuLayout.implicitHeight + 12
     grabFocus: true
 
-    readonly property string backgroundColor: "#282828"
-    readonly property string hoverColor: "#3c3836"
-    readonly property string textColor: "#ebdbb2"
-    readonly property string borderColor: "#504945"
-    readonly property string accentColor: "#fe8019"
-
     QsMenuOpener {
         id: menuOpener
         menu: menuPopup.menuModel
@@ -23,8 +19,8 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: menuPopup.backgroundColor
-        border.color: menuPopup.borderColor
+        color: Theme.backgroundColor
+        border.color: Theme.borderColor
         border.width: 1
 
         Column {
@@ -39,23 +35,26 @@ PopupWindow {
                 model: menuOpener.children
 
                 delegate: Item {
+                    id: contextMenuItemDelegate
                     width: menuLayout.width
 
-                    readonly property bool isSep: modelData.isSeparator
+                    required property var modelData
+                    readonly property bool isSep: contextMenuItemDelegate.modelData.isSeparator
+
                     height: isSep ? 8 : 26
 
                     Rectangle {
-                        visible: parent.isSep
-                        width: parent.width - 10
+                        visible: contextMenuItemDelegate.isSep
+                        width: contextMenuItemDelegate.width - 10
                         height: 1
-                        color: menuPopup.borderColor
+                        color: Theme.borderColor
                         anchors.centerIn: parent
                     }
 
                     Rectangle {
-                        visible: !parent.isSep
+                        visible: !contextMenuItemDelegate.isSep
                         anchors.fill: parent
-                        color: mouseArea.containsMouse ? menuPopup.hoverColor : "transparent"
+                        color: mouseArea.containsMouse ? Theme.hoverColor : "transparent"
 
                         Row {
                             anchors.fill: parent
@@ -63,20 +62,20 @@ PopupWindow {
                             spacing: 8
 
                             Image {
-                                visible: modelData.icon !== ""
+                                visible: contextMenuItemDelegate.modelData.icon !== ""
                                 width: 14
                                 height: 14
                                 anchors.verticalCenter: parent.verticalCenter
-                                source: modelData.icon
+                                source: contextMenuItemDelegate.modelData.icon
                                 sourceSize.width: 14
                                 sourceSize.height: 14
                             }
 
                             Text {
-                                text: modelData.text
-                                color: mouseArea.containsMouse ? menuPopup.accentColor : menuPopup.textColor
-                                font.family: "JetBrainsMono Nerd Font"
-                                font.pixelSize: 12
+                                text: contextMenuItemDelegate.modelData.text
+                                color: mouseArea.containsMouse ? Theme.flashyColor : Theme.textColor
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 11
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
@@ -84,15 +83,14 @@ PopupWindow {
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
-                            hoverEnabled: modelData.enabled
+                            hoverEnabled: contextMenuItemDelegate.modelData.enabled
                             cursorShape: hoverEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
                             onClicked: {
                                 if (hoverEnabled) {
-                                    if (typeof modelData.triggered === "function") {
-                                        modelData.triggered();
+                                    if (typeof contextMenuItemDelegate.modelData.triggered === "function") {
+                                        contextMenuItemDelegate.modelData.triggered();
                                     }
-
                                     menuPopup.visible = false;
                                 }
                             }

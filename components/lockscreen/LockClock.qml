@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../theme"
 
 ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
@@ -8,14 +9,16 @@ ColumnLayout {
 
     Text {
         id: clock
+
         property var date: new Date()
+
         Layout.alignment: Qt.AlignHCenter
 
         renderType: Text.NativeRendering
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Theme.fontFamily
         font.pixelSize: 110
         font.bold: true
-        color: "#8ec07c"
+        color: Theme.activeColor
 
         Timer {
             running: true
@@ -34,9 +37,9 @@ ColumnLayout {
     Text {
         Layout.alignment: Qt.AlignHCenter
         text: "SOBREPOSIÇÃO DE HORA DO SISTEMA"
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Theme.fontFamily
         font.pixelSize: 12
         font.letterSpacing: 4
-        color: "#504945"
+        color: Theme.hoverColor
     }
 }

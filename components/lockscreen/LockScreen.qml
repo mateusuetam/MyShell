@@ -1,8 +1,9 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pam
+import "../theme"
 
 Item {
     id: lockRoot
@@ -49,7 +50,7 @@ Item {
 
         WlSessionLockSurface {
             id: lockSurface
-            color: "#1d2021"
+            color: Theme.backgroundColor
 
             ColumnLayout {
                 anchors.fill: parent

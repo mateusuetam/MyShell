@@ -1,12 +1,11 @@
 import QtQuick
-import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 
 Item {
     id: idleManager
 
-    property bool enabled: true
+    property bool enabledIdle: true
     property var lockTarget: null
 
     Process {
@@ -27,7 +26,7 @@ Item {
     IdleMonitor {
         id: lockMonitor
         timeout: 300
-        enabled: idleManager.enabled
+        enabled: idleManager.enabledIdle
         respectInhibitors: true
 
         onIsIdleChanged: {
@@ -39,7 +38,7 @@ Item {
     IdleMonitor {
         id: screenMonitor
         timeout: 600
-        enabled: idleManager.enabled
+        enabled: idleManager.enabledIdle
         respectInhibitors: true
 
         onIsIdleChanged: {

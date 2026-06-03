@@ -1,12 +1,9 @@
 import QtQuick
 import Quickshell.Services.Pipewire
+import "../components/theme"
 
 Item {
     id: micModule
-
-    readonly property string textColor: "#ebdbb2"
-    readonly property string mutedColor: "#fe8019"
-    readonly property string volumeColor: "#b8bb26"
 
     readonly property var micNode: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
     readonly property int micPercent: micNode ? Math.round(micNode.volume * 100) : 0
@@ -44,14 +41,14 @@ Item {
 
     Text {
         id: micText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
-        color: micModule.micMuted ? micModule.mutedColor : micModule.volumeColor
+        color: micModule.micMuted ? Theme.flashyColor : Theme.positiveColor
 
         text: {
-            var prefix = `<span style="color: ${micModule.textColor};">mic:</span>`;
+            var prefix = `<span style="color: ${Theme.textColor};">mic:</span>`;
             return micModule.micMuted ? `${prefix} muted` : `${prefix} ${micModule.micPercent}%`;
         }
     }

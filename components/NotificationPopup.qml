@@ -1,14 +1,37 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import "../components/theme"
 
 PopupWindow {
     id: notifyPopup
 
+    readonly property color notifyColor: {
+        if (!currentNotify) {
+            return Theme.borderColor;
+        }
+
+        switch (currentNotify.urgency) {
+        case NotificationUrgency.Critical:
+            return Theme.warmColor;
+        case NotificationUrgency.Low:
+            return Theme.activeColor;
+        case NotificationUrgency.Normal:
+        default:
+            return Theme.borderColor;
+        }
+    }
+    property var notifyQueue: []
+    property var currentNotify: null
     required property QtObject targetWindow
 
+    Binding {
+        target: notifyPopup.targetWindow
+        property: "borderColor"
+        value: notifyPopup.visible ? notifyPopup.notifyColor : Theme.borderColor
+    }
+
     anchor.window: targetWindow
-    anchor.edges: Edges.Top
     anchor.rect.y: 29
     anchor.rect.x: Quickshell.screens[0] ? Math.round((Quickshell.screens[0].width - implicitWidth) / 2) : 0
     implicitWidth: 350
@@ -17,13 +40,6 @@ PopupWindow {
 
     color: "transparent"
     visible: false
-
-    property var notifyQueue: []
-    property var currentNotify: null
-
-    readonly property color normalBorder: "#3c3836"
-    readonly property color criticalBorder: "#cc241d"
-    readonly property color borderColor: currentNotify && currentNotify.urgency === NotificationUrgency.Critical ? criticalBorder : normalBorder
 
     NotificationServer {
         id: notifyServer
@@ -59,11 +75,15 @@ PopupWindow {
             animateIn.start();
 
             let timeout = 7000;
+
             if (currentNotify.expireTimeout > 0) {
                 timeout = currentNotify.expireTimeout * 1000;
             } else if (currentNotify.urgency === NotificationUrgency.Critical) {
                 timeout = 14000;
+            } else if (currentNotify.urgency === NotificationUrgency.Low) {
+                timeout = 4000;
             }
+
             dismissTimer.interval = timeout;
             dismissTimer.start();
         } else {
@@ -96,11 +116,11 @@ PopupWindow {
         duration: 150
         easing.type: Easing.InQuad
         onFinished: {
-            if (currentNotify) {
-                currentNotify.dismiss();
-                currentNotify = null;
+            if (notifyPopup.currentNotify) {
+                notifyPopup.currentNotify.dismiss();
+                notifyPopup.currentNotify = null;
             }
-            nextNotification();
+            notifyPopup.nextNotification();
         }
     }
 
@@ -110,7 +130,7 @@ PopupWindow {
         height: parent.height
         y: -height
 
-        color: "#282828"
+        color: Theme.backgroundColor
         radius: 0
 
         Rectangle {
@@ -118,7 +138,7 @@ PopupWindow {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: 1
-            color: notifyPopup.borderColor
+            color: notifyPopup.notifyColor
         }
 
         Rectangle {
@@ -126,7 +146,7 @@ PopupWindow {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: 1
-            color: notifyPopup.borderColor
+            color: notifyPopup.notifyColor
         }
 
         Rectangle {
@@ -134,7 +154,7 @@ PopupWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: notifyPopup.borderColor
+            color: notifyPopup.notifyColor
         }
 
         MouseArea {
@@ -155,9 +175,9 @@ PopupWindow {
             Text {
                 id: headerText
                 width: parent.width
-                color: "#ebdbb2"
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 12
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
                 font.bold: true
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
@@ -166,16 +186,16 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 1
-                color: notifyPopup.borderColor
+                color: notifyPopup.notifyColor
                 visible: bodyText.text !== ""
             }
 
             Text {
                 id: bodyText
                 width: parent.width
-                color: "#ebdbb2"
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 12
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
             }

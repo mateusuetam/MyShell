@@ -1,12 +1,10 @@
 import QtQuick
 import Quickshell.Wayland
+import "../components/theme"
 
 Item {
     id: idleModule
 
-    readonly property string textColor: "#ebdbb2"
-    readonly property string idlingColor: "#a89984"
-    readonly property string watchingColor: "#8ec07c"
     readonly property bool isActive: inhibitor.enabled
     property var parentWindow: null
 
@@ -30,13 +28,13 @@ Item {
 
     Text {
         id: idleText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
-        color: idleModule.isActive ? idleModule.watchingColor : idleModule.idlingColor
+        color: idleModule.isActive ? Theme.activeColor : Theme.unfocusedColor
         text: {
-            var prefix = `<span style="color: ${idleModule.textColor};">idle:</span>`;
+            var prefix = `<span style="color: ${Theme.textColor};">idle:</span>`;
             return idleModule.isActive ? `${prefix} watching` : `${prefix} idling`;
         }
     }

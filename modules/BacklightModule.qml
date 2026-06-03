@@ -1,15 +1,14 @@
 import QtQuick
 import Quickshell.Io
+import "../components/theme"
 
 Item {
     id: backlightModule
 
-    readonly property string lightColor: "#fabd2f"
+    property int brightnessPercent: 50
 
     implicitWidth: backlightText.implicitWidth
     implicitHeight: 30
-
-    property int brightnessPercent: 50
 
     Process {
         id: readBrightness
@@ -29,9 +28,12 @@ Item {
 
     Process {
         id: changeBrightness
+
+        // qmllint disable signal-handler-parameters
         onExited: {
             readBrightness.running = true;
         }
+        // qmllint enable signal-handler-parameters
     }
 
     Process {
@@ -74,9 +76,9 @@ Item {
 
     Text {
         id: backlightText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
-        color: backlightModule.lightColor
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
+        color: Theme.brightColor
         anchors.verticalCenter: parent.verticalCenter
         text: `light: ${backlightModule.brightnessPercent}%`
     }

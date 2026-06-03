@@ -3,9 +3,12 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import "../modules"
+import "../components/theme"
 
 PanelWindow {
     id: barWindow
+
+    property color borderColor: Theme.borderColor
 
     anchors {
         top: true
@@ -26,14 +29,20 @@ PanelWindow {
     // --- RENDERIZAÇÃO DA BARRA ---
     Rectangle {
         anchors.fill: parent
-        color: "#282828"
+        color: Theme.backgroundColor
 
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: "#3c3836"
+            color: barWindow.borderColor
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200
+                }
+            }
         }
 
         RowLayout {
@@ -45,7 +54,7 @@ PanelWindow {
             Row {
                 id: leftModules
                 spacing: 12
-                Layout.alignment: Qt.AlignLeft | Qt.AlignVerticalCenter
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                 MprisModule {}
             }
@@ -54,17 +63,17 @@ PanelWindow {
             Row {
                 id: rightModules
                 spacing: 12
-                Layout.alignment: Qt.AlignRight | Qt.AlignVerticalCenter
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
                 TrayModule {
                     parentWindow: barWindow
                 }
-                ClipboardModule {}
                 IdleModule {
                     parentWindow: barWindow
                 }
                 MicrophoneModule {}
                 VolumeModule {}
+                ClipboardModule {}
                 BluetoothModule {}
                 NetworkModule {}
                 BacklightModule {}

@@ -1,18 +1,15 @@
 import QtQuick
 import Quickshell.Io
 import Quickshell.Networking
+import "../components/theme"
 
 Item {
     id: networkModule
 
+    readonly property bool isWifiOn: Networking.wifiEnabled
+
     implicitWidth: networkText.implicitWidth
     implicitHeight: 30
-
-    readonly property string textColor: "#ebdbb2"
-    readonly property string offColor: "#fb4934"
-    readonly property string downColor: "#a89984"
-    readonly property string connectedColor: "#458588"
-    readonly property bool isWifiOn: Networking.wifiEnabled
 
     function getActiveDevice() {
         var devicesList = Networking.devices.values;
@@ -61,23 +58,23 @@ Item {
 
     Text {
         id: networkText
-        font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
         color: {
             if (!networkModule.isWifiOn) {
-                return networkModule.offColor;
+                return Theme.warmColor;
             }
             var dev = networkModule.getActiveDevice();
             if (!dev) {
-                return networkModule.downColor;
+                return Theme.unfocusedColor;
             }
-            return networkModule.connectedColor;
+            return Theme.connectedColor;
         }
 
         text: {
-            var prefix = `<span style="color: ${networkModule.textColor};">nw:</span>`;
+            var prefix = `<span style="color: ${Theme.textColor};">nw:</span>`;
             if (!networkModule.isWifiOn) {
                 return `${prefix} off`;
             }
