@@ -5,26 +5,28 @@ import "../components/theme"
 Item {
     id: mprisModule
 
-    readonly property var activePlayer: mprisModule.getRealActivePlayer()
+    readonly property var activePlayer: {
+        const list = Mpris.players.values;
 
-    function getRealActivePlayer() {
-        var list = Mpris.players.values;
-        if (!list || list.length === 0)
+        if (!list.length)
             return null;
-        for (var i = 0; i < list.length; i++) {
-            var p = list[i];
-            if (p && p.dbusName && p.dbusName.indexOf("playerctld") !== -1) {
+
+        for (const p of list) {
+            if (p?.dbusName?.includes("playerctld"))
                 continue;
-            }
-            if (p && p.trackTitle !== "") {
+
+            if (p?.trackTitle)
                 return p;
-            }
         }
+
         return null;
     }
 
-    implicitWidth: mprisText.implicitWidth
+    readonly property int maxWidth: 550
+
+    implicitWidth: visible ? Math.min(mprisText.implicitWidth, maxWidth) : 0
     implicitHeight: 30
+
     visible: activePlayer !== null
 
     MouseArea {
@@ -33,31 +35,45 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
         onClicked: mouse => {
-            if (!mprisModule.activePlayer)
+            const player = mprisModule.activePlayer;
+
+            if (!player)
                 return;
-            if (mouse.button === Qt.LeftButton && mprisModule.activePlayer.canTogglePlaying) {
-                mprisModule.activePlayer.togglePlaying();
-            } else if (mouse.button === Qt.RightButton && mprisModule.activePlayer.canGoNext) {
-                mprisModule.activePlayer.next();
-            } else if (mouse.button === Qt.MiddleButton && mprisModule.activePlayer.canGoPrevious) {
-                mprisModule.activePlayer.previous();
+
+            if (mouse.button === Qt.LeftButton && player.canTogglePlaying) {
+                player.togglePlaying();
+            } else if (mouse.button === Qt.RightButton && player.canGoNext) {
+                player.next();
+            } else if (mouse.button === Qt.MiddleButton && player.canGoPrevious) {
+                player.previous();
             }
         }
     }
 
     Text {
         id: mprisText
+
+        width: parent.implicitWidth
+        elide: Text.ElideRight
+        anchors.verticalCenter: parent.verticalCenter
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize
-        anchors.verticalCenter: parent.verticalCenter
-        color: (mprisModule.activePlayer && mprisModule.activePlayer.isPlaying) ? Theme.positiveColor : Theme.activeColor
+
+        color: {
+            const player = mprisModule.activePlayer;
+            return player?.isPlaying ? Theme.positiveColor : Theme.activeColor;
+        }
+
         text: {
-            if (!mprisModule.activePlayer || !mprisModule.activePlayer.trackTitle)
+            const player = mprisModule.activePlayer;
+
+            if (!player?.trackTitle)
                 return "";
-            var title = mprisModule.activePlayer.trackTitle;
-            var artist = mprisModule.activePlayer.trackArtist || "Desconhecido";
-            var icon = mprisModule.activePlayer.isPlaying ? "||" : ">";
-            return `${icon} ${title} - ${artist}`;
+
+            const icon = player.isPlaying ? "||" : ">";
+            const artist = player.trackArtist || "Desconhecido";
+
+            return `${icon} ${player.trackTitle} - ${artist}`;
         }
     }
 }
