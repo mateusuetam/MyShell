@@ -5,27 +5,26 @@ import Quickshell.Wayland
 PanelWindow {
     id: wallpaperWindow
 
+    readonly property url wallpaperPath: "file://" + Quickshell.env("HOME") + "/Imagens/afina.png"
+
+    WlrLayershell.layer: WlrLayer.Background
+    WlrLayershell.namespace: "wallpaper"
+
     anchors {
         top: true
+        right: true
         bottom: true
         left: true
-        right: true
     }
 
     exclusiveZone: 0
     focusable: false
 
-    Component.onCompleted: {
-        if (this.WlrLayershell !== null) {
-            this.WlrLayershell.layer = WlrLayer.Background;
-            this.WlrLayershell.namespace = "wallpaper";
-        }
-    }
-
     Image {
         anchors.fill: parent
-        source: "file://" + Quickshell.env("HOME") + "/Imagens/afina.png"
+        source: wallpaperWindow.wallpaperPath
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        cache: true
     }
 }

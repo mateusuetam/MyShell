@@ -10,21 +10,18 @@ PanelWindow {
 
     property color borderColor: Theme.borderColor
 
+    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.namespace: "mainbar"
+
     anchors {
         top: true
         left: true
         right: true
     }
+
     implicitHeight: 30
     exclusiveZone: 30
-    aboveWindows: true
     focusable: false
-
-    Component.onCompleted: {
-        if (this.WlrLayershell !== null) {
-            this.WlrLayershell.layer = WlrLayer.Top;
-        }
-    }
 
     // --- RENDERIZAÇÃO DA BARRA ---
     Rectangle {
