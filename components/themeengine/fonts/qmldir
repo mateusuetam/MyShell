@@ -1,0 +1,2 @@
+singleton FontFamily FontFamily.qml
+singleton FontSize FontSize.qml

@@ -1,12 +1,14 @@
 import QtQuick
 import Quickshell.Services.Mpris
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: mprisModule
 
-    readonly property color playingColor: "#689d6a"
-    readonly property color pausedColor: "#458588"
+    readonly property color playingColor: ColorRegistry.mprisPlayingColor
+    readonly property color pausedColor: ColorRegistry.mprisPausedColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property var activePlayer: {
         const list = Mpris.players.values;
@@ -60,8 +62,8 @@ Item {
         elide: Text.ElideRight
         anchors.verticalCenter: parent.verticalCenter
 
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: mprisModule.labelFontFamily
+        font.pixelSize: mprisModule.labelFontSize
 
         color: {
             const player = mprisModule.activePlayer;

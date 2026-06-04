@@ -1,11 +1,13 @@
 import QtQuick
 import Quickshell.Io
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: clipboardModule
 
-    readonly property color utilityColor: "#b16286"
+    readonly property color utilityColor: ColorRegistry.clipboardUtilityColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     implicitWidth: clipText.implicitWidth
     implicitHeight: 30
@@ -36,8 +38,8 @@ Item {
 
     Text {
         id: clipText
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: clipboardModule.labelFontFamily
+        font.pixelSize: clipboardModule.labelFontSize
 
         color: clipboardModule.utilityColor
         anchors.verticalCenter: parent.verticalCenter

@@ -1,15 +1,17 @@
 import QtQuick
 import Quickshell.Io
 import Quickshell.Networking
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: networkModule
 
-    readonly property color disabledColor: "#fb4934"
-    readonly property color disconnectedColor: "#928374"
-    readonly property color connectedColor: "#458588"
-    readonly property color labelColor: "#ebdbb2"
+    readonly property color disabledColor: ColorRegistry.networkDisabledColor
+    readonly property color disconnectedColor: ColorRegistry.networkDisconnectedColor
+    readonly property color connectedColor: ColorRegistry.networkConnectedColor
+    readonly property color labelColor: ColorRegistry.networkLabelColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property bool isWifiOn: Networking.wifiEnabled
 
@@ -64,8 +66,8 @@ Item {
     Text {
         id: networkText
 
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: networkModule.labelFontFamily
+        font.pixelSize: networkModule.labelFontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
 

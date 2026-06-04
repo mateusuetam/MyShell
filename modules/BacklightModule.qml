@@ -1,11 +1,14 @@
 import QtQuick
 import Quickshell.Io
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: backlightModule
 
-    readonly property color brightnessColor: "#fabd2f"
+    readonly property color brightnessColor: ColorRegistry.backlightBrightnessColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+
     property int brightnessPercent: 50
 
     implicitWidth: backlightText.implicitWidth
@@ -75,8 +78,8 @@ Item {
 
     Text {
         id: backlightText
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: backlightModule.labelFontFamily
+        font.pixelSize: backlightModule.labelFontSize
 
         color: backlightModule.brightnessColor
         anchors.verticalCenter: parent.verticalCenter

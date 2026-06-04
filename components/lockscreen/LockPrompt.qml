@@ -1,24 +1,24 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
-import "../theme"
+import "../themeengine"
 
 ColumnLayout {
     id: promptRoot
 
-    readonly property color labelColor: "#d79921"
-    readonly property color inputActiveColor: "#8ec07c"
-    readonly property color inputInactiveColor: "#689d6a"
-    readonly property color errorColor: "#cc241d"
-
-    readonly property string loginText: "NOSTROMO_LOGIN_node7 > INSIRA A CHAVE DE ACESSO:"
-    readonly property string authInProgressText: "AUTENTICANDO DIRETÓRIO DE SESSÃO..."
-    readonly property string errorText: "!! ERRO: CHAVE DE ACESSO INVÁLIDA // PRIVILÉGIOS NEGADOS !!"
-
+    readonly property color labelColor: ColorRegistry.lockPromptLabelColor
+    readonly property color inputActiveColor: ColorRegistry.lockPromptInputActiveColor
+    readonly property color inputInactiveColor: ColorRegistry.lockPromptInputInactiveColor
+    readonly property color errorColor: ColorRegistry.lockPromptErrorColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: 16
     readonly property int inputFontSize: 22
     readonly property int errorFontSize: 14
     readonly property int inputWidth: 400
+
+    readonly property string loginText: "NOSTROMO_LOGIN_node7 > INSIRA A CHAVE DE ACESSO:"
+    readonly property string authInProgressText: "AUTENTICANDO DIRETÓRIO DE SESSÃO..."
+    readonly property string errorText: "!! ERRO: CHAVE DE ACESSO INVÁLIDA // PRIVILÉGIOS NEGADOS !!"
 
     property bool unlockInProgress: false
     property bool showFailure: false
@@ -36,7 +36,7 @@ ColumnLayout {
 
     Text {
         text: promptRoot.unlockInProgress ? promptRoot.authInProgressText : promptRoot.loginText
-        font.family: Theme.fontFamily
+        font.family: promptRoot.labelFontFamily
         font.pixelSize: promptRoot.labelFontSize
         color: promptRoot.labelColor
     }
@@ -55,13 +55,13 @@ ColumnLayout {
 
             cursorDelegate: Item {}
 
-            font.family: Theme.fontFamily
+            font.family: promptRoot.labelFontFamily
             font.pixelSize: promptRoot.inputFontSize
 
             color: promptRoot.inputActiveColor
             background: Item {}
 
-            onTextChanged: promptRoot.textChanged(this.text)
+            onTextChanged: promptRoot.textChanged(text)
             onAccepted: promptRoot.accepted()
         }
 
@@ -90,7 +90,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: promptRoot.showFailure
         text: promptRoot.errorText
-        font.family: Theme.fontFamily
+        font.family: promptRoot.labelFontFamily
         font.pixelSize: promptRoot.errorFontSize
         font.bold: true
         color: promptRoot.errorColor

@@ -1,22 +1,24 @@
 import QtQuick
 import Quickshell.Services.UPower
-import "../components/theme"
+import "../components/themeengine"
 
 Text {
     id: batteryModule
 
-    readonly property color errorColor: "#cc241d"
-    readonly property color chargingColor: "#b8bb26"
-    readonly property color criticalColor: "#fb4934"
-    readonly property color lowColor: "#fe8019"
-    readonly property color normalColor: "#fabd2f"
+    readonly property color errorColor: ColorRegistry.batteryErrorColor
+    readonly property color chargingColor: ColorRegistry.batteryChargingColor
+    readonly property color criticalColor: ColorRegistry.batteryCriticalColor
+    readonly property color lowColor: ColorRegistry.batteryLowColor
+    readonly property color normalColor: ColorRegistry.batteryNormalColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property var dev: UPower.displayDevice
     readonly property int realPercentage: (dev && dev.ready) ? Math.round(dev.percentage * 100) : 0
     readonly property bool isFull: dev ? (dev.state === UPowerDeviceState.FullyCharged || (realPercentage >= 95 && dev.changeRate === 0)) : false
 
-    font.family: Theme.fontFamily
-    font.pixelSize: Theme.fontSize
+    font.family: batteryModule.labelFontFamily
+    font.pixelSize: batteryModule.labelFontSize
     anchors.verticalCenter: parent.verticalCenter
 
     color: {

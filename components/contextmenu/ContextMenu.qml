@@ -1,16 +1,17 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
-import "../theme"
+import "../themeengine"
 
 PopupWindow {
     id: menuPopup
 
-    readonly property color menuBackgroundColor: "#282828"
-    readonly property color menuBorderColor: "#3c3836"
-    readonly property color itemHoverColor: "#d65d0e"
-    readonly property color itemTextColor: "#ebdbb2"
-    readonly property color itemTextHoverColor: "#ebdbb2"
+    readonly property color menuBackgroundColor: ColorRegistry.menuBackgroundColor
+    readonly property color menuBorderColor: ColorRegistry.menuBorderColor
+    readonly property color itemTextColor: ColorRegistry.menuTextColor
+    readonly property color itemHoverColor: ColorRegistry.menuHoverColor
+    readonly property color itemTextHoverColor: ColorRegistry.menuTextHoverColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
 
     readonly property int menuWidth: 200
     readonly property int itemHeight: 26
@@ -83,7 +84,7 @@ PopupWindow {
                         Text {
                             text: contextMenuItemDelegate.modelData.text
                             color: mouseArea.containsMouse ? menuPopup.itemTextHoverColor : menuPopup.itemTextColor
-                            font.family: Theme.fontFamily
+                            font.family: menuPopup.labelFontFamily
                             font.pixelSize: menuPopup.menuFontSize
                             anchors.verticalCenter: parent.verticalCenter
                         }

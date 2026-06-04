@@ -1,13 +1,15 @@
 import QtQuick
 import Quickshell.Wayland
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: idleModule
 
-    readonly property color activatedColor: "#8ec07c"
-    readonly property color deactivatedColor: "#928374"
-    readonly property color labelColor: "#ebdbb2"
+    readonly property color activatedColor: ColorRegistry.idleActivatedColor
+    readonly property color deactivatedColor: ColorRegistry.idleDeactivatedColor
+    readonly property color labelColor: ColorRegistry.idleLabelColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property bool isActive: inhibitor.enabled
     property var parentWindow: null
@@ -33,8 +35,8 @@ Item {
     Text {
         id: idleText
 
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: idleModule.labelFontFamily
+        font.pixelSize: idleModule.labelFontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
 

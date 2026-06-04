@@ -3,12 +3,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Wayland
 import Quickshell.Services.Pam
-import "../theme"
+import "../themeengine"
 
 Item {
     id: lockRoot
 
-    readonly property color lockBackgroundColor: "#282828"
+    readonly property color lockBackgroundColor: ColorRegistry.lockScreenBackgroundColor
     readonly property int screenMargins: 60
     readonly property int elementSpacing: 20
 

@@ -1,14 +1,16 @@
 import QtQuick
 import Quickshell
-import "../components/theme"
+import "../components/themeengine"
 
 Text {
     id: clockModule
 
-    readonly property color labelColor: "#ebdbb2"
+    readonly property color labelColor: ColorRegistry.clockLabelColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-    font.family: Theme.fontFamily
-    font.pixelSize: Theme.fontSize
+    font.family: clockModule.labelFontFamily
+    font.pixelSize: clockModule.labelFontSize
 
     color: clockModule.labelColor
     anchors.verticalCenter: parent.verticalCenter

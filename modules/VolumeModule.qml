@@ -1,13 +1,15 @@
 import QtQuick
 import Quickshell.Services.Pipewire
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: volumeModule
 
-    readonly property color mutedColor: "#fe8019"
-    readonly property color activeColor: "#b8bb26"
-    readonly property color labelColor: "#ebdbb2"
+    readonly property color mutedColor: ColorRegistry.volumeMutedColor
+    readonly property color activeColor: ColorRegistry.volumeActiveColor
+    readonly property color labelColor: ColorRegistry.volumeLabelColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property var audioNode: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
     readonly property int volPercent: audioNode ? Math.round(audioNode.volume * 100) : 0
@@ -45,8 +47,8 @@ Item {
 
     Text {
         id: volText
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: volumeModule.labelFontFamily
+        font.pixelSize: volumeModule.labelFontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
 

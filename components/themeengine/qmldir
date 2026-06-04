@@ -1,0 +1,2 @@
+singleton ColorRegistry ColorRegistry.qml
+singleton TypographyRegistry TypographyRegistry.qml

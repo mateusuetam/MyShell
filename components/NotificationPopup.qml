@@ -1,16 +1,19 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
-import "../components/theme"
+import "themeengine"
 
 PopupWindow {
     id: notifyPopup
 
-    readonly property color popupBackgroundColor: "#282828"
-    readonly property color contentTextColor: "#ebdbb2"
-    readonly property color criticalUrgencyColor: "#fb4934"
-    readonly property color lowUrgencyColor: "#8ec07c"
-    readonly property color normalUrgencyColor: "#3c3836"
+    readonly property color popupBackgroundColor: ColorRegistry.notificationBackgroundColor
+    readonly property color contentTextColor: ColorRegistry.notificationContentColor
+    readonly property color criticalUrgencyColor: ColorRegistry.notificationCriticalColor
+    readonly property color lowUrgencyColor: ColorRegistry.notificationLowColor
+    readonly property color normalUrgencyColor: ColorRegistry.notificationNormalColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int headerFontSize: 16
+    readonly property int bodyFontSize: 14
 
     readonly property color notifyColor: {
         if (!currentNotify) {
@@ -183,8 +186,8 @@ PopupWindow {
                 id: headerText
                 width: parent.width
                 color: notifyPopup.contentTextColor
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
+                font.family: notifyPopup.labelFontFamily
+                font.pixelSize: notifyPopup.headerFontSize
                 font.bold: true
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
@@ -201,8 +204,8 @@ PopupWindow {
                 id: bodyText
                 width: parent.width
                 color: notifyPopup.contentTextColor
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
+                font.family: notifyPopup.labelFontFamily
+                font.pixelSize: notifyPopup.bodyFontSize
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
             }

@@ -8,7 +8,7 @@ Item {
     id: trayModule
 
     readonly property int iconSize: 20
-    readonly property int itemSpacing: 8
+    readonly property int itemSpacing: 10
 
     property var parentWindow: null
 

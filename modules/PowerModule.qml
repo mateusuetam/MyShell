@@ -1,11 +1,13 @@
 import QtQuick
 import Quickshell.Io
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: powermenuModule
 
-    readonly property color sessionColor: "#83a598"
+    readonly property color sessionColor: ColorRegistry.powerSessionColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     implicitWidth: powerText.implicitWidth
     implicitHeight: 30
@@ -26,8 +28,8 @@ Item {
     Text {
         id: powerText
 
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: powermenuModule.labelFontFamily
+        font.pixelSize: powermenuModule.labelFontSize
 
         color: powermenuModule.sessionColor
         anchors.verticalCenter: parent.verticalCenter

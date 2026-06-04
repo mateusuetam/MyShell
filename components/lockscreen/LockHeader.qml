@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
-import "../theme"
+import "../themeengine"
 
 ColumnLayout {
     id: lockHeader
 
     readonly property string headerText: "MU-TH-UR 6000 // INTERFACE DE SESSÃO SEGURA"
-    readonly property color accentColor: "#504945"
+    readonly property color accentColor: ColorRegistry.lockHeaderAccentColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: 14
 
     Layout.fillWidth: true
@@ -14,7 +15,7 @@ ColumnLayout {
 
     Text {
         text: lockHeader.headerText
-        font.family: Theme.fontFamily
+        font.family: lockHeader.labelFontFamily
         font.pixelSize: lockHeader.labelFontSize
         font.bold: true
         color: lockHeader.accentColor

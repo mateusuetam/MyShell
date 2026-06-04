@@ -3,12 +3,13 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import "../modules"
+import "themeengine"
 
 PanelWindow {
     id: barWindow
 
-    readonly property color barBackgroundColor: "#282828"
-    property color barBorderColor: "#3c3836"
+    readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
+    property color barBorderColor: ColorRegistry.mainbarBorderColor
 
     readonly property int barHeight: 30
     readonly property int layoutSpacing: 12

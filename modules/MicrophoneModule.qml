@@ -1,13 +1,15 @@
 import QtQuick
 import Quickshell.Services.Pipewire
-import "../components/theme"
+import "../components/themeengine"
 
 Item {
     id: micModule
 
-    readonly property color mutedColor: "#fe8019"
-    readonly property color activeColor: "#b8bb26"
-    readonly property color labelColor: "#ebdbb2"
+    readonly property color mutedColor: ColorRegistry.microphoneMutedColor
+    readonly property color activeColor: ColorRegistry.microphoneActiveColor
+    readonly property color labelColor: ColorRegistry.microphoneLabelColor
+    readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
+    readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property var micNode: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
     readonly property int micPercent: micNode ? Math.round(micNode.volume * 100) : 0
@@ -45,8 +47,8 @@ Item {
 
     Text {
         id: micText
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
+        font.family: micModule.labelFontFamily
+        font.pixelSize: micModule.labelFontSize
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.RichText
 
