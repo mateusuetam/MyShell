@@ -3,10 +3,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "components"
+import "components/wallpaper"
 import "components/lockscreen"
+import "components/contextmenu"
 
 ShellRoot {
     id: shellScope
+
+    ContextMenu {
+        id: sharedContextMenu
+    }
 
     IpcHandler {
         target: "lock_manager"
@@ -17,11 +23,13 @@ ShellRoot {
 
     Wallpaper {
         screen: Quickshell.screens[0]
+        globalMenu: sharedContextMenu
     }
 
     MainBar {
         id: mainBarWindow
         screen: Quickshell.screens[0]
+        globalMenu: sharedContextMenu
     }
 
     NotificationPopup {
