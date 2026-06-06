@@ -56,9 +56,9 @@ Item {
                 continue;
 
             list.push({
+                type: "action",
                 text: obj.name,
                 icon: "",
-                isSeparator: false,
                 enabled: true,
                 preventClose: false,
                 actionType: "change_wallpaper",

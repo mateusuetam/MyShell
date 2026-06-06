@@ -48,9 +48,9 @@ PanelWindow {
 
     readonly property var desktopMenuStructure: [
         {
+            type: "action",
             text: "Wallpaper Changer",
             icon: "",
-            isSeparator: false,
             preventClose: true,
             actionType: "open_wallpaper_submenu",
             actionData: null

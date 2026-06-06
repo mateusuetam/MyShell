@@ -53,8 +53,14 @@ PopupWindow {
 
     NotificationServer {
         id: notifyServer
+
+        imageSupported: false
+        actionsSupported: true
+        actionIconsSupported: true
         bodySupported: true
-        actionsSupported: false
+        bodyImagesSupported: false
+        bodyMarkupSupported: true
+        bodyHyperlinksSupported: true
 
         onNotification: notification => {
             notification.tracked = true;
