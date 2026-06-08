@@ -4,7 +4,7 @@ import QtQml
 import Quickshell
 import Qt.labs.folderlistmodel
 
-Item {
+QtObject {
     id: modelRoot
 
     property var subMenuStructure: []
@@ -16,9 +16,7 @@ Item {
         readonly property url urlPath: model.fileUrl
     }
 
-    visible: false
-
-    FolderListModel {
+    property FolderListModel folderModel: FolderListModel {
         id: folderModel
 
         folder: "file://" + Quickshell.env("HOME") + "/Imagens"
@@ -28,7 +26,7 @@ Item {
         showOnlyReadable: true
     }
 
-    Instantiator {
+    property Instantiator fileInstantiator: Instantiator {
         id: fileInstantiator
 
         model: folderModel
@@ -37,7 +35,7 @@ Item {
         onObjectRemoved: rebuildDebounce.restart()
     }
 
-    Timer {
+    property Timer rebuildDebounce: Timer {
         id: rebuildDebounce
 
         interval: 32

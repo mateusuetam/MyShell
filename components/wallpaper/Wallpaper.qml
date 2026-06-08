@@ -22,7 +22,7 @@ PanelWindow {
     exclusiveZone: 0
     focusable: false
 
-    WallpaperModel {
+    property WallpaperModel backendModel: WallpaperModel {
         id: backendModel
         onWallpaperSelected: fileUrl => {
             wallpaperWindow.sourcePath = fileUrl;

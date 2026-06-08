@@ -45,10 +45,21 @@ PanelWindow {
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onPressed: {
+                if (barWindow.globalMenu) {
+                    barWindow.globalMenu.close();
+                }
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: barWindow.sideMargins
             anchors.rightMargin: barWindow.sideMargins
+            z: 1
 
             // <<< LADO ESQUERDO <<<
             Row {
