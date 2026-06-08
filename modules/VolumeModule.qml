@@ -5,6 +5,9 @@ import "../components/themeengine"
 Item {
     id: volumeModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color mutedColor: ColorRegistry.volumeMutedColor
     readonly property color activeColor: ColorRegistry.volumeActiveColor
     readonly property color labelColor: ColorRegistry.volumeLabelColor
@@ -15,25 +18,37 @@ Item {
     readonly property int volPercent: audioNode ? Math.round(audioNode.volume * 100) : 0
     readonly property bool volMuted: audioNode ? audioNode.muted : false
 
+    implicitWidth: volRow.implicitWidth
+    implicitHeight: volumeModule.parentWindow ? volumeModule.parentWindow.barHeight : 30
+
+    visible: Pipewire.ready && !!Pipewire.defaultAudioSink
+
     PwObjectTracker {
         id: sinkTracker
         objects: [Pipewire.defaultAudioSink]
     }
 
-    implicitWidth: volText.implicitWidth
-    implicitHeight: 30
-    visible: Pipewire.ready && Pipewire.defaultAudioSink !== null
-
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-
-        onClicked: {
-            if (volumeModule.audioNode)
-                volumeModule.audioNode.muted = !volumeModule.audioNode.muted;
+        acceptedButtons: Qt.LeftButton
+        onPressed: mouse => {
+            let menu = volumeModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
+            if (mouse.button === Qt.LeftButton) {
+                if (volumeModule.audioNode) {
+                    volumeModule.audioNode.muted = !volumeModule.audioNode.muted;
+                }
+            }
         }
-
         onWheel: wheel => {
+            let menu = volumeModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
             if (!volumeModule.audioNode)
                 return;
             var step = 0.01;
@@ -45,18 +60,29 @@ Item {
         }
     }
 
-    Text {
-        id: volText
-        font.family: volumeModule.labelFontFamily
-        font.pixelSize: volumeModule.labelFontSize
+    Row {
+        id: volRow
         anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.RichText
-
-        color: volumeModule.volMuted ? volumeModule.mutedColor : volumeModule.activeColor
-
-        text: {
-            var prefix = `<span style="color: ${volumeModule.labelColor};">vol:</span>`;
-            return volumeModule.volMuted ? `${prefix} muted` : `${prefix} ${volumeModule.volPercent}%`;
+        readonly property var volState: {
+            return volumeModule.volMuted ? {
+                color: volumeModule.mutedColor,
+                text: "muted"
+            } : {
+                color: volumeModule.activeColor,
+                text: `${volumeModule.volPercent}%`
+            };
+        }
+        Text {
+            id: volPrefix
+            font.family: volumeModule.labelFontFamily
+            font.pixelSize: volumeModule.labelFontSize
+            color: volumeModule.labelColor
+            text: "vol: "
+        }
+        Text {
+            font: volPrefix.font
+            color: volRow.volState.color
+            text: volRow.volState.text
         }
     }
 }

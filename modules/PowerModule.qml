@@ -5,12 +5,15 @@ import "../components/themeengine"
 Item {
     id: powermenuModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color sessionColor: ColorRegistry.powerSessionColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-    implicitWidth: powerText.implicitWidth
-    implicitHeight: 30
+    implicitWidth: powerRow.implicitWidth
+    implicitHeight: powermenuModule.parentWindow ? powermenuModule.parentWindow.barHeight : 30
 
     Process {
         id: powerCmd
@@ -20,19 +23,27 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            powerCmd.startDetached();
+        acceptedButtons: Qt.LeftButton
+        onPressed: mouse => {
+            let menu = powermenuModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
+            if (mouse.button === Qt.LeftButton) {
+                powerCmd.startDetached();
+            }
         }
     }
 
-    Text {
-        id: powerText
-
-        font.family: powermenuModule.labelFontFamily
-        font.pixelSize: powermenuModule.labelFontSize
-
-        color: powermenuModule.sessionColor
+    Row {
+        id: powerRow
         anchors.verticalCenter: parent.verticalCenter
-        text: "-SESS-"
+        Text {
+            font.family: powermenuModule.labelFontFamily
+            font.pixelSize: powermenuModule.labelFontSize
+            color: powermenuModule.sessionColor
+            text: "-SESS-"
+        }
     }
 }

@@ -6,9 +6,10 @@ import Quickshell.Wayland
 PanelWindow {
     id: wallpaperWindow
 
+    required property var globalMenu
+
     property url sourcePath: "file://" + Quickshell.env("HOME") + "/Imagens/afina.png"
     readonly property int imageFillMode: Image.PreserveAspectCrop
-    property var globalMenu: null
 
     WlrLayershell.layer: WlrLayer.Background
     WlrLayershell.namespace: "wallpaper"
@@ -67,7 +68,6 @@ PanelWindow {
     }
 
     MouseArea {
-        id: wallpaperArea
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onPressed: mouse => {

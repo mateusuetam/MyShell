@@ -6,6 +6,9 @@ import "../components/themeengine"
 Item {
     id: bluetoothModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color disabledColor: ColorRegistry.bluetoothDisabledColor
     readonly property color disconnectedColor: ColorRegistry.bluetoothDisconnectedColor
     readonly property color connectedColor: ColorRegistry.bluetoothConnectedColor
@@ -13,21 +16,19 @@ Item {
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-    readonly property bool isBluetoothOn: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
+    readonly property var adapter: Bluetooth.defaultAdapter
+    readonly property var devicesModel: Bluetooth.devices
+    readonly property bool isBluetoothOn: adapter ? adapter.enabled : false
 
-    implicitWidth: bluetoothText.implicitWidth
-    implicitHeight: 30
+    implicitWidth: bluetoothRow.implicitWidth
+    implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
 
     function getConnectedDevice() {
-        var devicesList = Bluetooth.devices.values;
-        if (!devicesList)
-            return null;
-
-        for (var i = 0; i < devicesList.length; i++) {
-            var dev = devicesList[i];
-            if (dev && dev.connected) {
+        const list = devicesModel?.values ?? [];
+        for (let i = 0; i < list.length; ++i) {
+            const dev = list[i];
+            if (dev?.connected)
                 return dev;
-            }
         }
         return null;
     }
@@ -41,58 +42,62 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onClicked: mouse => {
+        onPressed: mouse => {
+            let menu = bluetoothModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
                 btMenu.running = true;
             } else if (mouse.button === Qt.RightButton) {
-                if (Bluetooth.defaultAdapter) {
-                    Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled;
+                if (bluetoothModule.adapter) {
+                    bluetoothModule.adapter.enabled = !bluetoothModule.adapter.enabled;
                 }
             }
         }
     }
 
-    Text {
-        id: bluetoothText
-
-        font.family: bluetoothModule.labelFontFamily
-        font.pixelSize: bluetoothModule.labelFontSize
+    Row {
+        id: bluetoothRow
         anchors.verticalCenter: parent.verticalCenter
-
-        textFormat: Text.RichText
-
-        color: {
+        readonly property var btState: {
             if (!bluetoothModule.isBluetoothOn) {
-                return bluetoothModule.disabledColor;
+                return {
+                    color: bluetoothModule.disabledColor,
+                    text: "off"
+                };
             }
-
-            var dev = bluetoothModule.getConnectedDevice();
+            const dev = bluetoothModule.getConnectedDevice();
             if (!dev) {
-                return bluetoothModule.disconnectedColor;
+                return {
+                    color: bluetoothModule.disconnectedColor,
+                    text: "unpaired"
+                };
             }
-
-            return bluetoothModule.connectedColor;
-        }
-
-        text: {
-            var prefix = `<span style="color: ${bluetoothModule.labelColor};">bt:</span>`;
-
-            if (!bluetoothModule.isBluetoothOn) {
-                return `${prefix} off`;
-            }
-
-            var dev = bluetoothModule.getConnectedDevice();
-            if (!dev) {
-                return `${prefix} unpaired`;
-            }
-
             if (dev.batteryAvailable) {
-                var batPercent = Math.round(dev.battery * 100);
-                return `${prefix} ${dev.name} (${batPercent}%)`;
+                const batPercent = Math.round(dev.battery * 100);
+                return {
+                    color: bluetoothModule.connectedColor,
+                    text: `${dev.name} (${batPercent}%)`
+                };
             }
-
-            return `${prefix} ${dev.name}`;
+            return {
+                color: bluetoothModule.connectedColor,
+                text: dev.name
+            };
+        }
+        Text {
+            id: btPrefix
+            font.family: bluetoothModule.labelFontFamily
+            font.pixelSize: bluetoothModule.labelFontSize
+            color: bluetoothModule.labelColor
+            text: "bt: "
+        }
+        Text {
+            font: btPrefix.font
+            color: bluetoothRow.btState.color
+            text: bluetoothRow.btState.text
         }
     }
 }

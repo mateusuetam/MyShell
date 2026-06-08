@@ -5,19 +5,20 @@ import Quickshell.Services.SystemTray
 Item {
     id: trayModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property int iconSize: 20
     readonly property int itemSpacing: 10
 
-    property var parentWindow: null
-    property var globalMenu: null
-
     implicitWidth: trayLayout.implicitWidth
-    implicitHeight: 30
-    visible: SystemTray.items !== undefined && SystemTray.items !== null
+    implicitHeight: trayModule.parentWindow ? trayModule.parentWindow.barHeight : 30
+
+    visible: !!SystemTray.items
 
     Row {
         id: trayLayout
-
+        height: parent.height
         spacing: trayModule.itemSpacing
         anchors.verticalCenter: parent.verticalCenter
 
@@ -35,7 +36,7 @@ Item {
 
                 Image {
                     anchors.fill: parent
-                    source: trayItemDelegate.trayItem && trayItemDelegate.trayItem.icon ? trayItemDelegate.trayItem.icon : ""
+                    source: trayItemDelegate.trayItem?.icon ?? ""
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     sourceSize.width: trayModule.iconSize
@@ -47,10 +48,14 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onPressed: mouse => {
+                        let menu = trayModule.globalMenu;
+                        if (menu) {
+                            menu.close();
+                        }
+                        mouse.accepted = true;
                         let item = trayItemDelegate.trayItem;
                         if (!item)
                             return;
-
                         if (mouse.button === Qt.LeftButton) {
                             item.activate();
                         } else if (mouse.button === Qt.RightButton && item.hasMenu && item.menu && trayModule.globalMenu) {

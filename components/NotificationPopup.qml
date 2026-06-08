@@ -33,6 +33,8 @@ PopupWindow {
 
     property var notifyQueue: []
     property var currentNotify: null
+
+    required property var globalMenu
     required property QtObject targetWindow
 
     Binding {
@@ -176,9 +178,23 @@ PopupWindow {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                dismissTimer.stop();
-                animateOut.start();
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onPressed: mouse => {
+                let menu = notifyPopup.globalMenu;
+                if (menu) {
+                    menu.close();
+                }
+                mouse.accepted = true;
+                if (mouse.button === Qt.LeftButton) {
+                    if (notifyPopup.currentNotify && typeof notifyPopup.currentNotify.activate === "function") {
+                        notifyPopup.currentNotify.activate();
+                    }
+                    dismissTimer.stop();
+                    animateOut.start();
+                } else if (mouse.button === Qt.RightButton) {
+                    dismissTimer.stop();
+                    animateOut.start();
+                }
             }
         }
 

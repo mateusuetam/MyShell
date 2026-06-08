@@ -5,12 +5,15 @@ import "../components/themeengine"
 Item {
     id: clipboardModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color utilityColor: ColorRegistry.clipboardUtilityColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-    implicitWidth: clipText.implicitWidth
-    implicitHeight: 30
+    implicitWidth: clipboardRow.implicitWidth
+    implicitHeight: clipboardModule.parentWindow ? clipboardModule.parentWindow.barHeight : 30
 
     Process {
         id: clipMenu
@@ -26,8 +29,12 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onClicked: mouse => {
+        onPressed: mouse => {
+            let menu = clipboardModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
                 clipMenu.startDetached();
             } else if (mouse.button === Qt.RightButton) {
@@ -36,13 +43,14 @@ Item {
         }
     }
 
-    Text {
-        id: clipText
-        font.family: clipboardModule.labelFontFamily
-        font.pixelSize: clipboardModule.labelFontSize
-
-        color: clipboardModule.utilityColor
+    Row {
+        id: clipboardRow
         anchors.verticalCenter: parent.verticalCenter
-        text: "clipboard"
+        Text {
+            font.family: clipboardModule.labelFontFamily
+            font.pixelSize: clipboardModule.labelFontSize
+            color: clipboardModule.utilityColor
+            text: "clipboard"
+        }
     }
 }

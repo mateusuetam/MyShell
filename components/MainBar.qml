@@ -9,6 +9,7 @@ PanelWindow {
     id: barWindow
 
     property var globalMenu: null
+
     readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
     property color barBorderColor: ColorRegistry.mainbarBorderColor
     readonly property int barHeight: 30
@@ -32,12 +33,14 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         color: barWindow.barBackgroundColor
+
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
             color: barWindow.barBorderColor
+
             Behavior on color {
                 ColorAnimation {
                     duration: 200
@@ -59,20 +62,27 @@ PanelWindow {
             anchors.fill: parent
             anchors.leftMargin: barWindow.sideMargins
             anchors.rightMargin: barWindow.sideMargins
+            spacing: 0
             z: 1
 
             // <<< LADO ESQUERDO <<<
             Row {
                 id: leftModules
+                Layout.fillHeight: true
 
                 spacing: barWindow.layoutSpacing
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-                MprisModule {}
+
+                MprisModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
             }
 
             // >>> LADO DIREITO >>>
             Row {
                 id: rightModules
+                Layout.fillHeight: true
 
                 spacing: barWindow.layoutSpacing
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
@@ -84,17 +94,53 @@ PanelWindow {
 
                 IdleModule {
                     parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
                 }
 
-                MicrophoneModule {}
-                VolumeModule {}
-                ClipboardModule {}
-                BluetoothModule {}
-                NetworkModule {}
-                BacklightModule {}
-                BatteryModule {}
-                ClockModule {}
-                PowerModule {}
+                MicrophoneModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                VolumeModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                ClipboardModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                BluetoothModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                NetworkModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                BacklightModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                BatteryModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                ClockModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
+
+                PowerModule {
+                    parentWindow: barWindow
+                    globalMenu: barWindow.globalMenu
+                }
             }
         }
     }

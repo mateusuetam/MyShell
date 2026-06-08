@@ -6,6 +6,9 @@ import "../components/themeengine"
 Item {
     id: networkModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color disabledColor: ColorRegistry.networkDisabledColor
     readonly property color disconnectedColor: ColorRegistry.networkDisconnectedColor
     readonly property color connectedColor: ColorRegistry.networkConnectedColor
@@ -15,8 +18,8 @@ Item {
 
     readonly property bool isWifiOn: Networking.wifiEnabled
 
-    implicitWidth: networkText.implicitWidth
-    implicitHeight: 30
+    implicitWidth: networkRow.implicitWidth
+    implicitHeight: networkModule.parentWindow ? networkModule.parentWindow.barHeight : 30
 
     function getActiveDevice() {
         var devicesList = Networking.devices.values;
@@ -53,8 +56,12 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onClicked: mouse => {
+        onPressed: mouse => {
+            let menu = networkModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
                 wifiMenu.running = true;
             } else if (mouse.button === Qt.RightButton) {
@@ -63,40 +70,40 @@ Item {
         }
     }
 
-    Text {
-        id: networkText
-
-        font.family: networkModule.labelFontFamily
-        font.pixelSize: networkModule.labelFontSize
+    Row {
+        id: networkRow
         anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.RichText
-
-        color: {
+        readonly property var nwState: {
             if (!networkModule.isWifiOn) {
-                return networkModule.disabledColor;
+                return {
+                    color: networkModule.disabledColor,
+                    text: "off"
+                };
             }
-            var dev = networkModule.getActiveDevice();
+            const dev = networkModule.getActiveDevice();
             if (!dev) {
-                return networkModule.disconnectedColor;
+                return {
+                    color: networkModule.disconnectedColor,
+                    text: "down"
+                };
             }
-            return networkModule.connectedColor;
+            const isWlan = dev.name.indexOf("wlan") !== -1 || dev.name.indexOf("wlp") !== -1;
+            return {
+                color: networkModule.connectedColor,
+                text: isWlan ? networkModule.getWifiName(dev) : dev.name
+            };
         }
-
-        text: {
-            var prefix = `<span style="color: ${networkModule.labelColor};">nw:</span>`;
-            if (!networkModule.isWifiOn) {
-                return `${prefix} off`;
-            }
-            var dev = networkModule.getActiveDevice();
-            if (!dev) {
-                return `${prefix} down`;
-            }
-
-            if (dev.name.indexOf("wlan") !== -1 || dev.name.indexOf("wlp") !== -1) {
-                var essid = networkModule.getWifiName(dev);
-                return `${prefix} ${essid}`;
-            }
-            return `${prefix} ${dev.name}`;
+        Text {
+            id: networkPrefix
+            font.family: networkModule.labelFontFamily
+            font.pixelSize: networkModule.labelFontSize
+            color: networkModule.labelColor
+            text: "nw: "
+        }
+        Text {
+            font: networkPrefix.font
+            color: networkRow.nwState.color
+            text: networkRow.nwState.text
         }
     }
 }

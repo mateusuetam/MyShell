@@ -56,9 +56,13 @@ Item {
             enabled: actionRoot.isEnabled
             hoverEnabled: actionRoot.isEnabled
             cursorShape: hoverEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: {
-                if (actionRoot._actualData) {
-                    actionRoot.triggered(actionRoot._actualData);
+            acceptedButtons: Qt.LeftButton
+            onPressed: mouse => {
+                mouse.accepted = true;
+                if (mouse.button === Qt.LeftButton) {
+                    if (actionRoot._actualData) {
+                        actionRoot.triggered(actionRoot._actualData);
+                    }
                 }
             }
         }

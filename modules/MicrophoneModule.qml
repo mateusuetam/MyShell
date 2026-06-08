@@ -5,6 +5,9 @@ import "../components/themeengine"
 Item {
     id: micModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color mutedColor: ColorRegistry.microphoneMutedColor
     readonly property color activeColor: ColorRegistry.microphoneActiveColor
     readonly property color labelColor: ColorRegistry.microphoneLabelColor
@@ -15,25 +18,37 @@ Item {
     readonly property int micPercent: micNode ? Math.round(micNode.volume * 100) : 0
     readonly property bool micMuted: micNode ? micNode.muted : false
 
+    implicitWidth: micRow.implicitWidth
+    implicitHeight: micModule.parentWindow ? micModule.parentWindow.barHeight : 30
+
+    visible: Pipewire.ready && !!Pipewire.defaultAudioSource
+
     PwObjectTracker {
         id: sourceTracker
         objects: [Pipewire.defaultAudioSource]
     }
 
-    implicitWidth: micText.implicitWidth
-    implicitHeight: 30
-    visible: Pipewire.ready && Pipewire.defaultAudioSource !== null
-
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-
-        onClicked: {
-            if (micModule.micNode)
-                micModule.micNode.muted = !micModule.micNode.muted;
+        acceptedButtons: Qt.LeftButton
+        onPressed: mouse => {
+            let menu = micModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
+            if (mouse.button === Qt.LeftButton) {
+                if (micModule.micNode) {
+                    micModule.micNode.muted = !micModule.micNode.muted;
+                }
+            }
         }
-
         onWheel: wheel => {
+            let menu = micModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
             if (!micModule.micNode)
                 return;
             var step = 0.01;
@@ -45,18 +60,29 @@ Item {
         }
     }
 
-    Text {
-        id: micText
-        font.family: micModule.labelFontFamily
-        font.pixelSize: micModule.labelFontSize
+    Row {
+        id: micRow
         anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.RichText
-
-        color: micModule.micMuted ? micModule.mutedColor : micModule.activeColor
-
-        text: {
-            var prefix = `<span style="color: ${micModule.labelColor};">mic:</span>`;
-            return micModule.micMuted ? `${prefix} muted` : `${prefix} ${micModule.micPercent}%`;
+        readonly property var micState: {
+            return micModule.micMuted ? {
+                color: micModule.mutedColor,
+                text: "muted"
+            } : {
+                color: micModule.activeColor,
+                text: `${micModule.micPercent}%`
+            };
+        }
+        Text {
+            id: micPrefix
+            font.family: micModule.labelFontFamily
+            font.pixelSize: micModule.labelFontSize
+            color: micModule.labelColor
+            text: "mic: "
+        }
+        Text {
+            font: micPrefix.font
+            color: micRow.micState.color
+            text: micRow.micState.text
         }
     }
 }

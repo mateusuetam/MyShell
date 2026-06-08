@@ -5,19 +5,22 @@ import "../components/themeengine"
 Item {
     id: backlightModule
 
+    required property var globalMenu
+    required property var parentWindow
+
+    readonly property color labelColor: ColorRegistry.backlightLabelColor
     readonly property color brightnessColor: ColorRegistry.backlightBrightnessColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     property int brightnessPercent: 50
 
-    implicitWidth: backlightText.implicitWidth
-    implicitHeight: 30
+    implicitWidth: backlightRow.implicitWidth
+    implicitHeight: backlightModule.parentWindow ? backlightModule.parentWindow.barHeight : 30
 
     Process {
         id: readBrightness
         command: ["sh", "-c", "brightnessctl -m | cut -d, -f4 | tr -d '%'"]
-
         stdout: StdioCollector {
             onStreamFinished: {
                 var val = parseInt(this.text.trim());
@@ -26,13 +29,11 @@ Item {
                 }
             }
         }
-
         Component.onCompleted: readBrightness.running = true
     }
 
     Process {
         id: changeBrightness
-
         onExited: {
             readBrightness.running = true;
         }
@@ -51,38 +52,49 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onClicked: mouse => {
+        onPressed: mouse => {
+            let menu = backlightModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
                 gammastepMenu.running = true;
             } else if (mouse.button === Qt.RightButton) {
                 gammastepToggle.running = true;
             }
         }
-
         onWheel: wheel => {
+            let menu = backlightModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
             if (changeBrightness.running)
                 return;
-
             if (wheel.angleDelta.y > 0) {
                 changeBrightness.command = ["brightnessctl", "set", "+1%"];
             } else {
                 changeBrightness.command = ["brightnessctl", "set", "1%-"];
             }
-
             changeBrightness.running = true;
         }
     }
 
-    Text {
-        id: backlightText
-        font.family: backlightModule.labelFontFamily
-        font.pixelSize: backlightModule.labelFontSize
-
-        color: backlightModule.brightnessColor
+    Row {
+        id: backlightRow
         anchors.verticalCenter: parent.verticalCenter
-        text: `light: ${backlightModule.brightnessPercent}%`
+        Text {
+            id: backlightPrefix
+            font.family: backlightModule.labelFontFamily
+            font.pixelSize: backlightModule.labelFontSize
+            color: backlightModule.labelColor
+            text: "light: "
+        }
+        Text {
+            font: backlightPrefix.font
+            color: backlightModule.brightnessColor
+            text: `${backlightModule.brightnessPercent}%`
+        }
     }
 }

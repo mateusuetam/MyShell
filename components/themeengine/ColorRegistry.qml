@@ -39,6 +39,7 @@ QtObject {
 
     // Backlight
     property color backlightBrightnessColor: Gruvbox.bright_yellow
+    property color backlightLabelColor: Gruvbox.light1
 
     // Battery
     property color batteryErrorColor: Gruvbox.neutral_red
@@ -46,9 +47,12 @@ QtObject {
     property color batteryCriticalColor: Gruvbox.bright_red
     property color batteryLowColor: Gruvbox.bright_orange
     property color batteryNormalColor: Gruvbox.bright_yellow
+    property color batteryLabelColor: Gruvbox.light1
 
     // Clock
     property color clockLabelColor: Gruvbox.light1
+    property color clockDayColor: Gruvbox.bright_aqua
+    property color clockMonthColor: Gruvbox.neutral_purple
 
     // Power
     property color powerSessionColor: Gruvbox.bright_blue

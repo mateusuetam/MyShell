@@ -5,46 +5,47 @@ import "../components/themeengine"
 Item {
     id: mprisModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color playingColor: ColorRegistry.mprisPlayingColor
     readonly property color pausedColor: ColorRegistry.mprisPausedColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
+    readonly property int maxWidth: 550
+
     readonly property var activePlayer: {
         const list = Mpris.players.values;
-
         if (!list.length)
             return null;
-
         for (const p of list) {
             if (p?.dbusName?.includes("playerctld"))
                 continue;
-
             if (p?.trackTitle)
                 return p;
         }
-
         return null;
     }
 
-    readonly property int maxWidth: 550
+    implicitWidth: visible ? Math.min(mprisRow.implicitWidth, maxWidth) : 0
+    implicitHeight: mprisModule.parentWindow ? mprisModule.parentWindow.barHeight : 30
 
-    implicitWidth: visible ? Math.min(mprisText.implicitWidth, maxWidth) : 0
-    implicitHeight: 30
-
-    visible: activePlayer !== null
+    visible: !!activePlayer
 
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-
-        onClicked: mouse => {
+        onPressed: mouse => {
+            let menu = mprisModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
             const player = mprisModule.activePlayer;
-
             if (!player)
                 return;
-
             if (mouse.button === Qt.LeftButton && player.canTogglePlaying) {
                 player.togglePlaying();
             } else if (mouse.button === Qt.RightButton && player.canGoNext) {
@@ -55,31 +56,32 @@ Item {
         }
     }
 
-    Text {
-        id: mprisText
-
-        width: parent.implicitWidth
-        elide: Text.ElideRight
+    Row {
+        id: mprisRow
         anchors.verticalCenter: parent.verticalCenter
-
-        font.family: mprisModule.labelFontFamily
-        font.pixelSize: mprisModule.labelFontSize
-
-        color: {
+        readonly property var playerState: {
             const player = mprisModule.activePlayer;
-            return player?.isPlaying ? mprisModule.playingColor : mprisModule.pausedColor;
-        }
-
-        text: {
-            const player = mprisModule.activePlayer;
-
-            if (!player?.trackTitle)
-                return "";
-
-            const icon = player.isPlaying ? "||" : ">";
+            if (!player || !player.trackTitle) {
+                return {
+                    color: mprisModule.pausedColor,
+                    text: ""
+                };
+            }
+            const icon = player.isPlaying ? "|| " : "> ";
             const artist = player.trackArtist || "Desconhecido";
-
-            return `${icon} ${player.trackTitle} - ${artist}`;
+            const uiColor = player.isPlaying ? mprisModule.playingColor : mprisModule.pausedColor;
+            return {
+                color: uiColor,
+                text: `${icon}${player.trackTitle} - ${artist}`
+            };
+        }
+        Text {
+            width: Math.min(implicitWidth, mprisModule.maxWidth)
+            elide: Text.ElideRight
+            font.family: mprisModule.labelFontFamily
+            font.pixelSize: mprisModule.labelFontSize
+            color: mprisRow.playerState.color
+            text: mprisRow.playerState.text
         }
     }
 }

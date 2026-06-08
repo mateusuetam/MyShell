@@ -2,9 +2,13 @@ import QtQuick
 import Quickshell.Services.UPower
 import "../components/themeengine"
 
-Text {
+Item {
     id: batteryModule
 
+    required property var globalMenu
+    required property var parentWindow
+
+    readonly property color labelColor: ColorRegistry.batteryLabelColor
     readonly property color errorColor: ColorRegistry.batteryErrorColor
     readonly property color chargingColor: ColorRegistry.batteryChargingColor
     readonly property color criticalColor: ColorRegistry.batteryCriticalColor
@@ -17,28 +21,50 @@ Text {
     readonly property int realPercentage: (dev && dev.ready) ? Math.round(dev.percentage * 100) : 0
     readonly property bool isFull: dev ? (dev.state === UPowerDeviceState.FullyCharged || (realPercentage >= 95 && dev.changeRate === 0)) : false
 
-    font.family: batteryModule.labelFontFamily
-    font.pixelSize: batteryModule.labelFontSize
-    anchors.verticalCenter: parent.verticalCenter
+    implicitWidth: batteryRow.implicitWidth
+    implicitHeight: batteryModule.parentWindow ? batteryModule.parentWindow.barHeight : 30
 
-    color: {
-        if (!dev || !dev.ready)
-            return batteryModule.errorColor;
-        if (!UPower.onBattery)
-            return batteryModule.chargingColor;
-        if (realPercentage <= 20)
-            return batteryModule.criticalColor;
-        if (realPercentage <= 30)
-            return batteryModule.lowColor;
-        return batteryModule.normalColor;
-    }
-
-    text: {
-        if (!dev || !dev.ready)
-            return "bat: --%";
-        if (!UPower.onBattery) {
-            return isFull ? `bat: ${realPercentage}% [AC]` : `bat: ${realPercentage}% +${Math.round(Math.abs(dev.changeRate))}W`;
+    Row {
+        id: batteryRow
+        anchors.verticalCenter: parent.verticalCenter
+        readonly property var batteryState: {
+            const dev = batteryModule.dev;
+            if (!dev || !dev.ready) {
+                return {
+                    color: batteryModule.errorColor,
+                    text: "--%"
+                };
+            }
+            const pct = batteryModule.realPercentage;
+            const rate = Math.round(Math.abs(dev.changeRate));
+            if (!UPower.onBattery) {
+                return {
+                    color: batteryModule.chargingColor,
+                    text: batteryModule.isFull ? `${pct}% [AC]` : `${pct}% +${rate}W`
+                };
+            }
+            let uiColor = batteryModule.normalColor;
+            if (pct <= 20) {
+                uiColor = batteryModule.criticalColor;
+            } else if (pct <= 30) {
+                uiColor = batteryModule.lowColor;
+            }
+            return {
+                color: uiColor,
+                text: `${pct}% - ${rate}W`
+            };
         }
-        return `bat: ${realPercentage}% - ${Math.round(Math.abs(dev.changeRate))}W`;
+        Text {
+            id: batteryPrefix
+            font.family: batteryModule.labelFontFamily
+            font.pixelSize: batteryModule.labelFontSize
+            color: batteryModule.labelColor
+            text: "bat: "
+        }
+        Text {
+            font: batteryPrefix.font
+            color: batteryRow.batteryState.color
+            text: batteryRow.batteryState.text
+        }
     }
 }

@@ -5,6 +5,9 @@ import "../components/themeengine"
 Item {
     id: idleModule
 
+    required property var globalMenu
+    required property var parentWindow
+
     readonly property color activatedColor: ColorRegistry.idleActivatedColor
     readonly property color deactivatedColor: ColorRegistry.idleDeactivatedColor
     readonly property color labelColor: ColorRegistry.idleLabelColor
@@ -12,7 +15,9 @@ Item {
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
     readonly property bool isActive: inhibitor.enabled
-    property var parentWindow: null
+
+    implicitWidth: idleRow.implicitWidth
+    implicitHeight: idleModule.parentWindow ? idleModule.parentWindow.barHeight : 30
 
     IdleInhibitor {
         id: inhibitor
@@ -20,31 +25,45 @@ Item {
         enabled: false
     }
 
-    implicitWidth: idleText.implicitWidth
-    implicitHeight: 30
-
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-
-        onClicked: {
-            inhibitor.enabled = !inhibitor.enabled;
+        acceptedButtons: Qt.LeftButton
+        onPressed: mouse => {
+            let menu = idleModule.globalMenu;
+            if (menu) {
+                menu.close();
+            }
+            mouse.accepted = true;
+            if (mouse.button === Qt.LeftButton) {
+                inhibitor.enabled = !inhibitor.enabled;
+            }
         }
     }
 
-    Text {
-        id: idleText
-
-        font.family: idleModule.labelFontFamily
-        font.pixelSize: idleModule.labelFontSize
+    Row {
+        id: idleRow
         anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.RichText
-
-        color: idleModule.isActive ? idleModule.activatedColor : idleModule.deactivatedColor
-
-        text: {
-            var prefix = `<span style="color: ${idleModule.labelColor};">idle:</span>`;
-            return idleModule.isActive ? `${prefix} watching` : `${prefix} idling`;
+        readonly property var idleState: {
+            return idleModule.isActive ? {
+                color: idleModule.activatedColor,
+                text: "watching"
+            } : {
+                color: idleModule.deactivatedColor,
+                text: "idling"
+            };
+        }
+        Text {
+            id: idlePrefix
+            font.family: idleModule.labelFontFamily
+            font.pixelSize: idleModule.labelFontSize
+            color: idleModule.labelColor
+            text: "idle: "
+        }
+        Text {
+            font: idlePrefix.font
+            color: idleRow.idleState.color
+            text: idleRow.idleState.text
         }
     }
 }

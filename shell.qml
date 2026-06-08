@@ -34,6 +34,7 @@ ShellRoot {
 
     NotificationPopup {
         targetWindow: mainBarWindow
+        globalMenu: sharedContextMenu
     }
 
     IdleManager {

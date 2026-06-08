@@ -152,8 +152,6 @@ PopupWindow {
             id: bgMouseArea
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onPressed: mouse => mouse.accepted = true
-            onClicked: mouse => mouse.accepted = true
         }
 
         ListView {
