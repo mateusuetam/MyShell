@@ -33,7 +33,9 @@ Item {
         }
     }
 
-    width: parent ? parent.width : 200
+    readonly property bool hasIcon: safeData.icon !== undefined && safeData.icon !== ""
+
+    width: parent ? parent.width : 0
     height: isSeparator ? delegateRoot.menuPopup.separatorHeight : delegateRoot.menuPopup.itemHeight
 
     Rectangle {
@@ -45,7 +47,7 @@ Item {
     }
 
     Rectangle {
-        visible: delegateRoot.isAction
+        visible: delegateRoot.isAction || delegateRoot.isSubmenu || delegateRoot.isToggle
         anchors.fill: parent
         color: mouseArea.containsMouse ? delegateRoot.menuPopup.itemHoverColor : "transparent"
 
@@ -56,8 +58,7 @@ Item {
 
             Image {
                 id: itemIcon
-
-                visible: delegateRoot.safeData.icon !== undefined && delegateRoot.safeData.icon !== ""
+                visible: delegateRoot.hasIcon
                 width: delegateRoot.menuPopup.iconSize
                 height: delegateRoot.menuPopup.iconSize
                 anchors.verticalCenter: parent.verticalCenter
@@ -68,21 +69,21 @@ Item {
 
             Text {
                 id: itemText
-
                 text: delegateRoot.safeData.text || ""
-                width: delegateRoot.width - (delegateRoot.menuPopup.iconSize + 24)
+                width: delegateRoot.width - (delegateRoot.hasIcon ? (delegateRoot.menuPopup.iconSize + 24) : 16)
                 anchors.verticalCenter: parent.verticalCenter
                 color: mouseArea.containsMouse ? delegateRoot.menuPopup.itemTextHoverColor : delegateRoot.menuPopup.itemTextColor
                 font.family: delegateRoot.menuPopup.labelFontFamily
                 font.pixelSize: delegateRoot.menuPopup.menuFontSize
-
                 elide: Text.ElideRight
             }
         }
 
+        // TODO: Inserir um indicador visual (setinha para a direita se isSubmenu === true)
+        // TODO: Inserir um Switch/Checkbox a direita se isToggle === true
+
         MouseArea {
             id: mouseArea
-
             anchors.fill: parent
             enabled: delegateRoot.isEnabled
             hoverEnabled: delegateRoot.isEnabled
@@ -91,5 +92,13 @@ Item {
                 delegateRoot.triggered(delegateRoot.safeData);
             }
         }
+    }
+
+    Rectangle {
+        visible: delegateRoot.isSlider
+        anchors.fill: parent
+        color: "transparent"
+
+        // TODO: Desenhar o slider se for implementar controle de Volume/Brilho
     }
 }

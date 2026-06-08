@@ -78,10 +78,8 @@ PopupWindow {
 
         _pendingModel = modelData;
         _pendingWindow = targetWindow;
-
         _pendingX = x;
         _pendingY = y;
-
         _isAnchorMode = false;
 
         repositionTimer.restart();
@@ -112,28 +110,21 @@ PopupWindow {
 
     Timer {
         id: repositionTimer
-
         interval: 32
         repeat: false
-
         onTriggered: {
             if (!menuPopup._pendingWindow)
                 return;
 
             menuPopup.menuModel = menuPopup._pendingModel;
-
             menuPopup._self.anchor.window = menuPopup._pendingWindow;
 
             if (menuPopup._isAnchorMode) {
                 if (!menuPopup._pendingAnchorItem)
                     return;
-
                 const windowPos = menuPopup._pendingAnchorItem.mapToItem(null, 0, menuPopup._pendingAnchorItem.height);
-
                 const newX = windowPos.x - (menuPopup.implicitWidth / 2) + (menuPopup._pendingAnchorItem.width / 2);
-
                 const newY = windowPos.y + menuPopup.verticalOffset;
-
                 menuPopup._self.anchor.rect = Qt.rect(newX, newY, menuPopup._pendingAnchorItem.width, 1);
             } else {
                 menuPopup._self.anchor.rect = Qt.rect(menuPopup._pendingX, menuPopup._pendingY, 1, 1);
@@ -145,38 +136,35 @@ PopupWindow {
 
     QsMenuOpener {
         id: menuOpener
-
         menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
     }
 
     Rectangle {
         anchors.fill: parent
-
         color: menuPopup.menuBackgroundColor
-
         border.color: menuPopup.menuBorderColor
         border.width: 1
 
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onPressed: mouse => mouse.accepted = true
+            onClicked: mouse => mouse.accepted = true
+        }
+
         ListView {
             id: menuView
-
             anchors.fill: parent
             anchors.margins: menuPopup.menuMargins
-
             spacing: 2
-
             interactive: false
             boundsBehavior: Flickable.StopAtBounds
-
             model: menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children
 
             delegate: MenuItemDelegate {
                 required property var model
-
                 width: menuView.width
-
                 menuPopup: menuPopup
-
                 itemData: model.modelData !== undefined ? model.modelData : model
 
                 onTriggered: dataObj => {
