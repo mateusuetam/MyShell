@@ -58,8 +58,8 @@ Item {
                             return;
                         if (mouse.button === Qt.LeftButton) {
                             item.activate();
-                        } else if (mouse.button === Qt.RightButton && item.hasMenu && item.menu && trayModule.globalMenu) {
-                            trayModule.globalMenu.openMenu(trayModule.parentWindow, trayItemDelegate, item.menu);
+                        } else if (mouse.button === Qt.RightButton && item.hasMenu && item.menu && menu) {
+                            menu.openMenu(trayModule.parentWindow, trayItemDelegate, item.menu);
                         }
                     }
                 }

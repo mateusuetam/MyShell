@@ -12,12 +12,59 @@ Item {
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
+    readonly property var powerMenuModel: [
+        {
+            type: "action",
+            text: "Sair",
+            onTrigger: () => cmdSair.startDetached()
+        },
+        {
+            type: "action",
+            text: "Bloquear",
+            onTrigger: () => cmdBloquear.startDetached()
+        },
+        {
+            type: "separator"
+        },
+        {
+            type: "action",
+            text: "Suspender",
+            onTrigger: () => cmdSuspender.startDetached()
+        },
+        {
+            type: "action",
+            text: "Reiniciar",
+            onTrigger: () => cmdReiniciar.startDetached()
+        },
+        {
+            type: "action",
+            text: "Desligar",
+            onTrigger: () => cmdDesligar.startDetached()
+        }
+    ]
+
     implicitWidth: powerRow.implicitWidth
     implicitHeight: powermenuModule.parentWindow ? powermenuModule.parentWindow.barHeight : 30
 
     Process {
-        id: powerCmd
-        command: ["sh", "-c", "$HOME/Documentos/repos/configs/scripts/powermenu.sh"]
+        id: cmdSair
+        command: ["niri", "msg", "action", "quit", "--skip-confirmation"]
+    }
+    Process {
+        id: cmdBloquear
+        command: ["quickshell", "ipc", "call", "lock_manager", "lock"]
+    }
+    Process {
+        id: cmdSuspender
+        command: ["systemctl", "suspend"]
+    }
+    Process {
+        id: cmdReiniciar
+        command: ["reboot"]
+    }
+    Process {
+        id: cmdDesligar
+        command: ["shutdown", "-h", "0"]
     }
 
     MouseArea {
@@ -31,7 +78,9 @@ Item {
             }
             mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
-                powerCmd.startDetached();
+                if (menu) {
+                    menu.openMenu(powermenuModule.parentWindow, powermenuModule, powermenuModule.powerMenuModel);
+                }
             }
         }
     }
