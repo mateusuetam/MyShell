@@ -15,14 +15,80 @@ Item {
     implicitWidth: clipboardRow.implicitWidth
     implicitHeight: clipboardModule.parentWindow ? clipboardModule.parentWindow.barHeight : 30
 
-    Process {
-        id: clipMenu
-        command: ["sh", "-c", "cliphist list | rofi -dmenu -theme $HOME/Documentos/repos/configs/rofi/launcher.rasi | cliphist decode | wl-copy"]
+    property var _tempModel: []
+
+    function parseClipboardOutput(rawText) {
+        let processedModel = [];
+        let cleanText = String(rawText || "").trim();
+
+        if (cleanText === "")
+            return processedModel;
+
+        let lines = cleanText.split("\n");
+        for (let i = 0; i < lines.length; i++) {
+            let trimmed = lines[i].trim();
+            if (trimmed === "")
+                continue;
+
+            let match = trimmed.match(/^(\d+)\s+(.*)$/);
+            let textPart = (match && match[2]) ? match[2].trim() : trimmed;
+
+            processedModel.push({
+                text: textPart,
+                display: textPart,
+                value: trimmed,
+                onTrigger: () => {
+                    clipboardModule.handleClipboardSelection(trimmed);
+                }
+            });
+        }
+        return processedModel;
+    }
+
+    function refreshClipboardList() {
+        cliphistListProcess.running = false;
+        cliphistListProcess.running = true;
+    }
+
+    function clearClipboardHistory() {
+        cliphistAction.command = ["sh", "-c", "cliphist wipe && notify-send Clipboard 'Histórico apagado!'"];
+        cliphistAction.startDetached();
     }
 
     Process {
-        id: clipWipe
-        command: ["sh", "-c", "cliphist wipe && notify-send Clipboard 'Histórico apagado!'"]
+        id: cliphistListProcess
+        command: ["sh", "-c", "cliphist list | head -n 50"]
+
+        stdout: StdioCollector {
+            id: clipboardBuffer
+
+            onStreamFinished: {
+                clipboardModule._tempModel = clipboardModule.parseClipboardOutput(this.text);
+
+                if (clipboardModule._tempModel.length > 0 && clipboardModule.globalMenu) {
+                    clipboardModule.globalMenu.showSearchInput = true;
+                    clipboardModule.globalMenu.openMenu(clipboardModule.parentWindow, clipboardModule, clipboardModule._tempModel);
+                }
+            }
+        }
+    }
+
+    Process {
+        id: cliphistAction
+    }
+
+    function handleClipboardSelection(stringData) {
+        if (stringData && typeof stringData === 'string') {
+            cliphistAction.command = ["sh", "-c", "printf '%s\n' " + utils.escapeShell(stringData) + " | cliphist decode | wl-copy"];
+            cliphistAction.startDetached();
+        }
+    }
+
+    QtObject {
+        id: utils
+        function escapeShell(cmd) {
+            return "'" + cmd.replace(/'/g, "'\\''") + "'";
+        }
     }
 
     MouseArea {
@@ -36,9 +102,9 @@ Item {
             }
             mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
-                clipMenu.startDetached();
+                clipboardModule.refreshClipboardList();
             } else if (mouse.button === Qt.RightButton) {
-                clipWipe.startDetached();
+                clipboardModule.clearClipboardHistory();
             }
         }
     }

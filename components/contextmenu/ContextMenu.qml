@@ -20,12 +20,15 @@ PopupWindow {
     readonly property int menuFontSize: 11
     readonly property int verticalOffset: 5
     readonly property int menuMargins: 6
+    readonly property int menuMaxHeight: 350
+
+    property bool showSearchInput: false
+    property string filterText: ""
 
     property var menuModel: null
     property var _pendingModel: null
     property var _pendingWindow: null
     property var _pendingAnchorItem: null
-
     property int _pendingX: 0
     property int _pendingY: 0
 
@@ -38,11 +41,29 @@ PopupWindow {
     signal itemDataActionTriggered(string actionType, var data)
 
     implicitWidth: menuWidth
-    implicitHeight: menuView.contentHeight + (menuMargins * 2)
+    implicitHeight: Math.min((menuPopup.showSearchInput ? searchLoader.height + 4 : 0) + menuView.contentHeight + (menuMargins * 2), menuMaxHeight)
     grabFocus: true
 
     onVisibleChanged: {
-        if (!visible) {
+        if (visible) {
+            if (showSearchInput && searchLoader.item) {
+                searchLoader.item.forceActiveFocus();
+            } else {
+                Qt.callLater(() => {
+                    menuBackground.forceActiveFocus();
+                });
+            }
+        } else {
+            if (searchLoader.item) {
+                searchLoader.item.text = "";
+            }
+
+            menuPopup.showSearchInput = false;
+            menuPopup.filterText = "";
+
+            if (_self.anchor.window !== null && _self.anchor.window.focusable !== undefined) {
+                _self.anchor.window.focusable = false;
+            }
             _self.anchor.window = null;
         }
     }
@@ -105,8 +126,11 @@ PopupWindow {
     function _applyPositioning() {
         if (!_pendingWindow)
             return;
-
         menuPopup.menuModel = _pendingModel;
+
+        if (_pendingWindow.focusable !== undefined) {
+            _pendingWindow.focusable = true;
+        }
         _self.anchor.window = _pendingWindow;
 
         if (_isAnchorMode) {
@@ -119,13 +143,40 @@ PopupWindow {
         } else {
             _self.anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
         }
-
         menuPopup.visible = true;
     }
 
     QsMenuOpener {
         id: menuOpener
         menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
+    }
+
+    function getFilteredModel() {
+        const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
+        if (!rawSource)
+            return [];
+
+        const search = menuPopup.filterText.toLowerCase().trim();
+        if (search === "")
+            return rawSource;
+
+        const itemsArray = Array.from(rawSource);
+        return itemsArray.filter(item => {
+            let textToMatch = "";
+            if (item && typeof item === 'object') {
+                if (item.text !== undefined)
+                    textToMatch = item.text;
+                else if (item.name !== undefined)
+                    textToMatch = item.name;
+                else if (item.label !== undefined)
+                    textToMatch = item.label;
+                else if (item.modelData !== undefined && item.modelData.text !== undefined)
+                    textToMatch = item.modelData.text;
+            } else if (typeof item === 'string') {
+                textToMatch = item;
+            }
+            return textToMatch.toLowerCase().includes(search);
+        });
     }
 
     Timer {
@@ -137,8 +188,9 @@ PopupWindow {
 
     Rectangle {
         id: menuBackground
+
         anchors.fill: parent
-        color: bgMouseArea.pressed ? Qt.lighter(menuPopup.menuBackgroundColor, 1.20) : menuPopup.menuBackgroundColor
+        color: (bgMouseArea.pressed || listEmptySpaceMouseArea.pressed) ? Qt.lighter(menuPopup.menuBackgroundColor, 1.20) : menuPopup.menuBackgroundColor
         border.color: menuPopup.menuBorderColor
         border.width: 1
 
@@ -152,16 +204,58 @@ PopupWindow {
             id: bgMouseArea
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
+            propagateComposedEvents: true
+            onWheel: wheel => wheel.accepted = false
+        }
+
+        focus: true
+        Keys.onEscapePressed: event => {
+            menuPopup.close();
+            event.accepted = true;
+        }
+
+        Loader {
+            id: searchLoader
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: menuPopup.menuMargins
+            anchors.leftMargin: menuPopup.menuMargins
+            anchors.rightMargin: menuPopup.menuMargins
+
+            visible: menuPopup.showSearchInput
+            source: menuPopup.showSearchInput ? "MenuSearchInput.qml" : ""
+
+            onLoaded: {
+                if (item) {
+                    item.menuPopup = menuPopup;
+                    item.inputHasFocus = true;
+                    item.textChanged.connect(() => {
+                        menuPopup.filterText = item.text;
+                    });
+                }
+            }
         }
 
         ListView {
             id: menuView
-            anchors.fill: parent
-            anchors.margins: menuPopup.menuMargins
+
+            anchors.top: searchLoader.visible ? searchLoader.bottom : parent.top
+            anchors.topMargin: searchLoader.visible ? 4 : menuPopup.menuMargins
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: menuPopup.menuMargins
+            anchors.left: parent.left
+            anchors.leftMargin: menuPopup.menuMargins
+            anchors.right: parent.right
+            anchors.rightMargin: menuPopup.menuMargins
+
             spacing: 2
-            interactive: false
+            interactive: true
             boundsBehavior: Flickable.StopAtBounds
-            model: menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children
+            clip: true
+
+            model: menuPopup.getFilteredModel()
 
             delegate: MenuItemDelegate {
                 required property var model
@@ -169,6 +263,15 @@ PopupWindow {
                 menuPopup: menuPopup
                 itemData: model.modelData !== undefined ? model.modelData : model
                 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
+            }
+
+            MouseArea {
+                id: listEmptySpaceMouseArea
+                z: -1
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                propagateComposedEvents: true
+                onWheel: wheel => wheel.accepted = false
             }
         }
     }
