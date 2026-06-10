@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import QtCore
 
 PanelWindow {
     id: wallpaperWindow
@@ -9,7 +10,7 @@ PanelWindow {
     required property var globalMenu
     property var focusWindow: null
 
-    property url sourcePath: "file://" + Quickshell.env("HOME") + "/Imagens/afina.png"
+    property url sourcePath: wallpaperSettings.savedPath
     readonly property int imageFillMode: Image.PreserveAspectCrop
 
     WlrLayershell.layer: WlrLayer.Background
@@ -24,10 +25,17 @@ PanelWindow {
     exclusiveZone: 0
     focusable: false
 
+    Settings {
+        id: wallpaperSettings
+        location: "file://" + Quickshell.env("HOME") + "/Documentos/repos/configs/quickshell/components/wallpaper/wallpaper_settings.conf"
+        category: "Wallpaper"
+        property url savedPath: ""
+    }
+
     property WallpaperModel backendModel: WallpaperModel {
         id: backendModel
         onWallpaperSelected: fileUrl => {
-            wallpaperWindow.sourcePath = fileUrl;
+            wallpaperSettings.savedPath = fileUrl;
         }
     }
 
@@ -55,6 +63,11 @@ PanelWindow {
             actionData: null
         }
     ]
+
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+    }
 
     Image {
         anchors.fill: parent
