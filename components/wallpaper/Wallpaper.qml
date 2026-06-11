@@ -22,7 +22,7 @@ PanelWindow {
         bottom: true
         left: true
     }
-    exclusiveZone: 0
+    exclusiveZone: -1
     focusable: false
 
     Settings {
@@ -51,12 +51,17 @@ PanelWindow {
                 break;
             }
         }
+        function onVisibleChanged() {
+            if (wallpaperWindow.globalMenu && !wallpaperWindow.globalMenu.visible) {
+                wallpaperWindow.focusable = false;
+            }
+        }
     }
 
     readonly property var desktopMenuStructure: [
         {
             type: "action",
-            text: "Wallpaper Changer",
+            text: "Trocar Wallpaper",
             icon: "",
             preventClose: true,
             actionType: "open_wallpaper_submenu",
@@ -88,6 +93,7 @@ PanelWindow {
                 return;
             mouse.accepted = true;
             if (mouse.button === Qt.RightButton) {
+                wallpaperWindow.focusable = true;
                 menu.showSearchInput = false;
                 menu.openAtPosition(wallpaperWindow, mouse.x, mouse.y, wallpaperWindow.desktopMenuStructure);
             } else if (mouse.button === Qt.LeftButton) {

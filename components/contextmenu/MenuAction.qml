@@ -14,34 +14,25 @@ Item {
     signal triggered(var dataObj)
 
     readonly property var _actualData: actionRoot.safeData || ({})
-    readonly property bool hasIcon: !!_actualData && _actualData.icon !== undefined && _actualData.icon !== ""
+
+    opacity: actionRoot.isEnabled ? 1.0 : 0.5
 
     Rectangle {
         anchors.fill: parent
-        color: (mouseArea.containsMouse || actionRoot.isCurrentKeyboardItem) ? actionRoot.menuPopup.itemHoverColor : "transparent"
+        color: (actionRoot.isEnabled && (mouseArea.containsMouse || actionRoot.isCurrentKeyboardItem)) ? actionRoot.menuPopup.itemHoverColor : "transparent"
 
         Row {
             anchors.fill: parent
             anchors.leftMargin: 8
+            anchors.rightMargin: 8
             spacing: 8
-
-            Image {
-                id: itemIcon
-                visible: actionRoot.hasIcon
-                width: actionRoot.menuPopup.iconSize
-                height: actionRoot.menuPopup.iconSize
-                anchors.verticalCenter: parent.verticalCenter
-                source: (actionRoot._actualData && actionRoot._actualData.icon) || ""
-                sourceSize.width: actionRoot.menuPopup.iconSize
-                sourceSize.height: actionRoot.menuPopup.iconSize
-            }
 
             Text {
                 id: itemText
-                text: (actionRoot._actualData && actionRoot._actualData.text) || ""
-                width: actionRoot.width - (actionRoot.hasIcon ? (actionRoot.menuPopup.iconSize + 24) : 16)
+                text: actionRoot._actualData.text || ""
+                width: parent.width
                 anchors.verticalCenter: parent.verticalCenter
-                color: (mouseArea.containsMouse || actionRoot.isCurrentKeyboardItem) ? actionRoot.menuPopup.itemTextHoverColor : actionRoot.menuPopup.itemTextColor
+                color: (actionRoot.isEnabled && (mouseArea.containsMouse || actionRoot.isCurrentKeyboardItem)) ? actionRoot.menuPopup.itemTextHoverColor : actionRoot.menuPopup.itemTextColor
                 font.family: actionRoot.menuPopup.labelFontFamily
                 font.pixelSize: actionRoot.menuPopup.menuFontSize
                 elide: Text.ElideRight
@@ -57,10 +48,8 @@ Item {
             acceptedButtons: Qt.LeftButton
             onPressed: mouse => {
                 mouse.accepted = true;
-                if (mouse.button === Qt.LeftButton) {
-                    if (actionRoot._actualData) {
-                        actionRoot.triggered(actionRoot._actualData);
-                    }
+                if (mouse.button === Qt.LeftButton && actionRoot._actualData) {
+                    actionRoot.triggered(actionRoot._actualData);
                 }
             }
         }

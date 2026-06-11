@@ -15,8 +15,7 @@ Item {
     readonly property string itemType: {
         const type = safeData.type;
         const validTypes = ["action", "separator", "submenu", "toggle", "slider"];
-        if (validTypes.indexOf(type) !== -1)
-            return type;
+        if (validTypes.includes(type)) return type;
         return safeData.isSeparator ? "separator" : "action";
     }
 
@@ -26,7 +25,7 @@ Item {
     readonly property bool isToggle: itemType === "toggle"
     readonly property bool isSlider: itemType === "slider"
 
-    width: parent ? parent.width : 0
+    width: ListView.view ? ListView.view.width : 0
     height: isSeparator ? menuPopup.separatorHeight : (isSlider ? menuPopup.itemHeight * 1.5 : menuPopup.itemHeight)
 
     Component {
@@ -61,10 +60,8 @@ Item {
     Loader {
         anchors.fill: parent
         sourceComponent: {
-            if (delegateRoot.isSeparator)
-                return separatorComponent;
-            if (delegateRoot.isSlider)
-                return sliderComponent;
+            if (delegateRoot.isSeparator) return separatorComponent;
+            if (delegateRoot.isSlider) return sliderComponent;
             return actionComponent;
         }
     }

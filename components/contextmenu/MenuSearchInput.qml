@@ -34,18 +34,27 @@ Item {
             color: searchRoot.menuPopup ? searchRoot.menuPopup.itemTextColor : "#fff"
             focus: true
             selectByMouse: true
+            clip: true
+
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Down) {
+                if (!searchRoot.menuPopup)
+                    return;
+                switch (event.key) {
+                case Qt.Key_Down:
+                case Qt.Key_Tab:
                     searchRoot.menuPopup.focusListView();
                     event.accepted = true;
-                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                    let view = searchRoot.menuPopup.menuView;
-                    if (view && view.model && view.model.length > 0) {
-                        const firstItem = view.model[0];
+                    break;
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                    const currentModel = searchRoot.menuPopup.getFilteredModel();
+                    if (currentModel && currentModel.length > 0) {
+                        const firstItem = currentModel[0];
                         const dataObj = firstItem.modelData !== undefined ? firstItem.modelData : firstItem;
                         searchRoot.menuPopup.handleItemTrigger(dataObj);
                     }
                     event.accepted = true;
+                    break;
                 }
             }
         }

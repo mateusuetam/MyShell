@@ -30,10 +30,10 @@ Item {
         readonly property var formattedParts: {
             const d = systemClock.date;
             return {
-                weekday: ptBr.toString(d, "ddd "),
-                day: ptBr.toString(d, "d "),
-                month: ptBr.toString(d, "MMMM "),
-                time: ptBr.toString(d, "- HH:mm")
+                weekday: clockModule.ptBr.toString(d, "ddd "),
+                day: clockModule.ptBr.toString(d, "d "),
+                month: clockModule.ptBr.toString(d, "MMMM "),
+                time: clockModule.ptBr.toString(d, "- HH:mm")
             };
         }
         Text {

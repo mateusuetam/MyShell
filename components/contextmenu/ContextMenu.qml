@@ -16,7 +16,6 @@ PopupWindow {
     readonly property int menuWidth: 200
     readonly property int itemHeight: 26
     readonly property int separatorHeight: 8
-    readonly property int iconSize: 14
     readonly property int menuFontSize: 11
     readonly property int verticalOffset: 5
     readonly property int menuMargins: 6
@@ -33,7 +32,6 @@ PopupWindow {
     property bool _isAnchorMode: false
     property bool _isInternalReset: false
 
-    readonly property var _self: menuPopup
     readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function" || menuPopup.menuModel.count !== undefined)
     readonly property alias menuView: menuView
 
@@ -62,7 +60,7 @@ PopupWindow {
                 }
                 menuPopup.showSearchInput = false;
                 menuPopup.filterText = "";
-                _self.anchor.window = null;
+                menuPopup.anchor.window = null;
             }
         }
     }
@@ -95,30 +93,34 @@ PopupWindow {
         _pendingAnchorItem = null;
         menuPopup.menuModel = null;
         menuPopup.filterText = "";
-        if (searchLoader.item) {
+        if (searchLoader.item)
             searchLoader.item.text = "";
-        }
+
         _isInternalReset = true;
         visible = false;
         _isInternalReset = false;
+
         _pendingModel = modelData;
         _pendingWindow = targetWindow;
     }
 
     function handleItemTrigger(dataObj) {
-        if (!dataObj)
+        if (!dataObj || dataObj.enabled === false || dataObj.isSeparator || dataObj.type === "separator")
             return;
+
         itemTriggered(dataObj);
+
         if (dataObj.actionType !== undefined) {
             itemDataActionTriggered(dataObj.actionType, dataObj.actionData);
         }
-        if (typeof dataObj.onTrigger === "function") {
+
+        if (typeof dataObj.onTrigger === "function")
             dataObj.onTrigger();
-        } else if (typeof dataObj.triggered === "function") {
+        else if (typeof dataObj.triggered === "function")
             dataObj.triggered();
-        } else if (typeof dataObj.trigger === "function") {
+        else if (typeof dataObj.trigger === "function")
             dataObj.trigger();
-        }
+
         if (dataObj.closeOnTrigger !== false && dataObj.preventClose !== true) {
             close();
         }
@@ -127,18 +129,19 @@ PopupWindow {
     function _applyPositioning() {
         if (!_pendingWindow)
             return;
+
         menuPopup.menuModel = _pendingModel;
-        menuView.currentIndex = -1;
-        _self.anchor.window = _pendingWindow;
+        menuPopup.anchor.window = _pendingWindow;
+
         if (_isAnchorMode) {
             if (!_pendingAnchorItem)
                 return;
             const windowPos = _pendingAnchorItem.mapToItem(null, 0, _pendingAnchorItem.height);
             const newX = windowPos.x - (implicitWidth / 2) + (_pendingAnchorItem.width / 2);
             const newY = windowPos.y + verticalOffset;
-            _self.anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
+            menuPopup.anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
         } else {
-            _self.anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
+            menuPopup.anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
         }
         menuPopup.visible = true;
     }
@@ -152,9 +155,11 @@ PopupWindow {
         const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
         if (!rawSource)
             return [];
+
         const search = menuPopup.filterText.toLowerCase().trim();
         if (search === "")
             return rawSource;
+
         const itemsArray = Array.from(rawSource);
         return itemsArray.filter(item => {
             let textToMatch = "";
@@ -194,6 +199,7 @@ PopupWindow {
         color: menuPopup.menuBackgroundColor
         border.color: menuPopup.menuBorderColor
         border.width: 1
+        focus: true
 
         MouseArea {
             anchors.fill: parent
@@ -204,35 +210,46 @@ PopupWindow {
             }
         }
 
-        focus: true
-
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Escape) {
+            switch (event.key) {
+            case Qt.Key_Escape:
                 menuPopup.close();
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Up) {
-                if (menuView.currentIndex === -1) {
+                break;
+            case Qt.Key_Tab:
+                if (menuPopup.showSearchInput && searchLoader.item) {
+                    searchLoader.item.forceFocusNow();
+                }
+                event.accepted = true;
+                break;
+            case Qt.Key_Up:
+                if (menuView.currentIndex <= 0) {
                     menuView.currentIndex = menuView.count - 1;
                 } else {
                     menuView.decrementCurrentIndex();
                 }
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Down) {
-                if (menuView.currentIndex === -1) {
+                break;
+            case Qt.Key_Down:
+                if (menuView.currentIndex === -1 || menuView.currentIndex === menuView.count - 1) {
                     menuView.currentIndex = 0;
                 } else {
                     menuView.incrementCurrentIndex();
                 }
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                break;
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
                 if (menuView.currentIndex >= 0) {
-                    const currentItemData = menuView.model[menuView.currentIndex];
+                    const currentModel = menuPopup.getFilteredModel();
+                    const currentItemData = currentModel[menuView.currentIndex];
                     if (currentItemData) {
                         const dataObj = currentItemData.modelData !== undefined ? currentItemData.modelData : currentItemData;
                         menuPopup.handleItemTrigger(dataObj);
                     }
                 }
                 event.accepted = true;
+                break;
             }
         }
 
@@ -241,9 +258,8 @@ PopupWindow {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: menuPopup.menuMargins
-            anchors.leftMargin: menuPopup.menuMargins
-            anchors.rightMargin: menuPopup.menuMargins
+            anchors.margins: menuPopup.menuMargins
+            anchors.bottomMargin: 0
             visible: menuPopup.showSearchInput
             source: menuPopup.showSearchInput ? "MenuSearchInput.qml" : ""
             onLoaded: {
@@ -261,20 +277,21 @@ PopupWindow {
         ListView {
             id: menuView
             anchors.top: searchLoader.visible ? searchLoader.bottom : parent.top
-            anchors.topMargin: searchLoader.visible ? 4 : menuPopup.menuMargins
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: menuPopup.menuMargins
             anchors.left: parent.left
-            anchors.leftMargin: menuPopup.menuMargins
             anchors.right: parent.right
-            anchors.rightMargin: menuPopup.menuMargins
+            anchors.margins: menuPopup.menuMargins
+            anchors.topMargin: searchLoader.visible ? 4 : menuPopup.menuMargins
+            highlightMoveDuration: 0
             spacing: 2
             interactive: true
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             currentIndex: -1
+            onModelChanged: currentIndex = -1
             highlightFollowsCurrentItem: true
             model: menuPopup.getFilteredModel()
+
             delegate: MenuItemDelegate {
                 required property var model
                 width: menuView.width

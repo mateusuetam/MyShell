@@ -7,9 +7,10 @@ Item {
     required property var menuPopup
 
     Rectangle {
-        width: parent.width - 10
+        width: parent.width - 12
         height: 1
         anchors.centerIn: parent
         color: separatorRoot.menuPopup.menuBorderColor
+        opacity: 0.6
     }
 }
