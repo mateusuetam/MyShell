@@ -40,7 +40,7 @@ Item {
             if (!UPower.onBattery) {
                 return {
                     color: batteryModule.chargingColor,
-                    text: batteryModule.isFull ? `${pct}% [AC]` : `${pct}% +${rate}W`
+                    text: batteryModule.isFull ? `${pct}% - [AC]` : `${pct}% +${rate}W`
                 };
             }
             let uiColor = batteryModule.normalColor;

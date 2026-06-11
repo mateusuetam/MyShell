@@ -3,6 +3,6 @@ import QtQuick
 import "fonts"
 
 QtObject {
-    property string appliedFontFamily: FontFamily.krypton
-    property int appliedFontSize: FontSize.normal
+    readonly property string appliedFontFamily: FontFamily.krypton
+    readonly property int appliedFontSize: FontSize.normal
 }

@@ -30,10 +30,10 @@ Item {
         readonly property var formattedParts: {
             const d = systemClock.date;
             return {
-                weekday: clockModule.ptBr.toString(d, "ddd "),
-                day: clockModule.ptBr.toString(d, "d "),
-                month: clockModule.ptBr.toString(d, "MMMM "),
-                time: clockModule.ptBr.toString(d, "- HH:mm")
+                weekday: clockModule.ptBr.toString(d, "ddd"),
+                day: clockModule.ptBr.toString(d, "d"),
+                month: clockModule.ptBr.toString(d, "MMMM"),
+                time: clockModule.ptBr.toString(d, "HH:mm")
             };
         }
         Text {
@@ -41,7 +41,7 @@ Item {
             font.family: clockModule.labelFontFamily
             font.pixelSize: clockModule.labelFontSize
             color: clockModule.labelColor
-            text: clockRow.formattedParts.weekday
+            text: `${clockRow.formattedParts.weekday} `
         }
         Text {
             font: clockBase.font
@@ -50,8 +50,8 @@ Item {
         }
         Text {
             font: clockBase.font
-            color: clockModule.labelColor
-            text: "de "
+            color: clockBase.color
+            text: " de "
         }
         Text {
             font: clockBase.font
@@ -60,8 +60,8 @@ Item {
         }
         Text {
             font: clockBase.font
-            color: clockModule.labelColor
-            text: clockRow.formattedParts.time
+            color: clockBase.color
+            text: ` - ${clockRow.formattedParts.time}`
         }
     }
 }

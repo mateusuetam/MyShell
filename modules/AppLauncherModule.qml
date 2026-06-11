@@ -9,7 +9,8 @@ Item {
     required property var globalMenu
     required property var parentWindow
 
-    readonly property color utilityColor: ColorRegistry.appLauncherLabelColor
+    readonly property color appSeparatorColor: ColorRegistry.appLauncherSeparatorColor
+    readonly property color appLabelColor: ColorRegistry.appLauncherLabelColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
@@ -77,10 +78,21 @@ Item {
         id: launcherRow
         anchors.verticalCenter: parent.verticalCenter
         Text {
+            id: appsPrefix
             font.family: appLauncherModule.labelFontFamily
             font.pixelSize: appLauncherModule.labelFontSize
-            color: appLauncherModule.utilityColor
-            text: "[APPS]"
+            color: appLauncherModule.appSeparatorColor
+            text: "["
+        }
+        Text {
+            font: appsPrefix.font
+            color: appLauncherModule.appLabelColor
+            text: "APPS"
+        }
+        Text {
+            font: appsPrefix.font
+            color: appsPrefix.color
+            text: "]"
         }
     }
 }

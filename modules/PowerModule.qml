@@ -8,7 +8,8 @@ Item {
     required property var globalMenu
     required property var parentWindow
 
-    readonly property color sessionColor: ColorRegistry.powerSessionColor
+    readonly property color sessionSeparatorColor: ColorRegistry.powerSessionSeparatorColor
+    readonly property color labelColor: ColorRegistry.powerSessionLabelColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
@@ -89,10 +90,21 @@ Item {
         id: powerRow
         anchors.verticalCenter: parent.verticalCenter
         Text {
+            id: powerPrefix
             font.family: powermenuModule.labelFontFamily
             font.pixelSize: powermenuModule.labelFontSize
-            color: powermenuModule.sessionColor
-            text: "[SESS]"
+            color: powermenuModule.sessionSeparatorColor
+            text: "["
+        }
+        Text {
+            font: powerPrefix.font
+            color: powermenuModule.labelColor
+            text: "SESS"
+        }
+        Text {
+            font: powerPrefix.font
+            color: powerPrefix.color
+            text: "]"
         }
     }
 }

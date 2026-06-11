@@ -8,7 +8,7 @@ Item {
     required property var globalMenu
     required property var parentWindow
 
-    readonly property color utilityColor: ColorRegistry.clipboardUtilityColor
+    readonly property color labelColor: ColorRegistry.clipboardLabelColor
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
@@ -115,7 +115,7 @@ Item {
         Text {
             font.family: clipboardModule.labelFontFamily
             font.pixelSize: clipboardModule.labelFontSize
-            color: clipboardModule.utilityColor
+            color: clipboardModule.labelColor
             text: "clipboard"
         }
     }

@@ -40,13 +40,71 @@ Item {
     }
 
     Process {
-        id: gammastepMenu
-        command: ["sh", "-c", "$HOME/Documentos/repos/configs/scripts/redfilter.sh"]
+        id: checkGammastep
+        command: ["sh", "-c", "pgrep -x gammastep > /dev/null"]
+        onExited: exitCode => {
+            backlightModule.openFilterMenu(exitCode === 0);
+        }
     }
 
     Process {
         id: gammastepToggle
-        command: ["sh", "-c", "pkill gammastep || gammastep -O 2500 &"]
+        command: ["sh", "-c", "if pgrep -x gammastep > /dev/null; then pkill gammastep; else gammastep -O 2500 & fi"]
+    }
+
+    Process {
+        id: gammastepApply
+        property int targetTemp: 2500
+        command: ["sh", "-c", `pkill gammastep; gammastep -O ${targetTemp} & notify-send "Gammastep" "Temperatura ajustada para ${targetTemp}K" -i display`]
+    }
+
+    Process {
+        id: gammastepKill
+        command: ["pkill", "gammastep"]
+    }
+
+    function applyTemperature(temp) {
+        gammastepApply.targetTemp = temp;
+        gammastepApply.running = true;
+    }
+
+    function openFilterMenu(isRunning) {
+        let menuModel = [];
+
+        if (isRunning) {
+            menuModel.push({
+                text: "Desativar Filtro",
+                onTrigger: () => {
+                    gammastepKill.running = true;
+                }
+            });
+        } else {
+            menuModel.push({
+                text: "Ativar Filtro (2500K)",
+                onTrigger: () => {
+                    backlightModule.applyTemperature(2500);
+                }
+            });
+        }
+        menuModel.push({
+            isSeparator: true,
+            enabled: false
+        });
+
+        const tempPresets = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
+        tempPresets.forEach(temp => {
+            menuModel.push({
+                text: `Temperatura: ${temp}K`,
+                onTrigger: () => {
+                    backlightModule.applyTemperature(temp);
+                }
+            });
+        });
+
+        if (backlightModule.globalMenu) {
+            backlightModule.globalMenu.showSearchInput = false;
+            backlightModule.globalMenu.openMenu(backlightModule.parentWindow, backlightModule, menuModel);
+        }
     }
 
     MouseArea {
@@ -60,7 +118,7 @@ Item {
             }
             mouse.accepted = true;
             if (mouse.button === Qt.LeftButton) {
-                gammastepMenu.running = true;
+                checkGammastep.running = true;
             } else if (mouse.button === Qt.RightButton) {
                 gammastepToggle.running = true;
             }

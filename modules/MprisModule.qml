@@ -13,7 +13,7 @@ Item {
     readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
     readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-    readonly property int maxWidth: 550
+    readonly property int maxWidth: 450
 
     readonly property var activePlayer: {
         const list = Mpris.players.values;

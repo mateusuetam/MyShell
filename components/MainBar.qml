@@ -14,8 +14,8 @@ PanelWindow {
     readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
     property color barBorderColor: ColorRegistry.mainbarBorderColor
     readonly property int barHeight: 30
-    readonly property int layoutSpacing: 12
-    readonly property int sideMargins: 6
+    readonly property int layoutSpacing: 10
+    readonly property int sideMargins: 5
 
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "mainbar"
