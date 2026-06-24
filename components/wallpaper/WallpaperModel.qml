@@ -5,64 +5,64 @@ import Quickshell
 import Qt.labs.folderlistmodel
 
 QtObject {
-    id: modelRoot
+id: modelRoot
 
-    property var subMenuStructure: []
-    signal wallpaperSelected(url fileUrl)
+property var subMenuStructure: []
+signal wallpaperSelected(url fileUrl)
 
-    component WallpaperDelegate: QtObject {
-        required property var model
-        readonly property string name: model.fileName
-        readonly property url urlPath: model.fileUrl
-    }
+component WallpaperDelegate: QtObject {
+required property var model
+readonly property string name: model.fileName
+readonly property url urlPath: model.fileUrl
+}
 
-    property FolderListModel folderModel: FolderListModel {
-        id: folderModel
+property FolderListModel folderModel: FolderListModel {
+id: folderModel
 
-        folder: "file://" + Quickshell.env("HOME") + "/Imagens"
-        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-        showDirs: false
-        showDotAndDotDot: false
-        showOnlyReadable: true
-    }
+folder: "file://" + Quickshell.env("HOME") + "/Imagens"
+nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+showDirs: false
+showDotAndDotDot: false
+showOnlyReadable: true
+}
 
-    property Instantiator fileInstantiator: Instantiator {
-        id: fileInstantiator
+property Instantiator fileInstantiator: Instantiator {
+id: fileInstantiator
 
-        model: folderModel
-        delegate: WallpaperDelegate {}
-        onObjectAdded: rebuildDebounce.restart()
-        onObjectRemoved: rebuildDebounce.restart()
-    }
+model: folderModel
+delegate: WallpaperDelegate {}
+onObjectAdded: rebuildDebounce.restart()
+onObjectRemoved: rebuildDebounce.restart()
+}
 
-    property Timer rebuildDebounce: Timer {
-        id: rebuildDebounce
+property Timer rebuildDebounce: Timer {
+id: rebuildDebounce
 
-        interval: 32
-        repeat: false
-        onTriggered: modelRoot.rebuildMenu()
-    }
+interval: 32
+repeat: false
+onTriggered: modelRoot.rebuildMenu()
+}
 
-    function rebuildMenu() {
-        modelRoot.subMenuStructure = [];
+function rebuildMenu() {
+modelRoot.subMenuStructure = [];
 
-        const list = [];
-        for (var i = 0; i < fileInstantiator.count; i++) {
-            const obj = fileInstantiator.objectAt(i) as WallpaperDelegate;
+const list = [];
+for (var i = 0; i < fileInstantiator.count; i++) {
+const obj = fileInstantiator.objectAt(i) as WallpaperDelegate;
 
-            if (!obj)
-                continue;
+if (!obj)
+continue;
 
-            list.push({
-                type: "action",
-                text: obj.name,
-                icon: "",
-                enabled: true,
-                preventClose: false,
-                actionType: "change_wallpaper",
-                actionData: obj.urlPath
-            });
-        }
-        modelRoot.subMenuStructure = list;
-    }
+list.push({
+type: "action",
+text: obj.name,
+icon: "",
+enabled: true,
+preventClose: false,
+actionType: "change_wallpaper",
+actionData: obj.urlPath
+});
+}
+modelRoot.subMenuStructure = list;
+}
 }
