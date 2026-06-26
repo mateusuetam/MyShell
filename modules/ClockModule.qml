@@ -30,9 +30,9 @@ anchors.verticalCenter: parent.verticalCenter
 readonly property var formattedParts: {
 const d = systemClock.date;
 return {
-weekday: clockModule.ptBr.toString(d, "ddd").toUpperCase(),
+weekday: clockModule.ptBr.toString(d, "ddd"),
 day: clockModule.ptBr.toString(d, "d"),
-month: clockModule.ptBr.toString(d, "MMM").toUpperCase(),
+month: clockModule.ptBr.toString(d, "MMM"),
 time: clockModule.ptBr.toString(d, "HH:mm")
 };
 }
@@ -51,7 +51,7 @@ text: clockRow.formattedParts.day
 Text {
 font: clockBase.font
 color: clockBase.color
-text: " - "
+text: " de "
 }
 Text {
 font: clockBase.font
@@ -61,7 +61,7 @@ text: clockRow.formattedParts.month
 Text {
 font: clockBase.font
 color: clockBase.color
-text: ` | ${clockRow.formattedParts.time}`
+text: ` - ${clockRow.formattedParts.time}`
 }
 }
 }

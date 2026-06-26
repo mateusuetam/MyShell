@@ -78,7 +78,9 @@ parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }
 }
-
+Item {
+Layout.fillWidth: true
+}
 // >>> LADO DIREITO >>>
 Row {
 id: rightModules
@@ -131,11 +133,6 @@ parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }
 
-ClockModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
 AppLauncherModule {
 id: appLauncherModuleInstance
 parentWindow: barWindow
@@ -147,6 +144,13 @@ parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }
 }
+}
+// --- CENTRO ---
+ClockModule {
+parentWindow: barWindow
+globalMenu: barWindow.globalMenu
+anchors.centerIn: parent
+z: 2
 }
 }
 }
