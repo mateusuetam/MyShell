@@ -55,7 +55,7 @@ command: ["pkill", "-f", "gammastep"]
 
 Process {
 id: gammastepStart
-command: ["gammastep", "-O", "2500"]
+command: ["sh", "-c", "notify-send -u low Gammastep 'Temperatura ajustada para 2500K' && gammastep -O 2500"]
 }
 
 Process {
@@ -76,7 +76,7 @@ command: ["pkill", "-f", "gammastep"]
 onExited: {
 applyGammastepRun.command = ["gammastep", "-O", backlightModule.targetTemp.toString()];
 applyGammastepRun.running = true;
-applyNotifyRun.command = ["notify-send", "Gammastep", `Temperatura ajustada para ${backlightModule.targetTemp}K`, "-i", "display"];
+applyNotifyRun.command = ["notify-send", "-u", "low", "Gammastep", `Temperatura ajustada para ${backlightModule.targetTemp}K`, "-i", "display"];
 applyNotifyRun.running = true;
 }
 }

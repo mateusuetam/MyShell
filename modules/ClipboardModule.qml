@@ -51,7 +51,7 @@ cliphistListProcess.running = true;
 }
 
 function clearClipboardHistory() {
-cliphistAction.command = ["sh", "-c", "cliphist wipe && notify-send Clipboard 'Histórico apagado!'"];
+cliphistAction.command = ["sh", "-c", "cliphist wipe && notify-send -u low Clipboard 'Histórico apagado!'"];
 cliphistAction.startDetached();
 }
 

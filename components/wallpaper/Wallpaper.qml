@@ -27,7 +27,7 @@ focusable: false
 
 Settings {
 id: wallpaperSettings
-location: "file://" + Quickshell.env("HOME") + "/Repos/configs/quickshell/shell/components/wallpaper/wallpaper_settings.conf"
+location: "file://" + Quickshell.env("HOME") + "/.wallpaper.conf"
 category: "Wallpaper"
 property url savedPath: ""
 }

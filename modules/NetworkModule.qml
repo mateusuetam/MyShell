@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Networking
+import Quickshell.Io
 import "../components/themeengine"
 import "../components/popupmenu"
 
@@ -22,17 +23,70 @@ property string currentSubMenu: "main"
 property var selectedNetwork: null
 property var forgottenNetworks: []
 
+property string lastStatus: ""
+property string pendingStatus: ""
+property bool isReady: false
+
 implicitWidth: networkRow.implicitWidth
 implicitHeight: networkModule.parentWindow ? networkModule.parentWindow.barHeight : 30
 
-PasswordPrompt {
-id: wifiPasswordPrompt
+Component.onCompleted: {
+lastStatus = getNetworkState().text
+Qt.callLater(() => { isReady = true; })
+}
+
+PasswordPrompt { id: wifiPasswordPrompt }
+Process { id: notifyProcess }
+
+Timer {
+id: stabilizationTimer
+interval: 150
+repeat: false
+onTriggered: {
+networkModule.processFinalStateChange(networkModule.pendingStatus);
+}
+}
+
+function sendNotification(title, message, urgency) {
+notifyProcess.exec(["notify-send", "-u", urgency, title, message]);
+}
+
+function handleStateChange(currentText) {
+if (!isReady) {
+lastStatus = currentText;
+return;
+}
+
+if (lastStatus === currentText) {
+stabilizationTimer.stop();
+return;
+}
+
+pendingStatus = currentText;
+stabilizationTimer.restart();
+}
+
+function processFinalStateChange(stableText) {
+if (lastStatus === stableText) return;
+
+if (stableText === "up") {
+sendNotification("Network", "Conexão estabelecida", "low");
+}
+else if (stableText === "off") {
+sendNotification("Network", "Wifi desligado", "low");
+}
+else if (stableText === "down") {
+if (Networking.wifiEnabled && lastStatus === "up") {
+sendNotification("Network", "Sem sinal...", "critical");
+}
+}
+
+lastStatus = stableText;
 }
 
 function getWifiDevice() {
 var devicesList = Networking.devices.values;
-if (!devicesList)
-return null;
+if (!devicesList) return null;
 for (var i = 0; i < devicesList.length; i++) {
 var dev = devicesList[i];
 if (dev && (dev.name.indexOf("wlan") !== -1 || dev.name.indexOf("wlp") !== -1 || dev.type === DeviceType.Wifi)) {
@@ -44,8 +98,7 @@ return null;
 
 function getActiveDevice() {
 var devicesList = Networking.devices.values;
-if (!devicesList)
-return null;
+if (!devicesList) return null;
 for (var i = 0; i < devicesList.length; i++) {
 var dev = devicesList[i];
 if (dev && dev.connected) {
@@ -56,8 +109,7 @@ return null;
 }
 
 function getWifiName(dev) {
-if (!dev || !dev.networks || !dev.networks.values)
-return "wifi";
+if (!dev || !dev.networks || !dev.networks.values) return "wifi";
 var networksList = dev.networks.values;
 for (var j = 0; j < networksList.length; j++) {
 var net = networksList[j];
@@ -74,16 +126,12 @@ let menuModel = [];
 if (!Networking.wifiEnabled) {
 menuModel.push({
 text: "Ligar Wi-Fi",
-onTrigger: () => {
-Networking.wifiEnabled = true;
-}
+onTrigger: () => { Networking.wifiEnabled = true; }
 });
 } else {
 menuModel.push({
 text: "Desligar Wi-Fi",
-onTrigger: () => {
-Networking.wifiEnabled = false;
-}
+onTrigger: () => { Networking.wifiEnabled = false; }
 });
 menuModel.push({
 text: "Escanear redes",
@@ -94,9 +142,7 @@ networkModule.updateMenu(true);
 }
 });
 
-menuModel.push({
-type: "separator"
-});
+menuModel.push({ type: "separator" });
 
 let wifiDev = networkModule.getWifiDevice();
 if (wifiDev && wifiDev.networks && wifiDev.networks.values) {
@@ -104,9 +150,7 @@ let nets = wifiDev.networks.values;
 for (let i = 0; i < nets.length; i++) {
 let net = nets[i];
 if (net && (net.known || net.connected)) {
-if (networkModule.forgottenNetworks.indexOf(net.name) !== -1) {
-continue;
-}
+if (networkModule.forgottenNetworks.indexOf(net.name) !== -1) continue;
 let prefix = net.connected ? "! Conectado: " : "? ";
 menuModel.push({
 text: prefix + net.name,
@@ -152,9 +196,7 @@ networkModule.updateMenu(true);
 }
 });
 
-menuModel.push({
-type: "separator"
-});
+menuModel.push({ type: "separator" });
 
 if (wifiDev && wifiDev.networks && wifiDev.networks.values) {
 let nets = wifiDev.networks.values;
@@ -162,20 +204,12 @@ let sortedNets = nets.slice().sort((a, b) => b.signalStrength - a.signalStrength
 
 for (let i = 0; i < sortedNets.length; i++) {
 let net = sortedNets[i];
-if (!net.name)
-continue;
-
-if (networkModule.forgottenNetworks.indexOf(net.name) !== -1) {
-continue;
-}
+if (!net.name || networkModule.forgottenNetworks.indexOf(net.name) !== -1) continue;
 
 let signalIcon = "2";
-if (net.signalStrength >= 0.8)
-signalIcon = "8";
-else if (net.signalStrength >= 0.6)
-signalIcon = "6";
-else if (net.signalStrength >= 0.4)
-signalIcon = "4";
+if (net.signalStrength >= 0.8) signalIcon = "8";
+else if (net.signalStrength >= 0.6) signalIcon = "6";
+else if (net.signalStrength >= 0.4) signalIcon = "4";
 
 let secIcon = (net.security === WifiSecurityType.Open) ? "NOPWD" : "PWD";
 let activeIcon = net.connected ? "! " : "";
@@ -200,32 +234,19 @@ return menuModel;
 
 function generateActionMenu(net) {
 let menuModel = [];
-if (!net)
-return menuModel;
+if (!net) return menuModel;
 
-if (!net.connected) {
 menuModel.push({
-text: "Conectar",
+text: net.connected ? "Desconectar" : "Conectar",
 preventClose: true,
 onTrigger: () => {
-net.connect();
+if (net.connected) net.disconnect();
+else net.connect();
 networkModule.currentSubMenu = "main";
 networkModule.selectedNetwork = null;
 networkModule.updateMenu(true);
 }
 });
-} else {
-menuModel.push({
-text: "Desconectar",
-preventClose: true,
-onTrigger: () => {
-net.disconnect();
-networkModule.currentSubMenu = "main";
-networkModule.selectedNetwork = null;
-networkModule.updateMenu(true);
-}
-});
-}
 
 menuModel.push({
 text: "Esquecer",
@@ -242,9 +263,7 @@ networkModule.updateMenu(true);
 }
 });
 
-menuModel.push({
-type: "separator"
-});
+menuModel.push({ type: "separator" });
 menuModel.push({
 text: "Voltar",
 preventClose: true,
@@ -258,16 +277,14 @@ return menuModel;
 }
 
 function updateMenu(forceOpen) {
-if (!networkModule.globalMenu)
-return;
+if (!networkModule.globalMenu) return;
 
 if (forceOpen && !networkModule.globalMenu.visible) {
 networkModule.currentSubMenu = "main";
 networkModule.selectedNetwork = null;
 }
 
-if (!forceOpen && !networkModule.globalMenu.visible)
-return;
+if (!forceOpen && !networkModule.globalMenu.visible) return;
 
 let modelData = [];
 if (networkModule.currentSubMenu === "scan") {
@@ -289,24 +306,13 @@ networkModule.globalMenu.openMenu(networkModule.parentWindow, networkModule, mod
 
 function getNetworkState() {
 if (!networkModule.isWifiOn) {
-return {
-color: networkModule.disabledColor,
-text: "off"
-};
+return { color: networkModule.disabledColor, text: "off" };
 }
-
 const dev = networkModule.getActiveDevice();
 if (!dev) {
-return {
-color: networkModule.disconnectedColor,
-text: "down"
-};
+return { color: networkModule.disconnectedColor, text: "down" };
 }
-
-return {
-color: networkModule.connectedColor,
-text: "up"
-};
+return { color: networkModule.connectedColor, text: "up" };
 }
 
 MouseArea {
@@ -315,9 +321,7 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: mouse => {
 let menu = networkModule.globalMenu;
-if (menu) {
-menu.close();
-}
+if (menu) menu.close();
 mouse.accepted = true;
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
@@ -333,7 +337,14 @@ Networking.wifiEnabled = !Networking.wifiEnabled;
 Row {
 id: networkRow
 anchors.verticalCenter: parent.verticalCenter
+
 readonly property var nwState: networkModule.getNetworkState()
+readonly property string stateText: nwState.text
+
+onStateTextChanged: {
+networkModule.handleStateChange(stateText);
+}
+
 Text {
 id: networkPrefix
 font.family: networkModule.labelFontFamily
@@ -344,7 +355,7 @@ text: "NW: "
 Text {
 font: networkPrefix.font
 color: networkRow.nwState.color
-text: networkRow.nwState.text
+text: networkRow.stateText
 }
 }
 }
