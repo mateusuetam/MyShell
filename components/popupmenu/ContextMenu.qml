@@ -62,6 +62,9 @@ searchLoader.item.text = "";
 menuPopup.showSearchInput = false;
 menuPopup.filterText = "";
 menuPopup.anchor.window = null;
+menuPopup.menuModel = null;
+menuView.currentIndex = -1;
+menuPopup._currentFilteredModel = [];
 }
 }
 }
