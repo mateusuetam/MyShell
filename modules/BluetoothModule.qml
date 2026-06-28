@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQml
 import Quickshell.Bluetooth
@@ -19,33 +20,20 @@ readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
 readonly property var adapter: Bluetooth.defaultAdapter
 readonly property var devicesModel: Bluetooth.devices
-readonly property bool isBluetoothOn: adapter ? adapter.enabled : false
+readonly property bool isBluetoothOn: bluetoothModule.adapter ? bluetoothModule.adapter.enabled : false
 
 implicitWidth: bluetoothRow.implicitWidth
 implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
 
 property var currentMenuDevice: null
-property string pendingDeviceAddress: ""
-property string pendingDeviceState: ""
-property var ignoredDevices: []
-property var deviceToConnectPostPair: null
 
-property bool isPairingProcess: false
-property bool isReady: false
-property var lastStates: ({})
+property string pendingOpAddress: ""
+property string pendingOpState: ""
 
-Component.onCompleted: {
-const list = bluetoothModule.devicesModel ? bluetoothModule.devicesModel.values : [];
-let initStates = {};
-for (let i = 0; i < list.length; i++) {
-let d = list[i];
-if (d) {
-initStates[d.address] = { connected: d.connected, paired: (d.paired || d.bonded) };
-}
-}
-bluetoothModule.lastStates = initStates;
-Qt.callLater(() => { bluetoothModule.isReady = true; });
-}
+property string imunityAddress: ""
+property bool justPairedImunity: false
+
+property bool startAgent: false
 
 Process { id: notifyProcess }
 
@@ -53,73 +41,36 @@ function sendNotification(title, message, urgency) {
 notifyProcess.exec(["notify-send", "-u", urgency, title, message]);
 }
 
-Instantiator {
-model: bluetoothModule.devicesModel ? bluetoothModule.devicesModel.values : []
-delegate: Connections {
-target: modelData
-
-function onConnectedChanged() {
-if (!bluetoothModule.isReady) return;
-
-let addr = target.address;
-let isConnected = target.connected;
-let oldState = bluetoothModule.lastStates[addr];
-
-if (!oldState) {
-bluetoothModule.lastStates[addr] = { connected: isConnected, paired: target.paired || target.bonded };
-return;
+Process {
+id: bluetoothAgentDaemon
+command: ["bluetoothctl", "--agent", "NoInputNoOutput"]
+running: bluetoothModule.startAgent
 }
 
-if (oldState.connected === isConnected) return;
-
-oldState.connected = isConnected;
-
-if (bluetoothModule.isPairingProcess && bluetoothModule.pendingDeviceAddress === addr) return;
-if (!isConnected && bluetoothModule.deviceToConnectPostPair && bluetoothModule.deviceToConnectPostPair.address === addr) return;
-
-let devName = target.name || addr;
-bluetoothModule.sendNotification("Bluetooth", (isConnected ? "Conectado: " : "Desconectado: ") + devName, "low");
-
-Qt.callLater(() => bluetoothModule.updateMenu(false));
+Component.onCompleted: {
+bluetoothModule.startAgent = true;
 }
 
-function onPairedChanged() {
-if (!bluetoothModule.isReady) return;
-updateDeviceStateCache(target);
-}
-
-function onBondedChanged() {
-if (!bluetoothModule.isReady) return;
-updateDeviceStateCache(target);
-}
-
-function updateDeviceStateCache(devTarget) {
-let addr = devTarget.address;
-if (bluetoothModule.lastStates[addr]) {
-bluetoothModule.lastStates[addr].paired = devTarget.paired || devTarget.bonded;
-} else {
-bluetoothModule.lastStates[addr] = { connected: devTarget.connected, paired: devTarget.paired || devTarget.bonded };
-}
-Qt.callLater(() => bluetoothModule.updateMenu(false));
+Timer {
+id: pairingTimeoutTimer
+interval: 8000
+repeat: false
+onTriggered: {
+if (bluetoothModule.pendingOpState === "pairing") {
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
+bluetoothModule.updateMenu(true);
 }
 }
 }
 
-Connections {
-target: bluetoothModule.adapter ? bluetoothModule.adapter : null
-function onEnabledChanged() {
-bluetoothModule.updateMenu(false);
-if (!bluetoothModule.isBluetoothOn) {
-bluetoothModule.lastStates = {};
-}
-}
-function onDiscoveringChanged() {
-if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
-discoveryTimeoutTimer.restart();
-} else {
-discoveryTimeoutTimer.stop();
-}
-bluetoothModule.updateMenu(false);
+Timer {
+id: imunityTimer
+interval: 3000
+repeat: false
+onTriggered: {
+bluetoothModule.justPairedImunity = false;
+bluetoothModule.imunityAddress = "";
 }
 }
 
@@ -134,70 +85,122 @@ bluetoothModule.adapter.discovering = false;
 }
 }
 
-Timer {
-id: discoveryRefreshTimer
-interval: 5000
-repeat: true
-running: bluetoothModule.adapter && bluetoothModule.adapter.discovering && bluetoothModule.globalMenu && bluetoothModule.globalMenu.visible && bluetoothModule.currentMenuDevice === null
-onTriggered: {
+Instantiator {
+model: bluetoothModule.devicesModel ? bluetoothModule.devicesModel.values : []
+
+onObjectAdded: (index, object) => bluetoothModule.updateMenu(false)
+onObjectRemoved: (index, object) => bluetoothModule.updateMenu(false)
+
+delegate: Connections {
+id: devConn
+required property var modelData
+target: devConn.modelData
+
+function onConnectedChanged() {
+const dev = devConn.modelData;
+if (!dev) return;
+
+if (!dev.connected && bluetoothModule.justPairedImunity && bluetoothModule.imunityAddress === dev.address) {
+bluetoothModule.updateMenu(true);
+return;
+}
+
+if (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing") {
+if (!dev.connected) {
+pairingTimeoutTimer.stop();
+
+bluetoothModule.imunityAddress = dev.address;
+bluetoothModule.justPairedImunity = true;
+imunityTimer.restart();
+
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
+}
+bluetoothModule.updateMenu(true);
+return;
+}
+
+if (bluetoothModule.pendingOpAddress === dev.address &&
+(bluetoothModule.pendingOpState === "connecting" || bluetoothModule.pendingOpState === "disconnecting")) {
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
+}
+
+let devName = dev.name || dev.address;
+bluetoothModule.sendNotification("Bluetooth", (dev.connected ? "Conectado: " : "Desconectado: ") + devName, "low");
 bluetoothModule.updateMenu(true);
 }
+
+function onBondedChanged() {
+const dev = devConn.modelData;
+if (!dev) return;
+
+if (dev.bonded && !dev.trusted) {
+dev.trusted = true;
 }
 
-Timer {
-id: connectionDelayTimer
-interval: 5000
-repeat: false
-onTriggered: {
-if (bluetoothModule.deviceToConnectPostPair) {
-bluetoothModule.pendingDeviceAddress = bluetoothModule.deviceToConnectPostPair.address;
-bluetoothModule.pendingDeviceState = "connecting";
-bluetoothModule.deviceToConnectPostPair.connect();
-
-bluetoothModule.deviceToConnectPostPair = null;
-bluetoothModule.isPairingProcess = false;
-bluetoothModule.currentMenuDevice = null;
+if (dev.bonded && bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing") {
+bluetoothModule.imunityAddress = dev.address;
+bluetoothModule.justPairedImunity = true;
+imunityTimer.restart();
+}
 
 bluetoothModule.updateMenu(true);
 }
+
+function onPairedChanged() { bluetoothModule.updateMenu(true); }
+function onTrustedChanged() { bluetoothModule.updateMenu(true); }
+}
+}
+
+Connections {
+target: bluetoothModule.adapter ? bluetoothModule.adapter : null
+function onEnabledChanged() { bluetoothModule.updateMenu(false); }
+function onDiscoveringChanged() {
+if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
+discoveryTimeoutTimer.restart();
+} else {
+discoveryTimeoutTimer.stop();
+}
+bluetoothModule.updateMenu(false);
 }
 }
 
 function getConnectedDevice() {
-const list = devicesModel?.values ?? [];
+const list = bluetoothModule.devicesModel?.values ?? [];
 for (let i = 0; i < list.length; ++i) {
 const dev = list[i];
-if (dev?.connected && bluetoothModule.ignoredDevices.indexOf(dev.address) === -1)
-return dev;
+if (dev?.connected) return dev;
 }
 return null;
 }
 
 function generateMainMenu() {
 let menuModel = [];
-if (!isBluetoothOn) {
-menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (adapter) adapter.enabled = true; } });
+
+if (!bluetoothModule.isBluetoothOn) {
+menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.enabled = true; } });
 return menuModel;
 }
 
-menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (adapter) adapter.enabled = false; } });
+menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.enabled = false; } });
 menuModel.push({
-text: adapter && adapter.discovering ? "Parar Busca" : "Iniciar Busca",
+text: bluetoothModule.adapter && bluetoothModule.adapter.discovering ? "Parar Busca" : "Iniciar Busca",
 preventClose: true,
-onTrigger: () => { if (adapter) adapter.discovering = !adapter.discovering; }
+onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.discovering = !bluetoothModule.adapter.discovering; }
 });
 
-const list = devicesModel?.values ?? [];
+const list = bluetoothModule.devicesModel?.values ?? [];
 let pairedDevices = [];
 let newDevices = [];
 
 for (let i = 0; i < list.length; i++) {
 let mainDev = list[i];
-if (!mainDev || bluetoothModule.ignoredDevices.indexOf(mainDev.address) !== -1) continue;
+if (!mainDev) continue;
 
-if (mainDev.bonded || mainDev.paired) {
+if (mainDev.bonded) {
 pairedDevices.push(mainDev);
-} else if (adapter && adapter.discovering) {
+} else if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
 newDevices.push(mainDev);
 }
 }
@@ -207,13 +210,15 @@ menuModel.push({ type: "separator" });
 for (let j = 0; j < pairedDevices.length; j++) {
 let pDev = pairedDevices[j];
 let label = (pDev.connected ? "! " : "? ") + (pDev.name || pDev.address);
+
 if (pDev.connected && pDev.batteryAvailable) {
 label += ` (${Math.round(pDev.battery * 100)}%)`;
 }
+
 menuModel.push({
 text: label,
 preventClose: true,
-onTrigger: () => { openDeviceSubMenu(pDev); }
+onTrigger: () => { bluetoothModule.openDeviceSubMenu(pDev); }
 });
 }
 }
@@ -225,7 +230,7 @@ let nDev = newDevices[k];
 menuModel.push({
 text: "? " + (nDev.name || nDev.address),
 preventClose: true,
-onTrigger: () => { openDeviceSubMenu(nDev); }
+onTrigger: () => { bluetoothModule.openDeviceSubMenu(nDev); }
 });
 }
 }
@@ -237,130 +242,115 @@ function generateDeviceMenu(dev) {
 let menuModel = [];
 if (!dev) return menuModel;
 
-let isConnecting = (bluetoothModule.pendingDeviceAddress === dev.address && bluetoothModule.pendingDeviceState === "connecting");
-let isDisconnecting = (bluetoothModule.pendingDeviceAddress === dev.address && bluetoothModule.pendingDeviceState === "disconnecting");
-let isPairing = (bluetoothModule.pendingDeviceAddress === dev.address && bluetoothModule.pendingDeviceState === "pairing");
-let isWaitingConnect = (bluetoothModule.deviceToConnectPostPair && bluetoothModule.deviceToConnectPostPair.address === dev.address);
-
-if (isPairing && (dev.paired || dev.bonded)) {
-if (!dev.trusted) dev.trusted = true;
-
-bluetoothModule.pendingDeviceAddress = "";
-bluetoothModule.pendingDeviceState = "";
-isPairing = false;
-
-if (adapter) adapter.discovering = false;
-
-bluetoothModule.deviceToConnectPostPair = dev;
-connectionDelayTimer.restart();
-isWaitingConnect = true;
-}
-
-if (isConnecting && dev.connected) {
-bluetoothModule.pendingDeviceAddress = "";
-bluetoothModule.pendingDeviceState = "";
-isConnecting = false;
-}
-
-if (isDisconnecting && !dev.connected) {
-bluetoothModule.pendingDeviceAddress = "";
-bluetoothModule.pendingDeviceState = "";
-isDisconnecting = false;
-}
-
-let connectText = dev.connected ? "Desconectar" : "Conectar";
-if (isConnecting || isWaitingConnect) connectText = "Conectando...";
-else if (isDisconnecting) connectText = "Desconectando...";
-
-let pairText = (dev.bonded || dev.paired) ? "Desparear" : "Parear";
-if (isPairing) pairText = "Pareando...";
+let isConnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "connecting");
+let isDisconnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "disconnecting");
+let isPairing = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing");
 
 menuModel.push({
 text: "Voltar ao Menu",
 preventClose: true,
+enabled: !isPairing,
 onTrigger: () => {
 bluetoothModule.currentMenuDevice = null;
-bluetoothModule.updateMenu(true);
+Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 });
 
 menuModel.push({ text: `${dev.name || dev.address}`, enabled: false });
 
-if (dev.paired || dev.bonded || isWaitingConnect) {
+if (isPairing) {
+menuModel.push({
+text: "Pareando...",
+preventClose: true,
+enabled: false,
+onTrigger: () => {}
+});
+} else if (dev.bonded) {
+let connectText = dev.connected ? "Desconectar" : "Conectar";
+if (isConnecting) connectText = "Conectando...";
+if (isDisconnecting) connectText = "Desconectando...";
+
 menuModel.push({
 text: connectText,
 preventClose: true,
-enabled: !isPairing && !isWaitingConnect,
+enabled: !isConnecting && !isDisconnecting,
 onTrigger: () => {
-if (isConnecting || isDisconnecting || isPairing || isWaitingConnect) return;
+if (isConnecting || isDisconnecting) return;
 
-bluetoothModule.pendingDeviceAddress = dev.address;
-bluetoothModule.pendingDeviceState = dev.connected ? "disconnecting" : "connecting";
+bluetoothModule.pendingOpAddress = dev.address;
+bluetoothModule.pendingOpState = dev.connected ? "disconnecting" : "connecting";
 
+try {
 if (dev.connected) dev.disconnect();
 else dev.connect();
-
-bluetoothModule.updateMenu(true);
+} catch(e) {
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
+}
+Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 });
-}
 
 menuModel.push({
-text: pairText,
+text: "Desparear",
 preventClose: true,
-enabled: !isConnecting && !isDisconnecting && !isWaitingConnect,
 onTrigger: () => {
-if (isPairing || isConnecting || isDisconnecting || isWaitingConnect) return;
-
-if (dev.paired || dev.bonded) {
-bluetoothModule.ignoredDevices.push(dev.address);
-dev.forget();
+try { dev.forget(); } catch(e) {}
 bluetoothModule.currentMenuDevice = null;
-} else {
-bluetoothModule.isPairingProcess = true;
-bluetoothModule.pendingDeviceAddress = dev.address;
-bluetoothModule.pendingDeviceState = "pairing";
-dev.pair();
-}
-bluetoothModule.updateMenu(true);
+Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 });
 
 menuModel.push({
 text: dev.trusted ? "Desconfiar" : "Confiar",
 preventClose: true,
-enabled: !isPairing && !isWaitingConnect,
 onTrigger: () => {
 dev.trusted = !dev.trusted;
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 });
+} else {
+menuModel.push({
+text: "Parear",
+preventClose: true,
+enabled: true,
+onTrigger: () => {
+bluetoothModule.pendingOpAddress = dev.address;
+bluetoothModule.pendingOpState = "pairing";
+pairingTimeoutTimer.restart();
+
+try { dev.pair(); } catch(e) {
+pairingTimeoutTimer.stop();
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
+}
+Qt.callLater(() => bluetoothModule.updateMenu(true));
+}
+});
+}
 
 return menuModel;
 }
 
 function openDeviceSubMenu(dev) {
 bluetoothModule.currentMenuDevice = dev;
-bluetoothModule.updateMenu(true);
+Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 
 function updateMenu(forceOpen) {
 if (!bluetoothModule.globalMenu) return;
 
 if (forceOpen && !bluetoothModule.globalMenu.visible) {
-bluetoothModule.ignoredDevices = [];
-bluetoothModule.pendingDeviceAddress = "";
-bluetoothModule.pendingDeviceState = "";
-bluetoothModule.deviceToConnectPostPair = null;
-bluetoothModule.isPairingProcess = false;
-connectionDelayTimer.stop();
+bluetoothModule.currentMenuDevice = null;
+bluetoothModule.pendingOpAddress = "";
+bluetoothModule.pendingOpState = "";
 }
 
 if (!forceOpen && !bluetoothModule.globalMenu.visible) return;
 
-let modelData = bluetoothModule.currentMenuDevice !== null 
-? generateDeviceMenu(bluetoothModule.currentMenuDevice) 
-: generateMainMenu();
+let modelData = bluetoothModule.currentMenuDevice !== null
+? bluetoothModule.generateDeviceMenu(bluetoothModule.currentMenuDevice)
+: bluetoothModule.generateMainMenu();
 
 bluetoothModule.globalMenu.showSearchInput = false;
 
@@ -388,13 +378,14 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
 if (bluetoothModule.globalMenu) bluetoothModule.globalMenu.close();
 mouse.accepted = true;
 
 if (mouse.button === Qt.LeftButton) {
 bluetoothModule.currentMenuDevice = null;
-bluetoothModule.updateMenu(true);
+Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton && bluetoothModule.adapter) {
 bluetoothModule.adapter.enabled = !bluetoothModule.adapter.enabled;
 }
@@ -413,6 +404,7 @@ font.pixelSize: bluetoothModule.labelFontSize
 color: bluetoothModule.labelColor
 text: "BT: "
 }
+
 Text {
 font: btPrefix.font
 color: bluetoothRow.btState.color
