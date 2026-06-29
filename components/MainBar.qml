@@ -9,7 +9,7 @@ PanelWindow {
 id: barWindow
 
 property var globalMenu: null
-property alias appsModule: appLauncherModuleInstance
+property alias startModule: startModuleInstance
 
 readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
 property color barBorderColor: ColorRegistry.mainbarBorderColor
@@ -133,13 +133,8 @@ parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }
 
-AppLauncherModule {
-id: appLauncherModuleInstance
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-PowerModule {
+StartModule {
+id: startModuleInstance
 parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }

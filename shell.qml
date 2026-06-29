@@ -26,10 +26,10 @@ globalMenu: sharedContextMenu
 }
 
 IpcHandler {
-target: "app_launcher"
+target: "start_launcher"
 function open(): void {
-if (mainBarWindow && mainBarWindow.appsModule) {
-mainBarWindow.appsModule.refreshAndOpenApps();
+if (mainBarWindow && mainBarWindow.startModule) {
+mainBarWindow.startModule.openAppMenu();
 }
 }
 }

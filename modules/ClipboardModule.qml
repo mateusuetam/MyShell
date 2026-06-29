@@ -116,7 +116,7 @@ Text {
 font.family: clipboardModule.labelFontFamily
 font.pixelSize: clipboardModule.labelFontSize
 color: clipboardModule.labelColor
-text: "CPBD"
+text: "CLIP"
 }
 }
 }

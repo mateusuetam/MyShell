@@ -3,9 +3,6 @@ import QtQuick
 import "palettes"
 
 QtObject {
-// AppLauncher
-readonly property color appLauncherSeparatorColor: Gruvbox.light1
-readonly property color appLauncherLabelColor: Gruvbox.bright_blue
 // Mpris
 readonly property color mprisPlayingColor: Gruvbox.neutral_aqua
 readonly property color mprisPausedColor: Gruvbox.neutral_blue
@@ -46,9 +43,13 @@ readonly property color batteryLabelColor: Gruvbox.light1
 readonly property color clockLabelColor: Gruvbox.light1
 readonly property color clockDayColor: Gruvbox.bright_aqua
 readonly property color clockMonthColor: Gruvbox.neutral_purple
-// Power
-readonly property color powerSessionSeparatorColor: Gruvbox.light1
-readonly property color powerSessionLabelColor: Gruvbox.bright_orange
+// Start
+readonly property color sLabelColor: Gruvbox.bright_orange
+readonly property color t1LabelColor: Gruvbox.bright_green
+readonly property color aLabelColor: Gruvbox.bright_blue
+readonly property color rLabelColor: Gruvbox.bright_yellow
+readonly property color t2LabelColor: Gruvbox.bright_purple
+readonly property color startSeparatorColor: Gruvbox.light1
 // MainBar
 readonly property color mainbarBackgroundColor: Gruvbox.dark0
 readonly property color mainbarBorderColor: Gruvbox.dark1

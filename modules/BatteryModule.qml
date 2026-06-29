@@ -40,7 +40,7 @@ const rate = Math.round(Math.abs(dev.changeRate));
 if (!UPower.onBattery) {
 return {
 color: batteryModule.chargingColor,
-text: batteryModule.isFull ? "AC/ON" : `${pct}% +${rate}W`
+text: batteryModule.isFull ? "AC/ON" : `${pct}% - ${rate}W`
 };
 }
 let uiColor = batteryModule.normalColor;

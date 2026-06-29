@@ -253,7 +253,7 @@ let isDisconnecting = (bluetoothModule.pendingOpAddress === dev.address && bluet
 let isPairing = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing");
 
 menuModel.push({
-text: "Voltar ao Menu",
+text: "Voltar",
 preventClose: true,
 enabled: !isPairing,
 onTrigger: () => {
