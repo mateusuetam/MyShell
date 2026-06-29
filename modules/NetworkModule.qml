@@ -134,7 +134,7 @@ text: "Desligar Wi-Fi",
 onTrigger: () => { Networking.wifiEnabled = false; }
 });
 menuModel.push({
-text: "Escanear redes",
+text: "Buscar Redes",
 preventClose: true,
 onTrigger: () => {
 networkModule.currentSubMenu = "scan";
@@ -177,7 +177,7 @@ wifiDev.scannerEnabled = true;
 }
 
 menuModel.push({
-text: "Atualizar scan",
+text: "Atualizar Busca",
 preventClose: true,
 onTrigger: () => {
 if (wifiDev) {
@@ -235,6 +235,8 @@ return menuModel;
 function generateActionMenu(net) {
 let menuModel = [];
 if (!net) return menuModel;
+
+menuModel.push({ text: `${net.name}`, enabled: false });
 
 menuModel.push({
 text: net.connected ? "Desconectar" : "Conectar",

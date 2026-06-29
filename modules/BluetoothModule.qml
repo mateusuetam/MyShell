@@ -190,7 +190,7 @@ return menuModel;
 
 menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = false; } });
 menuModel.push({
-text: adapter && adapter["discovering"] ? "Parar Busca" : "Iniciar Busca",
+text: adapter && adapter["discovering"] ? "Parar Busca" : "Buscar Dispositivos",
 preventClose: true,
 onTrigger: () => { if (adapter) adapter["discovering"] = !adapter["discovering"]; }
 });
@@ -251,16 +251,6 @@ if (!dev) return menuModel;
 let isConnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "connecting");
 let isDisconnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "disconnecting");
 let isPairing = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing");
-
-menuModel.push({
-text: "Voltar",
-preventClose: true,
-enabled: !isPairing,
-onTrigger: () => {
-bluetoothModule.currentMenuDevice = null;
-Qt.callLater(() => bluetoothModule.updateMenu(true));
-}
-});
 
 menuModel.push({ text: `${dev.name || dev.address}`, enabled: false });
 
@@ -334,6 +324,18 @@ Qt.callLater(() => bluetoothModule.updateMenu(true));
 }
 });
 }
+
+menuModel.push({ type: "separator" });
+
+menuModel.push({
+text: "Voltar",
+preventClose: true,
+enabled: !isPairing,
+onTrigger: () => {
+bluetoothModule.currentMenuDevice = null;
+Qt.callLater(() => bluetoothModule.updateMenu(true));
+}
+});
 
 return menuModel;
 }
