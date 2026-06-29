@@ -18,9 +18,10 @@ readonly property color labelColor: ColorRegistry.bluetoothLabelColor
 readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
 readonly property int labelFontSize: TypographyRegistry.appliedFontSize
 
-readonly property var adapter: Bluetooth.defaultAdapter
-readonly property var devicesModel: Bluetooth.devices
-readonly property bool isBluetoothOn: bluetoothModule.adapter ? bluetoothModule.adapter.enabled : false
+readonly property bool isBluetoothOn: (() => {
+const adapter = Bluetooth["defaultAdapter"];
+return adapter ? adapter["enabled"] : false;
+})()
 
 implicitWidth: bluetoothRow.implicitWidth
 implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
@@ -79,14 +80,15 @@ id: discoveryTimeoutTimer
 interval: 60000
 repeat: false
 onTriggered: {
-if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
-bluetoothModule.adapter.discovering = false;
+const adapter = Bluetooth["defaultAdapter"];
+if (adapter && adapter["discovering"]) {
+adapter["discovering"] = false;
 }
 }
 }
 
 Instantiator {
-model: bluetoothModule.devicesModel ? bluetoothModule.devicesModel.values : []
+model: Bluetooth["devices"] ? Bluetooth["devices"]["values"] : []
 
 onObjectAdded: (index, object) => bluetoothModule.updateMenu(false)
 onObjectRemoved: (index, object) => bluetoothModule.updateMenu(false)
@@ -154,10 +156,11 @@ function onTrustedChanged() { bluetoothModule.updateMenu(true); }
 }
 
 Connections {
-target: bluetoothModule.adapter ? bluetoothModule.adapter : null
+target: Bluetooth["defaultAdapter"] ? Bluetooth["defaultAdapter"] : null
 function onEnabledChanged() { bluetoothModule.updateMenu(false); }
 function onDiscoveringChanged() {
-if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
+const adapter = Bluetooth["defaultAdapter"];
+if (adapter && adapter["discovering"]) {
 discoveryTimeoutTimer.restart();
 } else {
 discoveryTimeoutTimer.stop();
@@ -167,7 +170,8 @@ bluetoothModule.updateMenu(false);
 }
 
 function getConnectedDevice() {
-const list = bluetoothModule.devicesModel?.values ?? [];
+const devices = Bluetooth["devices"];
+const list = devices ? (devices["values"] ?? []) : [];
 for (let i = 0; i < list.length; ++i) {
 const dev = list[i];
 if (dev?.connected) return dev;
@@ -177,20 +181,22 @@ return null;
 
 function generateMainMenu() {
 let menuModel = [];
+const adapter = Bluetooth["defaultAdapter"];
 
 if (!bluetoothModule.isBluetoothOn) {
-menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.enabled = true; } });
+menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = true; } });
 return menuModel;
 }
 
-menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.enabled = false; } });
+menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = false; } });
 menuModel.push({
-text: bluetoothModule.adapter && bluetoothModule.adapter.discovering ? "Parar Busca" : "Iniciar Busca",
+text: adapter && adapter["discovering"] ? "Parar Busca" : "Iniciar Busca",
 preventClose: true,
-onTrigger: () => { if (bluetoothModule.adapter) bluetoothModule.adapter.discovering = !bluetoothModule.adapter.discovering; }
+onTrigger: () => { if (adapter) adapter["discovering"] = !adapter["discovering"]; }
 });
 
-const list = bluetoothModule.devicesModel?.values ?? [];
+const devices = Bluetooth["devices"];
+const list = devices ? (devices["values"] ?? []) : [];
 let pairedDevices = [];
 let newDevices = [];
 
@@ -200,7 +206,7 @@ if (!mainDev) continue;
 
 if (mainDev.bonded) {
 pairedDevices.push(mainDev);
-} else if (bluetoothModule.adapter && bluetoothModule.adapter.discovering) {
+} else if (adapter && adapter["discovering"]) {
 newDevices.push(mainDev);
 }
 }
@@ -386,8 +392,11 @@ mouse.accepted = true;
 if (mouse.button === Qt.LeftButton) {
 bluetoothModule.currentMenuDevice = null;
 Qt.callLater(() => bluetoothModule.updateMenu(true));
-} else if (mouse.button === Qt.RightButton && bluetoothModule.adapter) {
-bluetoothModule.adapter.enabled = !bluetoothModule.adapter.enabled;
+} else if (mouse.button === Qt.RightButton) {
+const adapter = Bluetooth["defaultAdapter"];
+if (adapter) {
+adapter["enabled"] = !adapter["enabled"];
+}
 }
 }
 }

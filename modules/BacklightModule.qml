@@ -33,9 +33,10 @@ backlightModule.brightnessPercent = val;
 Component.onCompleted: readBrightness.running = true
 }
 
-Process {
-id: changeBrightness
-onExited: {
+Process { id: changeBrightness }
+Connections {
+target: changeBrightness
+function onExited() {
 readBrightness.running = true;
 }
 }
@@ -43,7 +44,10 @@ readBrightness.running = true;
 Process {
 id: checkGammastep
 command: ["pgrep", "-f", "gammastep"]
-onExited: exitCode => {
+}
+Connections {
+target: checkGammastep
+function onExited(exitCode) {
 backlightModule.updateMenu(exitCode === 0);
 }
 }
@@ -61,7 +65,10 @@ command: ["sh", "-c", "notify-send -u low Gammastep 'Temperatura ajustada para 2
 Process {
 id: gammastepToggleCheck
 command: ["pgrep", "-f", "gammastep"]
-onExited: exitCode => {
+}
+Connections {
+target: gammastepToggleCheck
+function onExited(exitCode) {
 if (exitCode === 0) {
 gammastepKill.running = true;
 } else {
@@ -73,7 +80,10 @@ gammastepStart.running = true;
 Process {
 id: applyGammastepKill
 command: ["pkill", "-f", "gammastep"]
-onExited: {
+}
+Connections {
+target: applyGammastepKill
+function onExited() {
 applyGammastepRun.command = ["gammastep", "-O", backlightModule.targetTemp.toString()];
 applyGammastepRun.running = true;
 applyNotifyRun.command = ["notify-send", "-u", "low", "Gammastep", `Temperatura ajustada para ${backlightModule.targetTemp}K`, "-i", "display"];
