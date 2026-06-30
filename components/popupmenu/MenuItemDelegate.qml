@@ -16,13 +16,6 @@ readonly property bool isSeparator: (safeData.isSeparator !== undefined ? safeDa
 readonly property bool isEnabled: safeData.enabled !== false && !isSeparator
 readonly property bool isCurrentKeyboardItem: !!delegateRoot.ListView.isCurrentItem
 
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedMenuFontSize
-readonly property color menuTextColor: ColorRegistry.menuTextColor
-readonly property color menuTextHoverColor: ColorRegistry.menuTextHoverColor
-readonly property color menuHoverColor: ColorRegistry.menuHoverColor
-readonly property color menuBorderColor: ColorRegistry.menuBorderColor
-
 width: ListView.view ? ListView.view.width : 0
 height: isSeparator ? separatorHeight : itemHeight
 
@@ -31,7 +24,7 @@ visible: delegateRoot.isSeparator
 width: parent.width - 12
 height: 1
 anchors.centerIn: parent
-color: delegateRoot.menuBorderColor
+color: ColorRegistry.menuBorderColor
 opacity: 0.6
 }
 
@@ -41,7 +34,7 @@ anchors.fill: parent
 visible: !delegateRoot.isSeparator
 
 opacity: delegateRoot.isEnabled ? 1.0 : 0.5
-color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? delegateRoot.menuHoverColor : "transparent"
+color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ColorRegistry.menuHoverColor : "transparent"
 
 Text {
 anchors.fill: parent
@@ -49,9 +42,9 @@ anchors.leftMargin: 8
 anchors.rightMargin: 8
 verticalAlignment: Text.AlignVCenter
 text: delegateRoot.safeData.text || ""
-color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? delegateRoot.menuTextHoverColor : delegateRoot.menuTextColor
-font.family: delegateRoot.labelFontFamily
-font.pixelSize: delegateRoot.labelFontSize
+color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ColorRegistry.menuTextHoverColor : ColorRegistry.menuTextColor
+font.family: TypographyRegistry.appliedFontFamily
+font.pixelSize: TypographyRegistry.appliedMenuFontSize
 elide: Text.ElideRight
 }
 

@@ -11,8 +11,6 @@ id: barWindow
 property var globalMenu: null
 property alias startModule: startModuleInstance
 
-readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
-
 property color barBorderColor: ColorRegistry.mainbarBorderColor
 
 readonly property int barHeight: 30
@@ -35,7 +33,7 @@ WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 // --- RENDERIZAÇÃO DA BARRA ---
 Rectangle {
 anchors.fill: parent
-color: barWindow.barBackgroundColor
+color: ColorRegistry.mainbarBackgroundColor
 
 Rectangle {
 anchors.bottom: parent.bottom

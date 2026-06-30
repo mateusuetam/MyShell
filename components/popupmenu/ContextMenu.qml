@@ -6,9 +6,6 @@ import "../themeengine"
 PopupWindow {
 id: menuPopup
 
-readonly property color menuBackgroundColor: ColorRegistry.menuBackgroundColor
-readonly property color menuBorderColor: ColorRegistry.menuBorderColor
-
 readonly property int menuWidth: 200
 readonly property int itemHeight: 26
 readonly property int separatorHeight: 8
@@ -192,8 +189,8 @@ onTriggered: menuPopup._applyPositioning()
 Rectangle {
 id: menuBackground
 anchors.fill: parent
-color: menuPopup.menuBackgroundColor
-border.color: menuPopup.menuBorderColor
+color: ColorRegistry.menuBackgroundColor
+border.color: ColorRegistry.menuBorderColor
 border.width: 1
 focus: true
 
