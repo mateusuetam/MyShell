@@ -8,10 +8,10 @@ id: mprisModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color playingColor: ColorRegistry.mprisPlayingColor
-readonly property color pausedColor: ColorRegistry.mprisPausedColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color playingColor: ThemeRegistry.mprisPlayingColor
+readonly property color pausedColor: ThemeRegistry.mprisPausedColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property int maxWidth: 450
 

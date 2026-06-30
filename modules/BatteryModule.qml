@@ -8,14 +8,14 @@ id: batteryModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ColorRegistry.batteryLabelColor
-readonly property color errorColor: ColorRegistry.batteryErrorColor
-readonly property color chargingColor: ColorRegistry.batteryChargingColor
-readonly property color criticalColor: ColorRegistry.batteryCriticalColor
-readonly property color lowColor: ColorRegistry.batteryLowColor
-readonly property color normalColor: ColorRegistry.batteryNormalColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color labelColor: ThemeRegistry.batteryLabelColor
+readonly property color errorColor: ThemeRegistry.batteryErrorColor
+readonly property color chargingColor: ThemeRegistry.batteryChargingColor
+readonly property color criticalColor: ThemeRegistry.batteryCriticalColor
+readonly property color lowColor: ThemeRegistry.batteryLowColor
+readonly property color normalColor: ThemeRegistry.batteryNormalColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property var dev: UPower.displayDevice
 readonly property int realPercentage: (dev && dev.ready) ? Math.round(dev.percentage * 100) : 0

@@ -8,16 +8,16 @@ id: notifyPopup
 
 readonly property color notifyColor: {
 if (!currentNotify) {
-return ColorRegistry.notificationNormalColor;
+return ThemeRegistry.notificationNormalColor;
 }
 switch (currentNotify.urgency) {
 case NotificationUrgency.Critical:
-return ColorRegistry.notificationCriticalColor;
+return ThemeRegistry.notificationCriticalColor;
 case NotificationUrgency.Low:
-return ColorRegistry.notificationLowColor;
+return ThemeRegistry.notificationLowColor;
 case NotificationUrgency.Normal:
 default:
-return ColorRegistry.notificationNormalColor;
+return ThemeRegistry.notificationNormalColor;
 }
 }
 
@@ -30,7 +30,7 @@ required property QtObject targetWindow
 Binding {
 target: notifyPopup.targetWindow
 property: "barBorderColor"
-value: notifyPopup.visible ? notifyPopup.notifyColor : ColorRegistry.notificationNormalColor
+value: notifyPopup.visible ? notifyPopup.notifyColor : ThemeRegistry.notificationNormalColor
 }
 
 anchor.window: targetWindow
@@ -135,7 +135,7 @@ width: parent.width
 height: parent.height
 y: -height
 
-color: ColorRegistry.notificationBackgroundColor
+color: ThemeRegistry.notificationBackgroundColor
 radius: 0
 
 Rectangle {
@@ -190,9 +190,9 @@ spacing: 6
 Text {
 id: headerText
 width: parent.width
-color: ColorRegistry.notificationContentColor
-font.family: TypographyRegistry.appliedFontFamily
-font.pixelSize: TypographyRegistry.appliedHeaderFontSize
+color: ThemeRegistry.notificationContentColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedHeaderFontSize
 font.bold: true
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
@@ -208,9 +208,9 @@ visible: bodyText.text !== ""
 Text {
 id: bodyText
 width: parent.width
-color: ColorRegistry.notificationContentColor
-font.family: TypographyRegistry.appliedFontFamily
-font.pixelSize: TypographyRegistry.appliedFontSize
+color: ThemeRegistry.notificationContentColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
 }

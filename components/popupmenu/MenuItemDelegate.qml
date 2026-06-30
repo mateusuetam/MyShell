@@ -24,7 +24,7 @@ visible: delegateRoot.isSeparator
 width: parent.width - 12
 height: 1
 anchors.centerIn: parent
-color: ColorRegistry.menuBorderColor
+color: ThemeRegistry.menuBorderColor
 opacity: 0.6
 }
 
@@ -34,7 +34,7 @@ anchors.fill: parent
 visible: !delegateRoot.isSeparator
 
 opacity: delegateRoot.isEnabled ? 1.0 : 0.5
-color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ColorRegistry.menuHoverColor : "transparent"
+color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ThemeRegistry.menuHoverColor : "transparent"
 
 Text {
 anchors.fill: parent
@@ -42,9 +42,9 @@ anchors.leftMargin: 8
 anchors.rightMargin: 8
 verticalAlignment: Text.AlignVCenter
 text: delegateRoot.safeData.text || ""
-color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ColorRegistry.menuTextHoverColor : ColorRegistry.menuTextColor
-font.family: TypographyRegistry.appliedFontFamily
-font.pixelSize: TypographyRegistry.appliedMenuFontSize
+color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ThemeRegistry.menuTextHoverColor : ThemeRegistry.menuTextColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedMenuFontSize
 elide: Text.ElideRight
 }
 

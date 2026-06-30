@@ -8,11 +8,11 @@ id: micModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color mutedColor: ColorRegistry.microphoneMutedColor
-readonly property color activeColor: ColorRegistry.microphoneActiveColor
-readonly property color labelColor: ColorRegistry.microphoneLabelColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color mutedColor: ThemeRegistry.microphoneMutedColor
+readonly property color activeColor: ThemeRegistry.microphoneActiveColor
+readonly property color labelColor: ThemeRegistry.microphoneLabelColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property var micNode: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
 readonly property int micPercent: micNode ? Math.round(micNode.volume * 100) : 0

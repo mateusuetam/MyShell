@@ -8,11 +8,11 @@ id: clockModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ColorRegistry.clockLabelColor
-readonly property color dayColor: ColorRegistry.clockDayColor
-readonly property color monthColor: ColorRegistry.clockMonthColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color labelColor: ThemeRegistry.clockLabelColor
+readonly property color dayColor: ThemeRegistry.clockDayColor
+readonly property color monthColor: ThemeRegistry.clockMonthColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property var ptBr: Qt.locale("pt_BR")
 

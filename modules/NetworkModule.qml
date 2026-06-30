@@ -10,12 +10,12 @@ id: networkModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color disabledColor: ColorRegistry.networkDisabledColor
-readonly property color disconnectedColor: ColorRegistry.networkDisconnectedColor
-readonly property color connectedColor: ColorRegistry.networkConnectedColor
-readonly property color labelColor: ColorRegistry.networkLabelColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color disabledColor: ThemeRegistry.networkDisabledColor
+readonly property color disconnectedColor: ThemeRegistry.networkDisconnectedColor
+readonly property color connectedColor: ThemeRegistry.networkConnectedColor
+readonly property color labelColor: ThemeRegistry.networkLabelColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property bool isWifiOn: Networking.wifiEnabled
 

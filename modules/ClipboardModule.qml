@@ -8,9 +8,9 @@ id: clipboardModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ColorRegistry.clipboardLabelColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color labelColor: ThemeRegistry.clipboardLabelColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 implicitWidth: clipboardRow.implicitWidth
 implicitHeight: clipboardModule.parentWindow ? clipboardModule.parentWindow.barHeight : 30

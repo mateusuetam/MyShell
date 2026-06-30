@@ -5,11 +5,11 @@ import "../themeengine"
 Item {
 id: searchRoot
 
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedMenuFontSize
-readonly property color menuTextColor: ColorRegistry.menuTextColor
-readonly property color menuBorderColor: ColorRegistry.menuBorderColor
-readonly property color menuBackgroundColor: ColorRegistry.menuBackgroundColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedMenuFontSize
+readonly property color menuTextColor: ThemeRegistry.menuTextColor
+readonly property color menuBorderColor: ThemeRegistry.menuBorderColor
+readonly property color menuBackgroundColor: ThemeRegistry.menuBackgroundColor
 
 property int itemHeight: 26
 

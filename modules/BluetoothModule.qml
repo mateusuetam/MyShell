@@ -11,12 +11,12 @@ id: bluetoothModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color disabledColor: ColorRegistry.bluetoothDisabledColor
-readonly property color disconnectedColor: ColorRegistry.bluetoothDisconnectedColor
-readonly property color connectedColor: ColorRegistry.bluetoothConnectedColor
-readonly property color labelColor: ColorRegistry.bluetoothLabelColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color disabledColor: ThemeRegistry.bluetoothDisabledColor
+readonly property color disconnectedColor: ThemeRegistry.bluetoothDisconnectedColor
+readonly property color connectedColor: ThemeRegistry.bluetoothConnectedColor
+readonly property color labelColor: ThemeRegistry.bluetoothLabelColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property bool isBluetoothOn: (() => {
 const adapter = Bluetooth["defaultAdapter"];

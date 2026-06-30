@@ -8,10 +8,10 @@ id: idleModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color activatedColor: ColorRegistry.idleActivatedColor
-readonly property color deactivatedColor: ColorRegistry.idleDeactivatedColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color activatedColor: ThemeRegistry.idleActivatedColor
+readonly property color deactivatedColor: ThemeRegistry.idleDeactivatedColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property bool isActive: inhibitor.enabled
 

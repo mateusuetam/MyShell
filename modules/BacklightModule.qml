@@ -8,10 +8,10 @@ id: backlightModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ColorRegistry.backlightLabelColor
-readonly property color brightnessColor: ColorRegistry.backlightBrightnessColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color labelColor: ThemeRegistry.backlightLabelColor
+readonly property color brightnessColor: ThemeRegistry.backlightBrightnessColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 property int brightnessPercent: 50
 property int targetTemp: 2500

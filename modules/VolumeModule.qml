@@ -8,11 +8,11 @@ id: volumeModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color mutedColor: ColorRegistry.volumeMutedColor
-readonly property color activeColor: ColorRegistry.volumeActiveColor
-readonly property color labelColor: ColorRegistry.volumeLabelColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color mutedColor: ThemeRegistry.volumeMutedColor
+readonly property color activeColor: ThemeRegistry.volumeActiveColor
+readonly property color labelColor: ThemeRegistry.volumeLabelColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 readonly property var audioNode: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
 readonly property int volPercent: audioNode ? Math.round(audioNode.volume * 100) : 0

@@ -6,12 +6,12 @@ import "../themeengine"
 PopupWindow {
 id: passwordPopup
 
-readonly property color menuBackgroundColor: ColorRegistry.menuBackgroundColor
-readonly property color menuBorderColor: ColorRegistry.menuBorderColor
-readonly property color menuErrorColor: ColorRegistry.menuErrorColor
-readonly property color itemTextColor: ColorRegistry.menuTextColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color menuBackgroundColor: ThemeRegistry.menuBackgroundColor
+readonly property color menuBorderColor: ThemeRegistry.menuBorderColor
+readonly property color menuErrorColor: ThemeRegistry.menuErrorColor
+readonly property color itemTextColor: ThemeRegistry.menuTextColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 property var targetNetwork: null
 property string statusState: "input"

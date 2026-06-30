@@ -10,14 +10,14 @@ id: startModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color sLabelColor: ColorRegistry.sLabelColor
-readonly property color t1LabelColor: ColorRegistry.t1LabelColor
-readonly property color aLabelColor: ColorRegistry.aLabelColor
-readonly property color rLabelColor: ColorRegistry.rLabelColor
-readonly property color t2LabelColor: ColorRegistry.t2LabelColor
-readonly property color separatorColor: ColorRegistry.startSeparatorColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int labelFontSize: TypographyRegistry.appliedFontSize
+readonly property color sLabelColor: ThemeRegistry.sLabelColor
+readonly property color t1LabelColor: ThemeRegistry.t1LabelColor
+readonly property color aLabelColor: ThemeRegistry.aLabelColor
+readonly property color rLabelColor: ThemeRegistry.rLabelColor
+readonly property color t2LabelColor: ThemeRegistry.t2LabelColor
+readonly property color separatorColor: ThemeRegistry.startSeparatorColor
+readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
+readonly property int labelFontSize: ThemeRegistry.appliedFontSize
 
 implicitWidth: startRow.implicitWidth
 implicitHeight: startModule.parentWindow ? startModule.parentWindow.barHeight : 30
