@@ -12,7 +12,9 @@ property var globalMenu: null
 property alias startModule: startModuleInstance
 
 readonly property color barBackgroundColor: ColorRegistry.mainbarBackgroundColor
+
 property color barBorderColor: ColorRegistry.mainbarBorderColor
+
 readonly property int barHeight: 30
 readonly property int layoutSpacing: 10
 readonly property int sideMargins: 5
@@ -67,20 +69,17 @@ spacing: 0
 z: 1
 
 // <<< LADO ESQUERDO <<<
-Row {
-id: leftModules
-Layout.fillHeight: true
-spacing: barWindow.layoutSpacing
-Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-
 MprisModule {
+Layout.fillHeight: true
+Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 parentWindow: barWindow
 globalMenu: barWindow.globalMenu
 }
-}
+
 Item {
 Layout.fillWidth: true
 }
+
 // >>> LADO DIREITO >>>
 Row {
 id: rightModules
@@ -88,50 +87,15 @@ Layout.fillHeight: true
 spacing: barWindow.layoutSpacing
 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
-TrayModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-IdleModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-ClipboardModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-MicrophoneModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-VolumeModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-BluetoothModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-NetworkModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-BacklightModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
-
-BatteryModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
+TrayModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+IdleModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+ClipboardModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+MicrophoneModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+VolumeModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 
 StartModule {
 id: startModuleInstance
@@ -140,6 +104,7 @@ globalMenu: barWindow.globalMenu
 }
 }
 }
+
 // --- CENTRO ---
 ClockModule {
 parentWindow: barWindow
