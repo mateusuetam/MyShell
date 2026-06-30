@@ -3,7 +3,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "components"
-import "components/wallpaper"
 import "components/lockscreen"
 import "components/popupmenu"
 

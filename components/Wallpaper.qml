@@ -1,17 +1,17 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQml
+import QtCore
 import Quickshell
 import Quickshell.Wayland
-import QtCore
+import Qt.labs.folderlistmodel
 
 PanelWindow {
 id: wallpaperWindow
 
 required property var globalMenu
-property var focusWindow: null
 
-property url sourcePath: wallpaperSettings.savedPath
-readonly property int imageFillMode: Image.PreserveAspectCrop
+property var subMenuStructure: []
 
 WlrLayershell.layer: WlrLayer.Background
 WlrLayershell.namespace: "wallpaper"
@@ -32,11 +32,53 @@ category: "Wallpaper"
 property url savedPath: ""
 }
 
-property WallpaperModel backendModel: WallpaperModel {
-id: backendModel
-onWallpaperSelected: fileUrl => {
-wallpaperSettings.savedPath = fileUrl;
+component WallpaperDelegate: QtObject {
+required property var model
+readonly property string name: model.fileName
+readonly property url urlPath: model.fileUrl
 }
+
+FolderListModel {
+id: folderModel
+folder: "file://" + Quickshell.env("HOME") + "/Imagens"
+nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+showDirs: false
+showDotAndDotDot: false
+showOnlyReadable: true
+}
+
+Instantiator {
+id: fileInstantiator
+model: folderModel
+delegate: WallpaperDelegate {}
+onObjectAdded: rebuildDebounce.restart()
+onObjectRemoved: rebuildDebounce.restart()
+}
+
+Timer {
+id: rebuildDebounce
+interval: 32
+repeat: false
+onTriggered: wallpaperWindow.rebuildMenu()
+}
+
+function rebuildMenu() {
+let list = [];
+for (var i = 0; i < fileInstantiator.count; i++) {
+const obj = fileInstantiator.objectAt(i) as WallpaperDelegate;
+if (!obj) continue;
+
+list.push({
+type: "action",
+text: obj.name,
+icon: "",
+enabled: true,
+preventClose: false,
+actionType: "change_wallpaper",
+actionData: obj.urlPath
+});
+}
+wallpaperWindow.subMenuStructure = list;
 }
 
 Connections {
@@ -44,10 +86,10 @@ target: wallpaperWindow.globalMenu
 function onItemDataActionTriggered(actionType, data) {
 switch (actionType) {
 case "open_wallpaper_submenu":
-wallpaperWindow.globalMenu.menuModel = backendModel.subMenuStructure;
+wallpaperWindow.globalMenu.menuModel = wallpaperWindow.subMenuStructure;
 break;
 case "change_wallpaper":
-backendModel.wallpaperSelected(data);
+wallpaperSettings.savedPath = data;
 break;
 }
 }
@@ -79,8 +121,8 @@ color: "black"
 
 Image {
 anchors.fill: parent
-source: wallpaperWindow.sourcePath
-fillMode: wallpaperWindow.imageFillMode
+source: wallpaperSettings.savedPath
+fillMode: Image.PreserveAspectCrop
 horizontalAlignment: Image.AlignHCenter
 verticalAlignment: Image.AlignVCenter
 asynchronous: true
@@ -92,8 +134,8 @@ anchors.fill: parent
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: mouse => {
 let menu = wallpaperWindow.globalMenu;
-if (!menu)
-return;
+if (!menu) return;
+
 mouse.accepted = true;
 if (mouse.button === Qt.RightButton) {
 wallpaperWindow.focusable = true;
