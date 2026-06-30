@@ -6,28 +6,18 @@ import "themeengine"
 PopupWindow {
 id: notifyPopup
 
-readonly property color popupBackgroundColor: ColorRegistry.notificationBackgroundColor
-readonly property color contentTextColor: ColorRegistry.notificationContentColor
-readonly property color criticalUrgencyColor: ColorRegistry.notificationCriticalColor
-readonly property color lowUrgencyColor: ColorRegistry.notificationLowColor
-readonly property color normalUrgencyColor: ColorRegistry.notificationNormalColor
-readonly property string labelFontFamily: TypographyRegistry.appliedFontFamily
-readonly property int headerFontSize: TypographyRegistry.appliedHeaderFontSize
-readonly property int bodyFontSize: TypographyRegistry.appliedFontSize
-
 readonly property color notifyColor: {
 if (!currentNotify) {
-return notifyPopup.normalUrgencyColor;
+return ColorRegistry.notificationNormalColor;
 }
-
 switch (currentNotify.urgency) {
 case NotificationUrgency.Critical:
-return notifyPopup.criticalUrgencyColor;
+return ColorRegistry.notificationCriticalColor;
 case NotificationUrgency.Low:
-return notifyPopup.lowUrgencyColor;
+return ColorRegistry.notificationLowColor;
 case NotificationUrgency.Normal:
 default:
-return notifyPopup.normalUrgencyColor;
+return ColorRegistry.notificationNormalColor;
 }
 }
 
@@ -40,14 +30,13 @@ required property QtObject targetWindow
 Binding {
 target: notifyPopup.targetWindow
 property: "barBorderColor"
-value: notifyPopup.visible ? notifyPopup.notifyColor : notifyPopup.normalUrgencyColor
+value: notifyPopup.visible ? notifyPopup.notifyColor : ColorRegistry.notificationNormalColor
 }
 
 anchor.window: targetWindow
 anchor.rect.y: 29
 anchor.rect.x: Quickshell.screens[0] ? Math.round((Quickshell.screens[0].width - implicitWidth) / 2) : 0
 implicitWidth: 350
-
 implicitHeight: contentColumn.implicitHeight + 14
 
 color: "transparent"
@@ -55,7 +44,6 @@ visible: false
 
 NotificationServer {
 id: notifyServer
-
 imageSupported: false
 actionsSupported: true
 actionIconsSupported: true
@@ -93,7 +81,6 @@ notifyPopup.visible = true;
 animateIn.start();
 
 let timeout = 7000;
-
 if (currentNotify.expireTimeout > 0) {
 timeout = currentNotify.expireTimeout * 1000;
 } else if (currentNotify.urgency === NotificationUrgency.Critical) {
@@ -148,7 +135,7 @@ width: parent.width
 height: parent.height
 y: -height
 
-color: notifyPopup.popupBackgroundColor
+color: ColorRegistry.notificationBackgroundColor
 radius: 0
 
 Rectangle {
@@ -181,20 +168,16 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: mouse => {
 let menu = notifyPopup.globalMenu;
-if (menu) {
-menu.close();
-}
+if (menu) menu.close();
+
 mouse.accepted = true;
-if (mouse.button === Qt.LeftButton) {
-if (notifyPopup.currentNotify && typeof notifyPopup.currentNotify.activate === "function") {
+
+if (mouse.button === Qt.LeftButton && notifyPopup.currentNotify && typeof notifyPopup.currentNotify.activate === "function") {
 notifyPopup.currentNotify.activate();
 }
+
 dismissTimer.stop();
 animateOut.start();
-} else if (mouse.button === Qt.RightButton) {
-dismissTimer.stop();
-animateOut.start();
-}
 }
 }
 
@@ -207,9 +190,9 @@ spacing: 6
 Text {
 id: headerText
 width: parent.width
-color: notifyPopup.contentTextColor
-font.family: notifyPopup.labelFontFamily
-font.pixelSize: notifyPopup.headerFontSize
+color: ColorRegistry.notificationContentColor
+font.family: TypographyRegistry.appliedFontFamily
+font.pixelSize: TypographyRegistry.appliedHeaderFontSize
 font.bold: true
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
@@ -225,9 +208,9 @@ visible: bodyText.text !== ""
 Text {
 id: bodyText
 width: parent.width
-color: notifyPopup.contentTextColor
-font.family: notifyPopup.labelFontFamily
-font.pixelSize: notifyPopup.bodyFontSize
+color: ColorRegistry.notificationContentColor
+font.family: TypographyRegistry.appliedFontFamily
+font.pixelSize: TypographyRegistry.appliedFontSize
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
 }
