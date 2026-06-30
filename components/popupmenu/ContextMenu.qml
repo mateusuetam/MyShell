@@ -17,7 +17,9 @@ readonly property int menuMargins: 6
 readonly property int menuMaxHeight: 450
 
 property bool showSearchInput: false
-property string filterText: ""
+
+readonly property string filterText: searchLoader.item ? searchLoader.item.text : ""
+
 property var menuModel: null
 property var _pendingModel: null
 property var _pendingWindow: null
@@ -60,7 +62,6 @@ if (searchLoader.item) {
 searchLoader.item.text = "";
 }
 menuPopup.showSearchInput = false;
-menuPopup.filterText = "";
 menuPopup.anchor.window = null;
 menuPopup.menuModel = null;
 menuView.currentIndex = -1;
@@ -74,8 +75,7 @@ visible = false;
 }
 
 function openMenu(targetWindow, anchorItem, modelData) {
-if (!anchorItem)
-return;
+if (!anchorItem) return;
 _prepareToOpen(targetWindow, modelData);
 _pendingAnchorItem = anchorItem;
 _isAnchorMode = true;
@@ -83,8 +83,7 @@ repositionTimer.restart();
 }
 
 function openAtPosition(targetWindow, x, y, modelData) {
-if (!targetWindow)
-return;
+if (!targetWindow) return;
 _prepareToOpen(targetWindow, modelData);
 _pendingX = x;
 _pendingY = y;
@@ -96,7 +95,6 @@ function _prepareToOpen(targetWindow, modelData) {
 repositionTimer.stop();
 _pendingAnchorItem = null;
 menuPopup.menuModel = null;
-menuPopup.filterText = "";
 if (searchLoader.item)
 searchLoader.item.text = "";
 
@@ -130,15 +128,13 @@ close();
 }
 
 function _applyPositioning() {
-if (!_pendingWindow)
-return;
+if (!_pendingWindow) return;
 
 menuPopup.menuModel = _pendingModel;
 menuPopup.anchor.window = _pendingWindow;
 
 if (_isAnchorMode) {
-if (!_pendingAnchorItem)
-return;
+if (!_pendingAnchorItem) return;
 const windowPos = _pendingAnchorItem.mapToItem(null, 0, _pendingAnchorItem.height);
 const newX = windowPos.x - (implicitWidth / 2) + (_pendingAnchorItem.width / 2);
 const newY = windowPos.y + verticalOffset;
@@ -156,8 +152,7 @@ menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
 
 function _updateFilteredModel() {
 const search = menuPopup.filterText.toLowerCase().trim();
-if (search === "")
-return;
+if (search === "") return;
 
 const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
 if (!rawSource) {
@@ -169,14 +164,10 @@ const itemsArray = Array.from(rawSource);
 menuPopup._currentFilteredModel = itemsArray.filter(item => {
 let textToMatch = "";
 if (item && typeof item === 'object') {
-if (item.text !== undefined)
-textToMatch = item.text;
-else if (item.name !== undefined)
-textToMatch = item.name;
-else if (item.label !== undefined)
-textToMatch = item.label;
-else if (item.modelData !== undefined && item.modelData.text !== undefined)
-textToMatch = item.modelData.text;
+if (item.text !== undefined) textToMatch = item.text;
+else if (item.name !== undefined) textToMatch = item.name;
+else if (item.label !== undefined) textToMatch = item.label;
+else if (item.modelData !== undefined && item.modelData.text !== undefined) textToMatch = item.modelData.text;
 } else if (typeof item === 'string') {
 textToMatch = item;
 }
@@ -265,32 +256,30 @@ anchors.margins: menuPopup.menuMargins
 anchors.bottomMargin: 0
 visible: menuPopup.showSearchInput
 active: menuPopup.showSearchInput
-sourceComponent: searchInputComponent
+source: "MenuSearchInput.qml"
+
 onLoaded: {
 if (item) {
-item.forceFocusNow();
-item.textChanged.connect(() => {
-menuPopup.filterText = item.text;
-});
-item.navigationDownRequested.connect(() => {
+item.itemHeight = menuPopup.itemHeight;
+}
+}
+}
+
+Connections {
+target: searchLoader.item
+ignoreUnknownSignals: true
+
+function onNavigationDownRequested() {
 menuPopup.focusListView();
-});
-item.actionTriggeredRequested.connect(() => {
+}
+
+function onActionTriggeredRequested() {
 if (menuView.count > 0) {
 const targetItem = menuView.currentItem ? menuView.currentItem : menuView.itemAtIndex(0);
 if (targetItem && targetItem.itemData) {
 menuPopup.handleItemTrigger(targetItem.itemData);
 }
 }
-});
-}
-}
-}
-
-Component {
-id: searchInputComponent
-MenuSearchInput {
-itemHeight: menuPopup.itemHeight
 }
 }
 
@@ -311,6 +300,7 @@ currentIndex: -1
 onModelChanged: currentIndex = -1
 highlightFollowsCurrentItem: true
 model: menuPopup.filterText.trim() === "" ? menuPopup._unfilteredModel : menuPopup._currentFilteredModel
+
 delegate: MenuItemDelegate {
 required property var model
 width: menuView.width
@@ -318,15 +308,6 @@ itemHeight: menuPopup.itemHeight
 separatorHeight: menuPopup.separatorHeight
 itemData: model.modelData !== undefined ? model.modelData : model
 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
-}
-MouseArea {
-z: -1
-anchors.fill: parent
-acceptedButtons: Qt.LeftButton | Qt.RightButton
-onPressed: mouse => {
-menuBackground.forceActiveFocus();
-mouse.accepted = false;
-}
 }
 }
 }
