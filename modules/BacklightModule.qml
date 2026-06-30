@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Io
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: backlightModule

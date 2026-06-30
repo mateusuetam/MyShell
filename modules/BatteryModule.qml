@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Services.UPower
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: batteryModule

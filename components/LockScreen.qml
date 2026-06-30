@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import Quickshell.Wayland
 import Quickshell.Services.Pam
-import "themeengine"
+import "../core"
 
 Item {
 id: lockRoot
@@ -28,7 +28,7 @@ pam.start();
 
 PamContext {
 id: pam
-configDirectory: "pam"
+configDirectory: "../core"
 config: "password.conf"
 onPamMessage: if (this.responseRequired) this.respond(lockRoot.currentText)
 

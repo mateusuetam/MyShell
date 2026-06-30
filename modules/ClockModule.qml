@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: clockModule

@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
-import "../themeengine"
+import "../core"
 
 PopupWindow {
 id: passwordPopup

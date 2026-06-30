@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../themeengine"
+import "../core"
 
 Item {
 id: delegateRoot

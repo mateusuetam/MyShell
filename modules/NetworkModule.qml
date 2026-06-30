@@ -1,14 +1,14 @@
 import QtQuick
 import Quickshell.Networking
 import Quickshell.Io
-import "../components/themeengine"
-import "../components/popupmenu"
+import "../core"
 
 Item {
 id: networkModule
 
 required property var globalMenu
 required property var parentWindow
+required property var passwordPrompt
 
 readonly property color disabledColor: ThemeRegistry.networkDisabledColor
 readonly property color disconnectedColor: ThemeRegistry.networkDisconnectedColor
@@ -35,7 +35,6 @@ lastStatus = getNetworkState().text
 Qt.callLater(() => { isReady = true; })
 }
 
-PasswordPrompt { id: wifiPasswordPrompt }
 Process { id: notifyProcess }
 
 Timer {
@@ -222,7 +221,7 @@ net.connect();
 } else {
 networkModule.globalMenu.close();
 Qt.callLater(() => {
-wifiPasswordPrompt.openPrompt(net, networkModule.parentWindow);
+networkModule.passwordPrompt.openPrompt(net, networkModule.parentWindow);
 });
 }
 }

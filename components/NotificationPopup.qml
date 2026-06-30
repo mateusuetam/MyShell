@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
-import "themeengine"
+import "../core"
 
 PopupWindow {
 id: notifyPopup

@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import "../core"
 import "../modules"
-import "themeengine"
 
 PanelWindow {
 id: barWindow
@@ -29,6 +29,8 @@ right: true
 implicitHeight: barWindow.barHeight
 exclusiveZone: barWindow.barHeight
 WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+PasswordPrompt { id: wifiPasswordPromptInstance }
 
 // --- RENDERIZAÇÃO DA BARRA ---
 Rectangle {
@@ -91,15 +93,10 @@ ClipboardModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 MicrophoneModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 VolumeModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
-NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; passwordPrompt: wifiPasswordPromptInstance }
 BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
-
-StartModule {
-id: startModuleInstance
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
+StartModule { id: startModuleInstance; parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 }
 }
 

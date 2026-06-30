@@ -3,7 +3,7 @@ import QtQuick
 import QtQml
 import Quickshell.Bluetooth
 import Quickshell.Io
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: bluetoothModule

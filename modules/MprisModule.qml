@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Services.Mpris
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: mprisModule

@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Wayland
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: idleModule

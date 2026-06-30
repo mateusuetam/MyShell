@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Services.Pipewire
-import "../components/themeengine"
+import "../core"
 
 Item {
 id: micModule
