@@ -6,13 +6,6 @@ import "../core"
 PopupWindow {
 id: passwordPopup
 
-readonly property color menuBackgroundColor: ThemeRegistry.menuBackgroundColor
-readonly property color menuBorderColor: ThemeRegistry.menuBorderColor
-readonly property color menuErrorColor: ThemeRegistry.menuErrorColor
-readonly property color itemTextColor: ThemeRegistry.menuTextColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 property var targetNetwork: null
 property string statusState: "input"
 
@@ -79,8 +72,8 @@ passwordInput.forceActiveFocus();
 
 Rectangle {
 anchors.fill: parent
-color: passwordPopup.menuBackgroundColor
-border.color: passwordPopup.statusState === "error" ? passwordPopup.menuErrorColor : passwordPopup.menuBorderColor
+color: ThemeRegistry.menuBackgroundColor
+border.color: passwordPopup.statusState === "error" ? ThemeRegistry.menuErrorColor : ThemeRegistry.menuBorderColor
 border.width: 1
 
 Row {
@@ -91,9 +84,9 @@ spacing: 10
 Text {
 id: promptLabel
 anchors.verticalCenter: parent.verticalCenter
-font.family: passwordPopup.labelFontFamily
-font.pixelSize: passwordPopup.labelFontSize
-color: passwordPopup.statusState === "error" ? passwordPopup.menuErrorColor : passwordPopup.itemTextColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: passwordPopup.statusState === "error" ? ThemeRegistry.menuErrorColor : ThemeRegistry.menuTextColor
 text: {
 if (passwordPopup.statusState === "error")
 return "Tente novamente:";
@@ -107,9 +100,9 @@ TextInput {
 id: passwordInput
 anchors.verticalCenter: parent.verticalCenter
 width: parent.width - promptLabel.width - parent.spacing
-font.family: passwordPopup.labelFontFamily
-font.pixelSize: passwordPopup.labelFontSize
-color: passwordPopup.itemTextColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.menuTextColor
 echoMode: TextInput.Password
 selectByMouse: true
 clip: true
