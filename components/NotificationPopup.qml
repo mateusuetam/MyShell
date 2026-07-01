@@ -8,16 +8,16 @@ id: notifyPopup
 
 readonly property color notifyColor: {
 if (!currentNotify) {
-return ThemeRegistry.notificationNormalColor;
+return ThemeRegistry.borderColor;
 }
 switch (currentNotify.urgency) {
 case NotificationUrgency.Critical:
-return ThemeRegistry.notificationCriticalColor;
+return ThemeRegistry.borderCriticalColor;
 case NotificationUrgency.Low:
-return ThemeRegistry.notificationLowColor;
+return ThemeRegistry.borderLowColor;
 case NotificationUrgency.Normal:
 default:
-return ThemeRegistry.notificationNormalColor;
+return ThemeRegistry.borderColor;
 }
 }
 
@@ -28,9 +28,9 @@ required property var globalMenu
 required property QtObject targetWindow
 
 Binding {
-target: notifyPopup.targetWindow
-property: "barBorderColor"
-value: notifyPopup.visible ? notifyPopup.notifyColor : ThemeRegistry.notificationNormalColor
+target: ThemeRegistry
+property: "dynamicBorderColor"
+value: notifyPopup.visible ? notifyPopup.notifyColor : ThemeRegistry.borderColor
 }
 
 anchor.window: targetWindow
@@ -135,7 +135,7 @@ width: parent.width
 height: parent.height
 y: -height
 
-color: ThemeRegistry.notificationBackgroundColor
+color: ThemeRegistry.backgroundColor
 radius: 0
 
 Rectangle {

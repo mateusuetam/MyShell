@@ -11,8 +11,6 @@ id: barWindow
 property var globalMenu: null
 property alias startModule: startModuleInstance
 
-property color barBorderColor: ThemeRegistry.mainbarBorderColor
-
 readonly property int barHeight: 30
 readonly property int layoutSpacing: 10
 readonly property int sideMargins: 5
@@ -35,14 +33,14 @@ PasswordPrompt { id: wifiPasswordPromptInstance }
 // --- RENDERIZAÇÃO DA BARRA ---
 Rectangle {
 anchors.fill: parent
-color: ThemeRegistry.mainbarBackgroundColor
+color: ThemeRegistry.backgroundColor
 
 Rectangle {
 anchors.bottom: parent.bottom
 anchors.left: parent.left
 anchors.right: parent.right
 height: 1
-color: barWindow.barBorderColor
+color: ThemeRegistry.dynamicBorderColor
 
 Behavior on color {
 ColorAnimation {

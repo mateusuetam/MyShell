@@ -139,9 +139,13 @@ readonly property color rLabelColor: bright_yellow
 readonly property color t2LabelColor: bright_purple
 readonly property color startSeparatorColor: light1
 
-// MainBar
-readonly property color mainbarBackgroundColor: dark0
-readonly property color mainbarBorderColor: dark1
+// Shell
+readonly property color backgroundColor: dark0
+readonly property color borderColor: dark1
+readonly property color borderLowColor: bright_green
+readonly property color borderCriticalColor: bright_red
+readonly property color notificationContentColor: light1
+property color dynamicBorderColor: borderColor
 
 // Menu
 readonly property color menuBackgroundColor: dark0
@@ -150,13 +154,6 @@ readonly property color menuTextHoverColor: dark2
 readonly property color menuTextColor: light1
 readonly property color menuHoverColor: bright_orange
 readonly property color menuErrorColor: bright_red
-
-// Notifications
-readonly property color notificationBackgroundColor: dark0
-readonly property color notificationCriticalColor: bright_red
-readonly property color notificationLowColor: bright_green
-readonly property color notificationNormalColor: dark1
-readonly property color notificationContentColor: light1
 
 // Lockscreen
 readonly property color lockClockColor: neutral_aqua
