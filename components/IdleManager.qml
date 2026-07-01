@@ -5,49 +5,32 @@ import Quickshell.Io
 Item {
 id: idleManager
 
-readonly property int lockTimeout: 300
-readonly property int screenTimeout: 600
-readonly property var monitorOffCommand: ["niri", "msg", "action", "power-off-monitors"]
-
 property bool enabledIdle: true
-property var lockTarget: null
-
-Process {
-id: screenProcess
-command: idleManager.monitorOffCommand
-}
+property LockScreen lockTarget: null
 
 function lockScreen() {
-if (lockTarget != null) {
+if (lockTarget)
 lockTarget.activateLock();
-}
 }
 
 function turnOffMonitors() {
 screenProcess.startDetached();
 }
 
-IdleMonitor {
-id: lockMonitor
-timeout: idleManager.lockTimeout
-enabled: idleManager.enabledIdle
-respectInhibitors: true
-
-onIsIdleChanged: {
-if (isIdle)
-idleManager.lockScreen();
-}
+Process {
+id: screenProcess
+command: ["niri", "msg", "action", "power-off-monitors"]
 }
 
 IdleMonitor {
-id: screenMonitor
-timeout: idleManager.screenTimeout
+timeout: 300
 enabled: idleManager.enabledIdle
-respectInhibitors: true
-
-onIsIdleChanged: {
-if (isIdle)
-idleManager.turnOffMonitors();
+onIsIdleChanged: if (isIdle) idleManager.lockScreen()
 }
+
+IdleMonitor {
+timeout: 600
+enabled: idleManager.enabledIdle
+onIsIdleChanged: if (isIdle) idleManager.turnOffMonitors()
 }
 }
