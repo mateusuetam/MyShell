@@ -6,6 +6,8 @@ import "../core"
 PopupWindow {
 id: notifyPopup
 
+signal clicked()
+
 readonly property color notifyColor: {
 if (!currentNotify) {
 return ThemeRegistry.borderColor;
@@ -24,13 +26,12 @@ return ThemeRegistry.borderColor;
 property var notifyQueue: []
 property var currentNotify: null
 
-required property var globalMenu
 required property QtObject targetWindow
 
 Binding {
 target: ThemeRegistry
 property: "dynamicBorderColor"
-value: notifyPopup.visible ? notifyPopup.notifyColor : ThemeRegistry.borderColor
+value: notifyPopup.notifyColor
 }
 
 anchor.window: targetWindow
@@ -167,9 +168,7 @@ anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: mouse => {
-let menu = notifyPopup.globalMenu;
-if (menu) menu.close();
-
+notifyPopup.clicked();
 mouse.accepted = true;
 
 if (mouse.button === Qt.LeftButton && notifyPopup.currentNotify && typeof notifyPopup.currentNotify.activate === "function") {

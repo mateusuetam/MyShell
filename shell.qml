@@ -11,6 +11,11 @@ ContextMenu {
 id: sharedContextMenu
 }
 
+NotificationPopup {
+targetWindow: mainBarWindow
+onClicked: sharedContextMenu.close()
+}
+
 Wallpaper {
 screen: Quickshell.screens[0]
 globalMenu: sharedContextMenu
@@ -22,18 +27,8 @@ screen: Quickshell.screens[0]
 globalMenu: sharedContextMenu
 }
 
-IpcHandler {
-target: "start_launcher"
-function open(): void {
-if (mainBarWindow && mainBarWindow.startModule) {
-mainBarWindow.startModule.openAppMenu();
-}
-}
-}
-
-NotificationPopup {
-targetWindow: mainBarWindow
-globalMenu: sharedContextMenu
+LockScreen {
+id: nativeLock
 }
 
 IdleManager {
@@ -41,8 +36,13 @@ id: globalIdle
 lockTarget: nativeLock
 }
 
-LockScreen {
-id: nativeLock
+IpcHandler {
+target: "start_launcher"
+function open(): void {
+if (mainBarWindow && mainBarWindow.startModule) {
+mainBarWindow.startModule.openAppMenu();
+}
+}
 }
 
 IpcHandler {
