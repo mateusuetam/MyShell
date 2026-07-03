@@ -25,37 +25,36 @@ visible: Pipewire.ready && !!Pipewire.defaultAudioSource
 
 PwObjectTracker {
 id: sourceTracker
-objects: [Pipewire.defaultAudioSource]
+objects: Pipewire.defaultAudioSource ? [Pipewire.defaultAudioSource] : []
 }
 
 MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
-onPressed: mouse => {
-let menu = micModule.globalMenu;
-if (menu) {
-menu.close();
-}
-mouse.accepted = true;
-if (mouse.button === Qt.LeftButton) {
-if (micModule.micNode) {
-micModule.micNode.muted = !micModule.micNode.muted;
+
+onPressed: {
+if (micModule.globalMenu) micModule.globalMenu.close();
+
+const node = micModule.micNode;
+if (node) {
+node.muted = !node.muted;
 }
 }
-}
+
 onWheel: wheel => {
-let menu = micModule.globalMenu;
-if (menu) {
-menu.close();
-}
-if (!micModule.micNode)
-return;
-var step = 0.01;
+if (micModule.globalMenu) micModule.globalMenu.close();
+
+const node = micModule.micNode;
+if (!node || wheel.angleDelta.y === 0) return;
+
+const step = 0.01;
+const currentVolume = node.volume;
+
 if (wheel.angleDelta.y > 0) {
-micModule.micNode.volume = Math.min(1.0, micModule.micNode.volume + step);
+node.volume = Math.min(1.0, currentVolume + step);
 } else {
-micModule.micNode.volume = Math.max(0.0, micModule.micNode.volume - step);
+node.volume = Math.max(0.0, currentVolume - step);
 }
 }
 }
@@ -63,15 +62,7 @@ micModule.micNode.volume = Math.max(0.0, micModule.micNode.volume - step);
 Row {
 id: micRow
 anchors.verticalCenter: parent.verticalCenter
-readonly property var micState: {
-return micModule.micMuted ? {
-color: micModule.mutedColor,
-text: "off"
-} : {
-color: micModule.activeColor,
-text: `${micModule.micPercent}%`
-};
-}
+
 Text {
 id: micPrefix
 font.family: micModule.labelFontFamily
@@ -79,10 +70,11 @@ font.pixelSize: micModule.labelFontSize
 color: micModule.labelColor
 text: "MC: "
 }
+
 Text {
 font: micPrefix.font
-color: micRow.micState.color
-text: micRow.micState.text
+color: micModule.micMuted ? micModule.mutedColor : micModule.activeColor
+text: micModule.micMuted ? "off" : `${micModule.micPercent}%`
 }
 }
 }

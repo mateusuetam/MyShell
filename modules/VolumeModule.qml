@@ -25,37 +25,36 @@ visible: Pipewire.ready && !!Pipewire.defaultAudioSink
 
 PwObjectTracker {
 id: sinkTracker
-objects: [Pipewire.defaultAudioSink]
+objects: Pipewire.defaultAudioSink ? [Pipewire.defaultAudioSink] : []
 }
 
 MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
-onPressed: mouse => {
-let menu = volumeModule.globalMenu;
-if (menu) {
-menu.close();
-}
-mouse.accepted = true;
-if (mouse.button === Qt.LeftButton) {
-if (volumeModule.audioNode) {
-volumeModule.audioNode.muted = !volumeModule.audioNode.muted;
+
+onPressed: {
+if (volumeModule.globalMenu) volumeModule.globalMenu.close();
+
+const node = volumeModule.audioNode;
+if (node) {
+node.muted = !node.muted;
 }
 }
-}
+
 onWheel: wheel => {
-let menu = volumeModule.globalMenu;
-if (menu) {
-menu.close();
-}
-if (!volumeModule.audioNode)
-return;
-var step = 0.01;
+if (volumeModule.globalMenu) volumeModule.globalMenu.close();
+
+const node = volumeModule.audioNode;
+if (!node || wheel.angleDelta.y === 0) return;
+
+const step = 0.01;
+const currentVolume = node.volume;
+
 if (wheel.angleDelta.y > 0) {
-volumeModule.audioNode.volume = Math.min(1.0, volumeModule.audioNode.volume + step);
+node.volume = Math.min(1.0, currentVolume + step);
 } else {
-volumeModule.audioNode.volume = Math.max(0.0, volumeModule.audioNode.volume - step);
+node.volume = Math.max(0.0, currentVolume - step);
 }
 }
 }
@@ -63,15 +62,7 @@ volumeModule.audioNode.volume = Math.max(0.0, volumeModule.audioNode.volume - st
 Row {
 id: volRow
 anchors.verticalCenter: parent.verticalCenter
-readonly property var volState: {
-return volumeModule.volMuted ? {
-color: volumeModule.mutedColor,
-text: "off"
-} : {
-color: volumeModule.activeColor,
-text: `${volumeModule.volPercent}%`
-};
-}
+
 Text {
 id: volPrefix
 font.family: volumeModule.labelFontFamily
@@ -79,10 +70,11 @@ font.pixelSize: volumeModule.labelFontSize
 color: volumeModule.labelColor
 text: "VL: "
 }
+
 Text {
 font: volPrefix.font
-color: volRow.volState.color
-text: volRow.volState.text
+color: volumeModule.volMuted ? volumeModule.mutedColor : volumeModule.activeColor
+text: volumeModule.volMuted ? "off" : `${volumeModule.volPercent}%`
 }
 }
 }
