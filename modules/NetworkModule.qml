@@ -10,13 +10,6 @@ required property var globalMenu
 required property var parentWindow
 required property var passwordPrompt
 
-readonly property color disabledColor: ThemeRegistry.networkDisabledColor
-readonly property color disconnectedColor: ThemeRegistry.networkDisconnectedColor
-readonly property color connectedColor: ThemeRegistry.networkConnectedColor
-readonly property color labelColor: ThemeRegistry.networkLabelColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property bool isWifiOn: Networking.wifiEnabled
 
 property string currentSubMenu: "main"
@@ -307,13 +300,13 @@ networkModule.globalMenu.openMenu(networkModule.parentWindow, networkModule, mod
 
 function getNetworkState() {
 if (!networkModule.isWifiOn) {
-return { color: networkModule.disabledColor, text: "off" };
+return { color: ThemeRegistry.networkDisabledColor, text: "off" };
 }
 const dev = networkModule.getActiveDevice();
 if (!dev) {
-return { color: networkModule.disconnectedColor, text: "down" };
+return { color: ThemeRegistry.networkDisconnectedColor, text: "down" };
 }
-return { color: networkModule.connectedColor, text: "up" };
+return { color: ThemeRegistry.networkConnectedColor, text: "up" };
 }
 
 MouseArea {
@@ -348,9 +341,9 @@ networkModule.handleStateChange(stateText);
 
 Text {
 id: networkPrefix
-font.family: networkModule.labelFontFamily
-font.pixelSize: networkModule.labelFontSize
-color: networkModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.networkLabelColor
 text: "NW: "
 }
 Text {

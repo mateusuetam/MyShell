@@ -8,12 +8,6 @@ id: clockModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ThemeRegistry.clockLabelColor
-readonly property color dayColor: ThemeRegistry.clockDayColor
-readonly property color monthColor: ThemeRegistry.clockMonthColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property var ptBr: Qt.locale("pt_BR")
 
 implicitWidth: clockRow.implicitWidth
@@ -38,14 +32,14 @@ time: clockModule.ptBr.toString(d, "HH:mm")
 }
 Text {
 id: clockBase
-font.family: clockModule.labelFontFamily
-font.pixelSize: clockModule.labelFontSize
-color: clockModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.clockLabelColor
 text: `${clockRow.formattedParts.weekday} `
 }
 Text {
 font: clockBase.font
-color: clockModule.dayColor
+color: ThemeRegistry.clockDayColor
 text: clockRow.formattedParts.day
 }
 Text {
@@ -55,7 +49,7 @@ text: " de "
 }
 Text {
 font: clockBase.font
-color: clockModule.monthColor
+color: ThemeRegistry.clockMonthColor
 text: clockRow.formattedParts.month
 }
 Text {

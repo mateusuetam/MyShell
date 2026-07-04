@@ -8,11 +8,6 @@ id: mprisModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color playingColor: ThemeRegistry.mprisPlayingColor
-readonly property color pausedColor: ThemeRegistry.mprisPausedColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property int maxWidth: 450
 
 readonly property var activePlayer: {
@@ -63,13 +58,13 @@ readonly property var playerState: {
 const player = mprisModule.activePlayer;
 if (!player || !player.trackTitle) {
 return {
-color: mprisModule.pausedColor,
+color: ThemeRegistry.mprisPausedColor,
 text: ""
 };
 }
 const icon = player.isPlaying ? "|| " : "> ";
 const artist = player.trackArtist || "Desconhecido";
-const uiColor = player.isPlaying ? mprisModule.playingColor : mprisModule.pausedColor;
+const uiColor = player.isPlaying ? ThemeRegistry.mprisPlayingColor : ThemeRegistry.mprisPausedColor;
 return {
 color: uiColor,
 text: `${icon}${player.trackTitle} - ${artist}`
@@ -78,8 +73,8 @@ text: `${icon}${player.trackTitle} - ${artist}`
 Text {
 width: Math.min(implicitWidth, mprisModule.maxWidth)
 elide: Text.ElideRight
-font.family: mprisModule.labelFontFamily
-font.pixelSize: mprisModule.labelFontSize
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
 color: mprisRow.playerState.color
 text: mprisRow.playerState.text
 }

@@ -11,13 +11,6 @@ id: bluetoothModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color disabledColor: ThemeRegistry.bluetoothDisabledColor
-readonly property color disconnectedColor: ThemeRegistry.bluetoothDisconnectedColor
-readonly property color connectedColor: ThemeRegistry.bluetoothConnectedColor
-readonly property color labelColor: ThemeRegistry.bluetoothLabelColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property bool isBluetoothOn: (() => {
 const adapter = Bluetooth["defaultAdapter"];
 return adapter ? adapter["enabled"] : false;
@@ -27,13 +20,10 @@ implicitWidth: bluetoothRow.implicitWidth
 implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
 
 property var currentMenuDevice: null
-
 property string pendingOpAddress: ""
 property string pendingOpState: ""
-
 property string imunityAddress: ""
 property bool justPairedImunity: false
-
 property bool startAgent: false
 
 Process { id: notifyProcess }
@@ -370,16 +360,16 @@ bluetoothModule.globalMenu.openMenu(bluetoothModule.parentWindow, bluetoothModul
 }
 
 function getBluetoothState() {
-if (!bluetoothModule.isBluetoothOn) return { color: bluetoothModule.disabledColor, text: "off" };
+if (!bluetoothModule.isBluetoothOn) return { color: ThemeRegistry.bluetoothDisabledColor, text: "off" };
 
 const dev = bluetoothModule.getConnectedDevice();
-if (!dev) return { color: bluetoothModule.disconnectedColor, text: "idle" };
+if (!dev) return { color: ThemeRegistry.bluetoothDisconnectedColor, text: "idle" };
 
 if (dev.batteryAvailable) {
-return { color: bluetoothModule.connectedColor, text: `up (${Math.round(dev.battery * 100)}%)` };
+return { color: ThemeRegistry.bluetoothConnectedColor, text: `up (${Math.round(dev.battery * 100)}%)` };
 }
 
-return { color: bluetoothModule.connectedColor, text: "up" };
+return { color: ThemeRegistry.bluetoothConnectedColor, text: "up" };
 }
 
 MouseArea {
@@ -410,9 +400,9 @@ readonly property var btState: bluetoothModule.getBluetoothState()
 
 Text {
 id: btPrefix
-font.family: bluetoothModule.labelFontFamily
-font.pixelSize: bluetoothModule.labelFontSize
-color: bluetoothModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.bluetoothLabelColor
 text: "BT: "
 }
 

@@ -8,11 +8,6 @@ id: backlightModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ThemeRegistry.backlightLabelColor
-readonly property color brightnessColor: ThemeRegistry.backlightBrightnessColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 property int brightnessPercent: 50
 property int targetTemp: 2500
 
@@ -177,14 +172,14 @@ id: backlightRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
 id: backlightPrefix
-font.family: backlightModule.labelFontFamily
-font.pixelSize: backlightModule.labelFontSize
-color: backlightModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.backlightLabelColor
 text: "BL: "
 }
 Text {
 font: backlightPrefix.font
-color: backlightModule.brightnessColor
+color: ThemeRegistry.backlightBrightnessColor
 text: `${backlightModule.brightnessPercent}%`
 }
 }

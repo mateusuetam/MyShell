@@ -8,12 +8,6 @@ id: volumeModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color mutedColor: ThemeRegistry.volumeMutedColor
-readonly property color activeColor: ThemeRegistry.volumeActiveColor
-readonly property color labelColor: ThemeRegistry.volumeLabelColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property var audioNode: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
 readonly property int volPercent: audioNode ? Math.round(audioNode.volume * 100) : 0
 readonly property bool volMuted: audioNode ? audioNode.muted : false
@@ -65,15 +59,15 @@ anchors.verticalCenter: parent.verticalCenter
 
 Text {
 id: volPrefix
-font.family: volumeModule.labelFontFamily
-font.pixelSize: volumeModule.labelFontSize
-color: volumeModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.volumeLabelColor
 text: "VL: "
 }
 
 Text {
 font: volPrefix.font
-color: volumeModule.volMuted ? volumeModule.mutedColor : volumeModule.activeColor
+color: volumeModule.volMuted ? ThemeRegistry.volumeMutedColor : ThemeRegistry.volumeActiveColor
 text: volumeModule.volMuted ? "off" : `${volumeModule.volPercent}%`
 }
 }

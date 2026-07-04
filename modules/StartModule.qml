@@ -9,15 +9,6 @@ id: startModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color sLabelColor: ThemeRegistry.sLabelColor
-readonly property color t1LabelColor: ThemeRegistry.t1LabelColor
-readonly property color aLabelColor: ThemeRegistry.aLabelColor
-readonly property color rLabelColor: ThemeRegistry.rLabelColor
-readonly property color t2LabelColor: ThemeRegistry.t2LabelColor
-readonly property color separatorColor: ThemeRegistry.startSeparatorColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 implicitWidth: startRow.implicitWidth
 implicitHeight: startModule.parentWindow ? startModule.parentWindow.barHeight : 30
 
@@ -141,16 +132,16 @@ id: startRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
 id: prefixText
-font.family: startModule.labelFontFamily
-font.pixelSize: startModule.labelFontSize
-color: startModule.separatorColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.startSeparatorColor
 text: "["
 }
-Text { font: prefixText.font; color: startModule.sLabelColor; text: "S" }
-Text { font: prefixText.font; color: startModule.t1LabelColor; text: "T" }
-Text { font: prefixText.font; color: startModule.aLabelColor; text: "A" }
-Text { font: prefixText.font; color: startModule.rLabelColor; text: "R" }
-Text { font: prefixText.font; color: startModule.t2LabelColor; text: "T" }
+Text { font: prefixText.font; color: ThemeRegistry.sLabelColor; text: "S" }
+Text { font: prefixText.font; color: ThemeRegistry.t1LabelColor; text: "T" }
+Text { font: prefixText.font; color: ThemeRegistry.aLabelColor; text: "A" }
+Text { font: prefixText.font; color: ThemeRegistry.rLabelColor; text: "R" }
+Text { font: prefixText.font; color: ThemeRegistry.t2LabelColor; text: "T" }
 Text { font: prefixText.font; color: prefixText.color; text: "]" }
 }
 }

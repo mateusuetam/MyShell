@@ -8,11 +8,6 @@ id: idleModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color activatedColor: ThemeRegistry.idleActivatedColor
-readonly property color deactivatedColor: ThemeRegistry.idleDeactivatedColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property bool isActive: inhibitor.enabled
 
 implicitWidth: idleRow.implicitWidth
@@ -45,16 +40,16 @@ id: idleRow
 anchors.verticalCenter: parent.verticalCenter
 readonly property var idleState: {
 return idleModule.isActive ? {
-color: idleModule.activatedColor,
+color: ThemeRegistry.idleActivatedColor,
 text: "ACTIVE"
 } : {
-color: idleModule.deactivatedColor,
+color: ThemeRegistry.idleDeactivatedColor,
 text: "IDLING"
 };
 }
 Text {
-font.family: idleModule.labelFontFamily
-font.pixelSize: idleModule.labelFontSize
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
 color: idleRow.idleState.color
 text: idleRow.idleState.text
 }

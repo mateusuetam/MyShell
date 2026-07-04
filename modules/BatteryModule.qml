@@ -8,15 +8,6 @@ id: batteryModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ThemeRegistry.batteryLabelColor
-readonly property color errorColor: ThemeRegistry.batteryErrorColor
-readonly property color chargingColor: ThemeRegistry.batteryChargingColor
-readonly property color criticalColor: ThemeRegistry.batteryCriticalColor
-readonly property color lowColor: ThemeRegistry.batteryLowColor
-readonly property color normalColor: ThemeRegistry.batteryNormalColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property var dev: UPower.displayDevice
 readonly property int realPercentage: (dev && dev.ready) ? Math.round(dev.percentage * 100) : 0
 readonly property bool isFull: dev ? (dev.state === UPowerDeviceState.FullyCharged || (realPercentage >= 95 && dev.changeRate === 0)) : false
@@ -31,7 +22,7 @@ readonly property var batteryState: {
 const dev = batteryModule.dev;
 if (!dev || !dev.ready) {
 return {
-color: batteryModule.errorColor,
+color: ThemeRegistry.batteryErrorColor,
 text: "--%"
 };
 }
@@ -39,15 +30,15 @@ const pct = batteryModule.realPercentage;
 const rate = Math.round(Math.abs(dev.changeRate));
 if (!UPower.onBattery) {
 return {
-color: batteryModule.chargingColor,
+color: ThemeRegistry.batteryChargingColor,
 text: batteryModule.isFull ? "AC/ON" : `${pct}% - ${rate}W`
 };
 }
-let uiColor = batteryModule.normalColor;
+let uiColor = ThemeRegistry.batteryNormalColor;
 if (pct <= 20) {
-uiColor = batteryModule.criticalColor;
+uiColor = ThemeRegistry.batteryCriticalColor;
 } else if (pct <= 30) {
-uiColor = batteryModule.lowColor;
+uiColor = ThemeRegistry.batteryLowColor;
 }
 return {
 color: uiColor,
@@ -56,9 +47,9 @@ text: `${pct}% - ${rate}W`
 }
 Text {
 id: batteryPrefix
-font.family: batteryModule.labelFontFamily
-font.pixelSize: batteryModule.labelFontSize
-color: batteryModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.batteryLabelColor
 text: "BA: "
 }
 Text {

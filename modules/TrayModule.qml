@@ -8,9 +8,6 @@ id: trayModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property int iconSize: 20
-readonly property int itemSpacing: 10
-
 implicitWidth: trayLayout.implicitWidth
 implicitHeight: trayModule.parentWindow ? trayModule.parentWindow.barHeight : 30
 
@@ -19,7 +16,7 @@ visible: !!SystemTray.items
 Row {
 id: trayLayout
 height: parent.height
-spacing: trayModule.itemSpacing
+spacing: 10
 anchors.verticalCenter: parent.verticalCenter
 
 Repeater {
@@ -27,8 +24,8 @@ model: SystemTray.items
 delegate: Item {
 id: trayItemDelegate
 
-width: trayModule.iconSize
-height: trayModule.iconSize
+width: 20
+height: 20
 anchors.verticalCenter: parent.verticalCenter
 
 required property var modelData
@@ -39,8 +36,8 @@ anchors.fill: parent
 source: trayItemDelegate.trayItem?.icon ?? ""
 fillMode: Image.PreserveAspectFit
 asynchronous: true
-sourceSize.width: trayModule.iconSize
-sourceSize.height: trayModule.iconSize
+sourceSize.width: 20
+sourceSize.height: 20
 }
 
 MouseArea {

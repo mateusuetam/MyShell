@@ -8,12 +8,6 @@ id: micModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color mutedColor: ThemeRegistry.microphoneMutedColor
-readonly property color activeColor: ThemeRegistry.microphoneActiveColor
-readonly property color labelColor: ThemeRegistry.microphoneLabelColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 readonly property var micNode: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
 readonly property int micPercent: micNode ? Math.round(micNode.volume * 100) : 0
 readonly property bool micMuted: micNode ? micNode.muted : false
@@ -65,15 +59,15 @@ anchors.verticalCenter: parent.verticalCenter
 
 Text {
 id: micPrefix
-font.family: micModule.labelFontFamily
-font.pixelSize: micModule.labelFontSize
-color: micModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.microphoneLabelColor
 text: "MC: "
 }
 
 Text {
 font: micPrefix.font
-color: micModule.micMuted ? micModule.mutedColor : micModule.activeColor
+color: micModule.micMuted ? ThemeRegistry.microphoneMutedColor : ThemeRegistry.microphoneActiveColor
 text: micModule.micMuted ? "off" : `${micModule.micPercent}%`
 }
 }

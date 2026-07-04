@@ -8,10 +8,6 @@ id: clipboardModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property color labelColor: ThemeRegistry.clipboardLabelColor
-readonly property string labelFontFamily: ThemeRegistry.appliedFontFamily
-readonly property int labelFontSize: ThemeRegistry.appliedFontSize
-
 implicitWidth: clipboardRow.implicitWidth
 implicitHeight: clipboardModule.parentWindow ? clipboardModule.parentWindow.barHeight : 30
 
@@ -113,9 +109,9 @@ Row {
 id: clipboardRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
-font.family: clipboardModule.labelFontFamily
-font.pixelSize: clipboardModule.labelFontSize
-color: clipboardModule.labelColor
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.clipboardLabelColor
 text: "CLIP"
 }
 }
