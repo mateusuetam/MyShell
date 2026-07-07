@@ -26,6 +26,8 @@ property string imunityAddress: ""
 property bool justPairedImunity: false
 property bool startAgent: false
 
+property bool isRfkillBlocked: false
+
 Process { id: notifyProcess }
 
 function sendNotification(title, message, urgency) {
@@ -38,8 +40,42 @@ command: ["bluetoothctl", "--agent", "NoInputNoOutput"]
 running: bluetoothModule.startAgent
 }
 
+Process {
+id: rfkillCheckProcess
+command: ["rfkill", "list", "bluetooth"]
+stdout: StdioCollector {
+onStreamFinished: {
+let output = this.text.toLowerCase();
+if (output.includes("soft blocked: yes")) {
+bluetoothModule.isRfkillBlocked = true;
+} else if (output.includes("soft blocked: no")) {
+bluetoothModule.isRfkillBlocked = false;
+}
+bluetoothModule.updateMenu(false);
+}
+}
+}
+
+Process {
+id: rfkillToggleProcess
+onRunningChanged: {
+if (!running) {
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
+}
+}
+}
+
+function toggleRfkill() {
+if (bluetoothModule.isRfkillBlocked) {
+rfkillToggleProcess.exec(["rfkill", "unblock", "bluetooth"]);
+} else {
+rfkillToggleProcess.exec(["rfkill", "block", "bluetooth"]);
+}
+}
+
 Component.onCompleted: {
 bluetoothModule.startAgent = true;
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
 }
 
 Timer {
@@ -50,14 +86,14 @@ onTriggered: {
 if (bluetoothModule.pendingOpState === "pairing") {
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
-bluetoothModule.updateMenu(true);
+bluetoothModule.updateMenu(false);
 }
 }
 }
 
 Timer {
 id: imunityTimer
-interval: 3000
+interval: 6000
 repeat: false
 onTriggered: {
 bluetoothModule.justPairedImunity = false;
@@ -93,7 +129,7 @@ const dev = devConn.modelData;
 if (!dev) return;
 
 if (!dev.connected && bluetoothModule.justPairedImunity && bluetoothModule.imunityAddress === dev.address) {
-bluetoothModule.updateMenu(true);
+bluetoothModule.updateMenu(false);
 return;
 }
 
@@ -108,7 +144,7 @@ imunityTimer.restart();
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
-bluetoothModule.updateMenu(true);
+bluetoothModule.updateMenu(false);
 return;
 }
 
@@ -120,7 +156,7 @@ bluetoothModule.pendingOpState = "";
 
 let devName = dev.name || dev.address;
 bluetoothModule.sendNotification("Bluetooth", (dev.connected ? "Conectado: " : "Desconectado: ") + devName, "normal");
-bluetoothModule.updateMenu(true);
+bluetoothModule.updateMenu(false);
 }
 
 function onBondedChanged() {
@@ -137,17 +173,20 @@ bluetoothModule.justPairedImunity = true;
 imunityTimer.restart();
 }
 
-bluetoothModule.updateMenu(true);
+bluetoothModule.updateMenu(false);
 }
 
-function onPairedChanged() { bluetoothModule.updateMenu(true); }
-function onTrustedChanged() { bluetoothModule.updateMenu(true); }
+function onPairedChanged() { bluetoothModule.updateMenu(false); }
+function onTrustedChanged() { bluetoothModule.updateMenu(false); }
 }
 }
 
 Connections {
 target: Bluetooth["defaultAdapter"] ? Bluetooth["defaultAdapter"] : null
-function onEnabledChanged() { bluetoothModule.updateMenu(false); }
+function onEnabledChanged() {
+bluetoothModule.updateMenu(false);
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
+}
 function onDiscoveringChanged() {
 const adapter = Bluetooth["defaultAdapter"];
 if (adapter && adapter["discovering"]) {
@@ -175,10 +214,23 @@ const adapter = Bluetooth["defaultAdapter"];
 
 if (!bluetoothModule.isBluetoothOn) {
 menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = true; } });
+
+menuModel.push({
+text: bluetoothModule.isRfkillBlocked ? "Desbloquear Bluetooth" : "Bloquear Bluetooth",
+preventClose: true,
+onTrigger: () => bluetoothModule.toggleRfkill()
+});
 return menuModel;
 }
 
 menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = false; } });
+
+menuModel.push({
+text: "Bloquear Bluetooth",
+preventClose: true,
+onTrigger: () => bluetoothModule.toggleRfkill()
+});
+
 menuModel.push({
 text: adapter && adapter["discovering"] ? "Parar Busca" : "Buscar Dispositivos",
 preventClose: true,
@@ -360,7 +412,10 @@ bluetoothModule.globalMenu.openMenu(bluetoothModule.parentWindow, bluetoothModul
 }
 
 function getBluetoothState() {
-if (!bluetoothModule.isBluetoothOn) return { color: ThemeRegistry.bluetoothDisabledColor, text: "off" };
+if (!bluetoothModule.isBluetoothOn) {
+let offText = bluetoothModule.isRfkillBlocked ? "off (B)" : "off";
+return { color: ThemeRegistry.bluetoothDisabledColor, text: offText };
+}
 
 const dev = bluetoothModule.getConnectedDevice();
 if (!dev) return { color: ThemeRegistry.bluetoothDisconnectedColor, text: "idle" };
@@ -383,6 +438,7 @@ mouse.accepted = true;
 
 if (mouse.button === Qt.LeftButton) {
 bluetoothModule.currentMenuDevice = null;
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton) {
 const adapter = Bluetooth["defaultAdapter"];

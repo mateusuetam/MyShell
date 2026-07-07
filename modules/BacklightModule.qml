@@ -114,7 +114,7 @@ backlightModule.applyTemperature(2500);
 }
 menuModel.push({ type: "separator" });
 
-const tempPresets = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
+const tempPresets = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000];
 for (let i = 0; i < tempPresets.length; i++) {
 let temp = tempPresets[i];
 menuModel.push({
