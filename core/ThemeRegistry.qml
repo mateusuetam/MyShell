@@ -80,6 +80,7 @@ readonly property color startSeparatorColor: "#ebdbb2"
 readonly property color backgroundColor: "#282828"
 readonly property color borderColor: "#3c3836"
 readonly property color borderLowColor: "#b8bb26"
+readonly property color borderNormalColor: "#83a598"
 readonly property color borderCriticalColor: "#fb4934"
 readonly property color notificationContentColor: "#ebdbb2"
 property color dynamicBorderColor: borderColor

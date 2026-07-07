@@ -119,7 +119,7 @@ bluetoothModule.pendingOpState = "";
 }
 
 let devName = dev.name || dev.address;
-bluetoothModule.sendNotification("Bluetooth", (dev.connected ? "Conectado: " : "Desconectado: ") + devName, "low");
+bluetoothModule.sendNotification("Bluetooth", (dev.connected ? "Conectado: " : "Desconectado: ") + devName, "normal");
 bluetoothModule.updateMenu(true);
 }
 

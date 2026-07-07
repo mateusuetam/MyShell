@@ -13,11 +13,12 @@ if (!currentNotify) {
 return ThemeRegistry.borderColor;
 }
 switch (currentNotify.urgency) {
-case NotificationUrgency.Critical:
-return ThemeRegistry.borderCriticalColor;
 case NotificationUrgency.Low:
 return ThemeRegistry.borderLowColor;
 case NotificationUrgency.Normal:
+return ThemeRegistry.borderNormalColor;
+case NotificationUrgency.Critical:
+return ThemeRegistry.borderCriticalColor;
 default:
 return ThemeRegistry.borderColor;
 }

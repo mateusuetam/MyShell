@@ -62,10 +62,10 @@ function processFinalStateChange(stableText) {
 if (lastStatus === stableText) return;
 
 if (stableText === "up") {
-sendNotification("Network", "Conexão estabelecida", "low");
+sendNotification("Network", "Conexão estabelecida", "normal");
 }
 else if (stableText === "off") {
-sendNotification("Network", "Wifi desligado", "low");
+sendNotification("Network", "Wifi desligado", "normal");
 }
 else if (stableText === "down") {
 if (Networking.wifiEnabled && lastStatus === "up") {
