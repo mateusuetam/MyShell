@@ -20,11 +20,47 @@ property string lastStatus: ""
 property string pendingStatus: ""
 property bool isReady: false
 
+property bool isRfkillBlocked: false
+
 implicitWidth: networkRow.implicitWidth
 implicitHeight: networkModule.parentWindow ? networkModule.parentWindow.barHeight : 30
 
+Process {
+id: rfkillCheckProcess
+command: ["rfkill", "list", "wifi"]
+stdout: StdioCollector {
+onStreamFinished: {
+let output = this.text.toLowerCase();
+if (output.includes("soft blocked: yes")) {
+networkModule.isRfkillBlocked = true;
+} else if (output.includes("soft blocked: no")) {
+networkModule.isRfkillBlocked = false;
+}
+networkModule.updateMenu(false);
+}
+}
+}
+
+Process {
+id: rfkillToggleProcess
+onRunningChanged: {
+if (!running) {
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
+}
+}
+}
+
+function toggleRfkill() {
+if (networkModule.isRfkillBlocked) {
+rfkillToggleProcess.exec(["rfkill", "unblock", "wifi"]);
+} else {
+rfkillToggleProcess.exec(["rfkill", "block", "wifi"]);
+}
+}
+
 Component.onCompleted: {
-lastStatus = getNetworkState().text
+lastStatus = getNetworkState().text;
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
 Qt.callLater(() => { isReady = true; })
 }
 
@@ -120,11 +156,25 @@ menuModel.push({
 text: "Ligar Wi-Fi",
 onTrigger: () => { Networking.wifiEnabled = true; }
 });
+
+menuModel.push({
+text: networkModule.isRfkillBlocked ? "Desbloquear Wi-Fi" : "Bloquear Wi-Fi",
+preventClose: true,
+onTrigger: () => networkModule.toggleRfkill()
+});
+
 } else {
 menuModel.push({
 text: "Desligar Wi-Fi",
 onTrigger: () => { Networking.wifiEnabled = false; }
 });
+
+menuModel.push({
+text: "Bloquear Wi-Fi",
+preventClose: true,
+onTrigger: () => networkModule.toggleRfkill()
+});
+
 menuModel.push({
 text: "Buscar Redes",
 preventClose: true,
@@ -300,7 +350,8 @@ networkModule.globalMenu.openMenu(networkModule.parentWindow, networkModule, mod
 
 function getNetworkState() {
 if (!networkModule.isWifiOn) {
-return { color: ThemeRegistry.networkDisabledColor, text: "off" };
+let offText = networkModule.isRfkillBlocked ? "off (B)" : "off";
+return { color: ThemeRegistry.networkDisabledColor, text: offText };
 }
 const dev = networkModule.getActiveDevice();
 if (!dev) {
@@ -321,6 +372,7 @@ if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
 networkModule.currentSubMenu = "main";
 networkModule.selectedNetwork = null;
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
 networkModule.updateMenu(true);
 } else if (mouse.button === Qt.RightButton) {
 Networking.wifiEnabled = !Networking.wifiEnabled;
