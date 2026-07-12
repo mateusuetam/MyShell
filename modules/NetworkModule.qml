@@ -20,47 +20,44 @@ property string lastStatus: ""
 property string pendingStatus: ""
 property bool isReady: false
 
-property bool isRfkillBlocked: false
+property bool isManualBlock: false
+readonly property bool isRfkillBlocked: !Networking.wifiHardwareEnabled || isManualBlock
 
 implicitWidth: networkRow.implicitWidth
 implicitHeight: networkModule.parentWindow ? networkModule.parentWindow.barHeight : 30
 
 Process {
-id: rfkillCheckProcess
-command: ["rfkill", "list", "wifi"]
-stdout: StdioCollector {
-onStreamFinished: {
-let output = this.text.toLowerCase();
-if (output.includes("soft blocked: yes")) {
-networkModule.isRfkillBlocked = true;
-} else if (output.includes("soft blocked: no")) {
-networkModule.isRfkillBlocked = false;
-}
-networkModule.updateMenu(false);
-}
-}
-}
-
-Process {
 id: rfkillToggleProcess
-onRunningChanged: {
-if (!running) {
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
-}
-}
 }
 
 function toggleRfkill() {
-if (networkModule.isRfkillBlocked) {
+if (networkModule.isManualBlock) {
 rfkillToggleProcess.exec(["rfkill", "unblock", "wifi"]);
+networkModule.isManualBlock = false;
+Networking.wifiEnabled = true;
 } else {
 rfkillToggleProcess.exec(["rfkill", "block", "wifi"]);
+networkModule.isManualBlock = true;
+Networking.wifiEnabled = false;
+}
+networkModule.updateMenu(false);
+}
+
+Connections {
+target: Networking
+function onWifiEnabledChanged() {
+if (Networking.wifiEnabled) {
+networkModule.isManualBlock = false;
+}
+networkModule.updateMenu(false);
+}
+function onWifiHardwareEnabledChanged() {
+networkModule.updateMenu(false);
 }
 }
 
 Component.onCompleted: {
 lastStatus = getNetworkState().text;
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
 Qt.callLater(() => { isReady = true; })
 }
 
@@ -103,6 +100,9 @@ sendNotification("Network", "Conexão estabelecida", "normal");
 else if (stableText === "off") {
 sendNotification("Network", "Wifi desligado", "normal");
 }
+else if (stableText === "off (B)") {
+sendNotification("Network", "Wifi bloqueado", "normal");
+}
 else if (stableText === "down") {
 if (Networking.wifiEnabled && lastStatus === "up") {
 sendNotification("Network", "Sem sinal...", "critical");
@@ -136,24 +136,13 @@ return dev;
 return null;
 }
 
-function getWifiName(dev) {
-if (!dev || !dev.networks || !dev.networks.values) return "wifi";
-var networksList = dev.networks.values;
-for (var j = 0; j < networksList.length; j++) {
-var net = networksList[j];
-if (net && net.connected && net.name) {
-return net.name;
-}
-}
-return "wifi";
-}
-
 function generateMainMenu() {
 let menuModel = [];
 
 if (!Networking.wifiEnabled) {
 menuModel.push({
 text: "Ligar Wi-Fi",
+enabled: !networkModule.isRfkillBlocked,
 onTrigger: () => { Networking.wifiEnabled = true; }
 });
 
@@ -214,9 +203,7 @@ function generateScanMenu() {
 let menuModel = [];
 let wifiDev = networkModule.getWifiDevice();
 
-if (wifiDev) {
-wifiDev.scannerEnabled = true;
-}
+if (wifiDev) wifiDev.scannerEnabled = true;
 
 menuModel.push({
 text: "Atualizar Busca",
@@ -349,9 +336,11 @@ networkModule.globalMenu.openMenu(networkModule.parentWindow, networkModule, mod
 }
 
 function getNetworkState() {
+if (networkModule.isRfkillBlocked) {
+return { color: ThemeRegistry.networkDisabledColor, text: "off (B)" };
+}
 if (!networkModule.isWifiOn) {
-let offText = networkModule.isRfkillBlocked ? "off (B)" : "off";
-return { color: ThemeRegistry.networkDisabledColor, text: offText };
+return { color: ThemeRegistry.networkDisabledColor, text: "off" };
 }
 const dev = networkModule.getActiveDevice();
 if (!dev) {
@@ -364,18 +353,20 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
-let menu = networkModule.globalMenu;
-if (menu) menu.close();
+if (networkModule.globalMenu) networkModule.globalMenu.close();
 mouse.accepted = true;
+
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
 networkModule.currentSubMenu = "main";
 networkModule.selectedNetwork = null;
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
 networkModule.updateMenu(true);
 } else if (mouse.button === Qt.RightButton) {
+if (!networkModule.isRfkillBlocked) {
 Networking.wifiEnabled = !Networking.wifiEnabled;
+}
 }
 }
 }
@@ -383,7 +374,6 @@ Networking.wifiEnabled = !Networking.wifiEnabled;
 Row {
 id: networkRow
 anchors.verticalCenter: parent.verticalCenter
-
 readonly property var nwState: networkModule.getNetworkState()
 readonly property string stateText: nwState.text
 

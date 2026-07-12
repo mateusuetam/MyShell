@@ -40,17 +40,19 @@ command: ["bluetoothctl", "--agent", "NoInputNoOutput"]
 running: bluetoothModule.startAgent
 }
 
+function checkRfkill() {
+if (!rfkillCheckProcess.running) {
+rfkillCheckProcess.exec(rfkillCheckProcess.command);
+}
+}
+
 Process {
 id: rfkillCheckProcess
-command: ["rfkill", "list", "bluetooth"]
+command: ["sh", "-c", "for d in /sys/class/rfkill/rfkill*; do if [ -f \"$d/type\" ] && [ \"$(cat \"$d/type\")\" = \"bluetooth\" ]; then if [ \"$(cat \"$d/soft\")\" = \"1\" ] || [ \"$(cat \"$d/hard\")\" = \"1\" ]; then echo \"yes\"; exit 0; fi; fi; done; echo \"no\""]
 stdout: StdioCollector {
 onStreamFinished: {
-let output = this.text.toLowerCase();
-if (output.includes("soft blocked: yes")) {
-bluetoothModule.isRfkillBlocked = true;
-} else if (output.includes("soft blocked: no")) {
-bluetoothModule.isRfkillBlocked = false;
-}
+let output = this.text.trim().toLowerCase();
+bluetoothModule.isRfkillBlocked = (output === "yes");
 bluetoothModule.updateMenu(false);
 }
 }
@@ -60,7 +62,7 @@ Process {
 id: rfkillToggleProcess
 onRunningChanged: {
 if (!running) {
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
+bluetoothModule.checkRfkill();
 }
 }
 }
@@ -75,7 +77,7 @@ rfkillToggleProcess.exec(["rfkill", "block", "bluetooth"]);
 
 Component.onCompleted: {
 bluetoothModule.startAgent = true;
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
+bluetoothModule.checkRfkill();
 }
 
 Timer {
@@ -115,7 +117,6 @@ adapter["discovering"] = false;
 
 Instantiator {
 model: Bluetooth["devices"] ? Bluetooth["devices"]["values"] : []
-
 onObjectAdded: (index, object) => bluetoothModule.updateMenu(false)
 onObjectRemoved: (index, object) => bluetoothModule.updateMenu(false)
 
@@ -136,11 +137,9 @@ return;
 if (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing") {
 if (!dev.connected) {
 pairingTimeoutTimer.stop();
-
 bluetoothModule.imunityAddress = dev.address;
 bluetoothModule.justPairedImunity = true;
 imunityTimer.restart();
-
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
@@ -148,8 +147,7 @@ bluetoothModule.updateMenu(false);
 return;
 }
 
-if (bluetoothModule.pendingOpAddress === dev.address &&
-(bluetoothModule.pendingOpState === "connecting" || bluetoothModule.pendingOpState === "disconnecting")) {
+if (bluetoothModule.pendingOpAddress === dev.address && (bluetoothModule.pendingOpState === "connecting" || bluetoothModule.pendingOpState === "disconnecting")) {
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
@@ -185,7 +183,7 @@ Connections {
 target: Bluetooth["defaultAdapter"] ? Bluetooth["defaultAdapter"] : null
 function onEnabledChanged() {
 bluetoothModule.updateMenu(false);
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
+bluetoothModule.checkRfkill();
 }
 function onDiscoveringChanged() {
 const adapter = Bluetooth["defaultAdapter"];
@@ -213,7 +211,11 @@ let menuModel = [];
 const adapter = Bluetooth["defaultAdapter"];
 
 if (!bluetoothModule.isBluetoothOn) {
-menuModel.push({ text: "Ligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = true; } });
+menuModel.push({
+text: "Ligar Bluetooth",
+enabled: !bluetoothModule.isRfkillBlocked,
+onTrigger: () => { if (adapter) adapter["enabled"] = true; }
+});
 
 menuModel.push({
 text: bluetoothModule.isRfkillBlocked ? "Desbloquear Bluetooth" : "Bloquear Bluetooth",
@@ -436,14 +438,19 @@ onPressed: mouse => {
 if (bluetoothModule.globalMenu) bluetoothModule.globalMenu.close();
 mouse.accepted = true;
 
+bluetoothModule.checkRfkill();
+
 if (mouse.button === Qt.LeftButton) {
 bluetoothModule.currentMenuDevice = null;
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton) {
 const adapter = Bluetooth["defaultAdapter"];
 if (adapter) {
-adapter["enabled"] = !adapter["enabled"];
+if (adapter["enabled"]) {
+adapter["enabled"] = false;
+} else if (!bluetoothModule.isRfkillBlocked) {
+adapter["enabled"] = true;
+}
 }
 }
 }
