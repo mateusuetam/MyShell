@@ -83,11 +83,9 @@ wallpaperWindow.subMenuStructure = list;
 
 Connections {
 target: wallpaperWindow.globalMenu
+
 function onItemDataActionTriggered(actionType, data) {
 switch (actionType) {
-case "open_wallpaper_submenu":
-wallpaperWindow.globalMenu.menuModel = wallpaperWindow.subMenuStructure;
-break;
 case "change_wallpaper":
 wallpaperSettings.savedPath = data;
 break;
@@ -109,8 +107,15 @@ type: "action",
 text: "Trocar Wallpaper",
 icon: "",
 preventClose: true,
-actionType: "open_wallpaper_submenu",
-actionData: null
+onTrigger: () => {
+if (wallpaperWindow.globalMenu) {
+wallpaperWindow.globalMenu.pushMenu(
+wallpaperWindow.subMenuStructure,
+"wallpapers",
+() => wallpaperWindow.subMenuStructure
+);
+}
+}
 }
 ]
 

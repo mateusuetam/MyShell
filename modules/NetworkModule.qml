@@ -12,8 +12,6 @@ required property var passwordPrompt
 
 readonly property bool isWifiOn: Networking.wifiEnabled
 
-property string currentSubMenu: "main"
-property var selectedNetwork: null
 property var forgottenNetworks: []
 
 property string lastStatus: ""
@@ -168,8 +166,13 @@ menuModel.push({
 text: "Buscar Redes",
 preventClose: true,
 onTrigger: () => {
-networkModule.currentSubMenu = "scan";
-networkModule.updateMenu(true);
+if (networkModule.globalMenu) {
+networkModule.globalMenu.pushMenu(
+networkModule.generateScanMenu(),
+"scan",
+() => networkModule.generateScanMenu()
+);
+}
 }
 });
 
@@ -187,9 +190,13 @@ menuModel.push({
 text: prefix + net.name,
 preventClose: true,
 onTrigger: () => {
-networkModule.selectedNetwork = net;
-networkModule.currentSubMenu = "action";
-networkModule.updateMenu(true);
+if (networkModule.globalMenu) {
+networkModule.globalMenu.pushMenu(
+networkModule.generateActionMenu(net),
+"action_" + net.name,
+() => networkModule.generateActionMenu(net)
+);
+}
 }
 });
 }
@@ -213,15 +220,7 @@ if (wifiDev) {
 wifiDev.scannerEnabled = false;
 wifiDev.scannerEnabled = true;
 }
-networkModule.updateMenu(true);
-}
-});
-menuModel.push({
-text: "Voltar",
-preventClose: true,
-onTrigger: () => {
-networkModule.currentSubMenu = "main";
-networkModule.updateMenu(true);
+networkModule.updateMenu(false);
 }
 });
 
@@ -273,9 +272,7 @@ preventClose: true,
 onTrigger: () => {
 if (net.connected) net.disconnect();
 else net.connect();
-networkModule.currentSubMenu = "main";
-networkModule.selectedNetwork = null;
-networkModule.updateMenu(true);
+networkModule.globalMenu.popMenu();
 }
 });
 
@@ -288,50 +285,29 @@ if (networkModule.forgottenNetworks.indexOf(netName) === -1) {
 networkModule.forgottenNetworks.push(netName);
 }
 net.forget();
-networkModule.currentSubMenu = "main";
-networkModule.selectedNetwork = null;
-networkModule.updateMenu(true);
+networkModule.globalMenu.popMenu();
 }
 });
 
-menuModel.push({ type: "separator" });
-menuModel.push({
-text: "Voltar",
-preventClose: true,
-onTrigger: () => {
-networkModule.selectedNetwork = null;
-networkModule.currentSubMenu = "main";
-networkModule.updateMenu(true);
-}
-});
 return menuModel;
 }
 
 function updateMenu(forceOpen) {
 if (!networkModule.globalMenu) return;
-
-if (forceOpen && !networkModule.globalMenu.visible) {
-networkModule.currentSubMenu = "main";
-networkModule.selectedNetwork = null;
-}
-
 if (!forceOpen && !networkModule.globalMenu.visible) return;
-
-let modelData = [];
-if (networkModule.currentSubMenu === "scan") {
-modelData = networkModule.generateScanMenu();
-} else if (networkModule.currentSubMenu === "action" && networkModule.selectedNetwork !== null) {
-modelData = networkModule.generateActionMenu(networkModule.selectedNetwork);
-} else {
-modelData = networkModule.generateMainMenu();
-}
 
 networkModule.globalMenu.showSearchInput = false;
 
 if (networkModule.globalMenu.visible) {
-networkModule.globalMenu.menuModel = modelData;
+networkModule.globalMenu.refresh();
 } else {
-networkModule.globalMenu.openMenu(networkModule.parentWindow, networkModule, modelData);
+networkModule.globalMenu.openMenu(
+networkModule.parentWindow,
+networkModule,
+networkModule.generateMainMenu(),
+"main",
+() => networkModule.generateMainMenu()
+);
 }
 }
 
@@ -360,8 +336,6 @@ mouse.accepted = true;
 
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
-networkModule.currentSubMenu = "main";
-networkModule.selectedNetwork = null;
 networkModule.updateMenu(true);
 } else if (mouse.button === Qt.RightButton) {
 if (!networkModule.isRfkillBlocked) {

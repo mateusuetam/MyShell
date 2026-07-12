@@ -19,7 +19,6 @@ return adapter ? adapter["enabled"] : false;
 implicitWidth: bluetoothRow.implicitWidth
 implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
 
-property var currentMenuDevice: null
 property string pendingOpAddress: ""
 property string pendingOpState: ""
 property string imunityAddress: ""
@@ -327,7 +326,7 @@ else dev.connect();
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
-Qt.callLater(() => bluetoothModule.updateMenu(true));
+Qt.callLater(() => bluetoothModule.updateMenu(false));
 }
 });
 
@@ -336,8 +335,7 @@ text: "Desparear",
 preventClose: true,
 onTrigger: () => {
 try { dev.forget(); } catch(e) {}
-bluetoothModule.currentMenuDevice = null;
-Qt.callLater(() => bluetoothModule.updateMenu(true));
+bluetoothModule.globalMenu.popMenu();
 }
 });
 
@@ -346,7 +344,7 @@ text: dev.trusted ? "Desconfiar" : "Confiar",
 preventClose: true,
 onTrigger: () => {
 dev.trusted = !dev.trusted;
-Qt.callLater(() => bluetoothModule.updateMenu(true));
+Qt.callLater(() => bluetoothModule.updateMenu(false));
 }
 });
 } else {
@@ -364,52 +362,45 @@ pairingTimeoutTimer.stop();
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
-Qt.callLater(() => bluetoothModule.updateMenu(true));
+Qt.callLater(() => bluetoothModule.updateMenu(false));
 }
 });
 }
-
-menuModel.push({ type: "separator" });
-
-menuModel.push({
-text: "Voltar",
-preventClose: true,
-enabled: !isPairing,
-onTrigger: () => {
-bluetoothModule.currentMenuDevice = null;
-Qt.callLater(() => bluetoothModule.updateMenu(true));
-}
-});
 
 return menuModel;
 }
 
 function openDeviceSubMenu(dev) {
-bluetoothModule.currentMenuDevice = dev;
-Qt.callLater(() => bluetoothModule.updateMenu(true));
+if (!bluetoothModule.globalMenu) return;
+bluetoothModule.globalMenu.pushMenu(
+bluetoothModule.generateDeviceMenu(dev),
+"device_" + dev.address,
+() => bluetoothModule.generateDeviceMenu(dev)
+);
 }
 
 function updateMenu(forceOpen) {
 if (!bluetoothModule.globalMenu) return;
 
 if (forceOpen && !bluetoothModule.globalMenu.visible) {
-bluetoothModule.currentMenuDevice = null;
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
 
 if (!forceOpen && !bluetoothModule.globalMenu.visible) return;
 
-let modelData = bluetoothModule.currentMenuDevice !== null
-? bluetoothModule.generateDeviceMenu(bluetoothModule.currentMenuDevice)
-: bluetoothModule.generateMainMenu();
-
 bluetoothModule.globalMenu.showSearchInput = false;
 
 if (bluetoothModule.globalMenu.visible) {
-bluetoothModule.globalMenu.menuModel = modelData;
+bluetoothModule.globalMenu.refresh();
 } else {
-bluetoothModule.globalMenu.openMenu(bluetoothModule.parentWindow, bluetoothModule, modelData);
+bluetoothModule.globalMenu.openMenu(
+bluetoothModule.parentWindow,
+bluetoothModule,
+bluetoothModule.generateMainMenu(),
+"main",
+() => bluetoothModule.generateMainMenu()
+);
 }
 }
 
@@ -441,7 +432,6 @@ mouse.accepted = true;
 bluetoothModule.checkRfkill();
 
 if (mouse.button === Qt.LeftButton) {
-bluetoothModule.currentMenuDevice = null;
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton) {
 const adapter = Bluetooth["defaultAdapter"];

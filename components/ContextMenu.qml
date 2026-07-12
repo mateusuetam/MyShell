@@ -26,6 +26,76 @@ property int _pendingY: 0
 property bool _isAnchorMode: false
 property bool _isInternalReset: false
 
+property var menuStack: []
+
+readonly property var backMenuItem: ({
+__internalBackItem: true,
+text: "Voltar",
+preventClose: true,
+onTrigger: () => menuPopup.popMenu()
+})
+
+readonly property var backSeparator: ({
+type: "separator"
+})
+
+function pushMenu(modelData, tag, refreshFn) {
+menuStack.push({
+model: modelData,
+tag: tag || "",
+refreshFn: refreshFn || null
+});
+_updateMenuFromStack();
+}
+
+function popMenu() {
+if (menuStack.length > 1) {
+menuStack.pop();
+_updateMenuFromStack();
+} else {
+close();
+}
+}
+
+function refresh() {
+if (!visible)
+return;
+
+for (let i = 0; i < menuStack.length; ++i) {
+const entry = menuStack[i];
+
+if (typeof entry.refreshFn === "function") {
+const updated = entry.refreshFn();
+entry.model = updated ?? [];
+}
+}
+
+_updateMenuFromStack();
+}
+
+function _updateMenuFromStack() {
+if (menuStack.length === 0) {
+menuPopup.menuModel = null;
+return;
+}
+
+const topEntry = menuStack[menuStack.length - 1];
+let currentModel = topEntry.model;
+
+if (menuStack.length > 1 && Array.isArray(currentModel)) {
+const hasVoltar = currentModel.some(item => item && item.__internalBackItem === true);
+
+if (!hasVoltar) {
+currentModel = currentModel.concat([
+backSeparator,
+backMenuItem
+]);
+}
+}
+
+menuPopup.menuModel = currentModel;
+}
+
 readonly property alias menuView: menuView
 readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function" || menuPopup.menuModel.count !== undefined)
 readonly property var _unfilteredModel: menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children
@@ -61,6 +131,7 @@ searchLoader.item.text = "";
 menuPopup.showSearchInput = false;
 menuPopup.anchor.window = null;
 menuPopup.menuModel = null;
+menuPopup.menuStack = [];
 menuView.currentIndex = -1;
 menuPopup._currentFilteredModel = [];
 }
@@ -71,24 +142,24 @@ function close() {
 visible = false;
 }
 
-function openMenu(targetWindow, anchorItem, modelData) {
+function openMenu(targetWindow, anchorItem, modelData, tag, refreshFn) {
 if (!anchorItem) return;
-_prepareToOpen(targetWindow, modelData);
+_prepareToOpen(targetWindow, modelData, tag, refreshFn);
 _pendingAnchorItem = anchorItem;
 _isAnchorMode = true;
 repositionTimer.restart();
 }
 
-function openAtPosition(targetWindow, x, y, modelData) {
+function openAtPosition(targetWindow, x, y, modelData, tag, refreshFn) {
 if (!targetWindow) return;
-_prepareToOpen(targetWindow, modelData);
+_prepareToOpen(targetWindow, modelData, tag, refreshFn);
 _pendingX = x;
 _pendingY = y;
 _isAnchorMode = false;
 repositionTimer.restart();
 }
 
-function _prepareToOpen(targetWindow, modelData) {
+function _prepareToOpen(targetWindow, modelData, tag, refreshFn) {
 repositionTimer.stop();
 _pendingAnchorItem = null;
 menuPopup.menuModel = null;
@@ -98,6 +169,12 @@ searchLoader.item.text = "";
 _isInternalReset = true;
 visible = false;
 _isInternalReset = false;
+
+menuPopup.menuStack = [{
+model: modelData,
+tag: tag || "main",
+refreshFn: refreshFn || null
+}];
 
 _pendingModel = modelData;
 _pendingWindow = targetWindow;
@@ -127,7 +204,7 @@ close();
 function _applyPositioning() {
 if (!_pendingWindow) return;
 
-menuPopup.menuModel = _pendingModel;
+_updateMenuFromStack();
 menuPopup.anchor.window = _pendingWindow;
 
 if (_isAnchorMode) {
@@ -149,7 +226,10 @@ menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
 
 function _updateFilteredModel() {
 const search = menuPopup.filterText.toLowerCase().trim();
-if (search === "") return;
+if (search === "") {
+_currentFilteredModel = [];
+return;
+}
 
 const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
 if (!rawSource) {
