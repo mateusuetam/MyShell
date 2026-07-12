@@ -138,7 +138,6 @@ height: parent.height
 y: -height
 
 color: ThemeRegistry.backgroundColor
-radius: 0
 
 Rectangle {
 anchors.left: parent.left

@@ -123,10 +123,11 @@ Image {
 anchors.fill: parent
 source: wallpaperSettings.savedPath
 fillMode: Image.PreserveAspectCrop
-horizontalAlignment: Image.AlignHCenter
-verticalAlignment: Image.AlignVCenter
 asynchronous: true
 cache: true
+sourceSize.width: width
+sourceSize.height: height
+autoTransform: true
 }
 
 MouseArea {
