@@ -71,12 +71,7 @@ function nextNotification() {
 if (notifyQueue.length > 0) {
 currentNotify = notifyQueue.shift();
 
-if (currentNotify.appName.toLowerCase() === "notify-send") {
 headerText.text = currentNotify.summary;
-} else {
-headerText.text = `[${currentNotify.appName.toUpperCase()}] ${currentNotify.summary}`;
-}
-
 bodyText.text = currentNotify.body;
 
 notifyPopup.visible = true;
