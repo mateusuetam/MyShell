@@ -8,6 +8,10 @@ id: mprisModule
 required property var globalMenu
 required property var parentWindow
 
+property int pendingTrackId: -1
+property int lastNotifiedTrackId: -1
+property int notifyRetries: 0
+
 readonly property int maxWidth: 450
 
 readonly property var activePlayer: {
@@ -32,27 +36,58 @@ target: mprisModule.activePlayer
 ignoreUnknownSignals: true
 
 function onPostTrackChanged() {
+const player = mprisModule.activePlayer;
+
+if (!player || !player.trackTitle)
+return;
+
+mprisModule.pendingTrackId = player.uniqueId;
+mprisModule.notifyRetries = 0;
+
 notifyDebounce.restart();
 }
 }
 
 Timer {
 id: notifyDebounce
+
 interval: 200
 repeat: false
+
 onTriggered: {
 const player = mprisModule.activePlayer;
-if (player && player.trackTitle) {
-const title = player.trackTitle;
-const artist = player.trackArtist || "Desconhecido";
+
+if (!player)
+return;
+
+const id = player.uniqueId;
+
+if (id !== mprisModule.pendingTrackId)
+return;
+
+if (id === mprisModule.lastNotifiedTrackId)
+return;
+
+if (!player.isPlaying || !player.lengthSupported) {
+if (mprisModule.notifyRetries < 10) {
+mprisModule.notifyRetries++;
+notifyDebounce.restart();
+}
+return;
+}
+
+if (player.length > 0 && player.length < 15)
+return;
+
+mprisModule.lastNotifiedTrackId = id;
 
 notifyProcess.command = [
 "notify-send",
-artist,
-title
+player.trackArtist || "Desconhecido",
+player.trackTitle
 ];
+
 notifyProcess.running = true;
-}
 }
 }
 
