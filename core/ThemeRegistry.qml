@@ -7,9 +7,7 @@ id: theme
 /* ===================
 REGISTRO DE TIPOGRAFIA
 ====================== */
-
 readonly property string appliedFontFamily: "Monaspace Krypton NF"
-
 readonly property int appliedFontSize: 14
 readonly property int appliedMenuFontSize: 12
 readonly property int appliedHeaderFontSize: 16
@@ -19,87 +17,87 @@ REGISTRO DE CORES
 ================= */
 
 // Mpris
-readonly property color mprisPlayingColor: "#689d6a"
-readonly property color mprisPausedColor: "#458588"
+readonly property color mprisPlayingColor: ThemeEngine.palette.green
+readonly property color mprisPausedColor: ThemeEngine.palette.blue
 
 // Idle
-readonly property color idleActivatedColor: "#8ec07c"
-readonly property color idleDeactivatedColor: "#a89984"
+readonly property color idleActivatedColor: ThemeEngine.palette.greenSoft
+readonly property color idleDeactivatedColor: ThemeEngine.palette.gray
 
 // Microphone
-readonly property color microphoneMutedColor: "#fe8019"
-readonly property color microphoneActiveColor: "#b8bb26"
-readonly property color microphoneLabelColor: "#ebdbb2"
+readonly property color microphoneMutedColor: ThemeEngine.palette.orange
+readonly property color microphoneActiveColor: ThemeEngine.palette.greenBright
+readonly property color microphoneLabelColor: ThemeEngine.palette.foreground
 
 // Volume
-readonly property color volumeMutedColor: "#fe8019"
-readonly property color volumeActiveColor: "#b8bb26"
-readonly property color volumeLabelColor: "#ebdbb2"
+readonly property color volumeMutedColor: ThemeEngine.palette.orange
+readonly property color volumeActiveColor: ThemeEngine.palette.greenBright
+readonly property color volumeLabelColor: ThemeEngine.palette.foreground
 
 // Clipboard
-readonly property color clipboardLabelColor: "#b16286"
+readonly property color clipboardLabelColor: ThemeEngine.palette.purple
 
 // Bluetooth
-readonly property color bluetoothDisabledColor: "#fb4934"
-readonly property color bluetoothDisconnectedColor: "#a89984"
-readonly property color bluetoothConnectedColor: "#458588"
-readonly property color bluetoothLabelColor: "#ebdbb2"
+readonly property color bluetoothDisabledColor: ThemeEngine.palette.redBright
+readonly property color bluetoothDisconnectedColor: ThemeEngine.palette.gray
+readonly property color bluetoothConnectedColor: ThemeEngine.palette.blue
+readonly property color bluetoothLabelColor: ThemeEngine.palette.foreground
 
 // Network
-readonly property color networkDisabledColor: "#fb4934"
-readonly property color networkDisconnectedColor: "#a89984"
-readonly property color networkConnectedColor: "#458588"
-readonly property color networkLabelColor: "#ebdbb2"
+readonly property color networkDisabledColor: ThemeEngine.palette.redBright
+readonly property color networkDisconnectedColor: ThemeEngine.palette.gray
+readonly property color networkConnectedColor: ThemeEngine.palette.blue
+readonly property color networkLabelColor: ThemeEngine.palette.foreground
 
 // Backlight
-readonly property color backlightBrightnessColor: "#fabd2f"
-readonly property color backlightLabelColor: "#ebdbb2"
+readonly property color backlightBrightnessColor: ThemeEngine.palette.yellowBright
+readonly property color backlightLabelColor: ThemeEngine.palette.foreground
 
 // Battery
-readonly property color batteryErrorColor: "#cc241d"
-readonly property color batteryChargingColor: "#b8bb26"
-readonly property color batteryCriticalColor: "#fb4934"
-readonly property color batteryLowColor: "#fe8019"
-readonly property color batteryNormalColor: "#fabd2f"
-readonly property color batteryLabelColor: "#ebdbb2"
+readonly property color batteryErrorColor: ThemeEngine.palette.red
+readonly property color batteryChargingColor: ThemeEngine.palette.greenBright
+readonly property color batteryCriticalColor: ThemeEngine.palette.redBright
+readonly property color batteryLowColor: ThemeEngine.palette.orange
+readonly property color batteryNormalColor: ThemeEngine.palette.yellowBright
+readonly property color batteryLabelColor: ThemeEngine.palette.foreground
 
 // Clock
-readonly property color clockLabelColor: "#ebdbb2"
-readonly property color clockDayColor: "#8ec07c"
-readonly property color clockMonthColor: "#b16286"
+readonly property color clockLabelColor: ThemeEngine.palette.foreground
+readonly property color clockDayColor: ThemeEngine.palette.greenSoft
+readonly property color clockMonthColor: ThemeEngine.palette.purple
 
 // Start
-readonly property color sLabelColor: "#fe8019"
-readonly property color t1LabelColor: "#b8bb26"
-readonly property color aLabelColor: "#83a598"
-readonly property color rLabelColor: "#fabd2f"
-readonly property color t2LabelColor: "#d3869b"
-readonly property color startSeparatorColor: "#ebdbb2"
+readonly property color sLabelColor: ThemeEngine.palette.orange
+readonly property color t1LabelColor: ThemeEngine.palette.greenBright
+readonly property color aLabelColor: ThemeEngine.palette.cyan
+readonly property color rLabelColor: ThemeEngine.palette.yellowBright
+readonly property color t2LabelColor: ThemeEngine.palette.purpleBright
+readonly property color startSeparatorColor: ThemeEngine.palette.foreground
 
 // Shell
-readonly property color backgroundColor: "#282828"
-readonly property color borderColor: "#3c3836"
-readonly property color borderLowColor: "#b8bb26"
-readonly property color borderNormalColor: "#83a598"
-readonly property color borderCriticalColor: "#fb4934"
-readonly property color notificationContentColor: "#ebdbb2"
+readonly property color backgroundColor: ThemeEngine.palette.background
+readonly property color borderColor: ThemeEngine.palette.surface
+readonly property color borderLowColor: ThemeEngine.palette.greenBright
+readonly property color borderNormalColor: ThemeEngine.palette.cyan
+readonly property color borderCriticalColor: ThemeEngine.palette.redBright
+readonly property color notificationContentColor: ThemeEngine.palette.foreground
 property color dynamicBorderColor: borderColor
 
 // Menu
-readonly property color menuBackgroundColor: "#282828"
-readonly property color menuBorderColor: "#3c3836"
-readonly property color menuTextHoverColor: "#504945"
-readonly property color menuTextColor: "#ebdbb2"
-readonly property color menuHoverColor: "#fe8019"
-readonly property color menuErrorColor: "#fb4934"
+readonly property color menuBackgroundColor: ThemeEngine.palette.background
+readonly property color menuBorderColor: ThemeEngine.palette.surface
+readonly property color menuTextHoverColor: ThemeEngine.palette.surfaceVariant
+readonly property color menuTextColor: ThemeEngine.palette.foreground
+readonly property color menuHoverColor: ThemeEngine.palette.orange
+readonly property color menuErrorColor: ThemeEngine.palette.redBright
 
 // Lockscreen
-readonly property color lockClockColor: "#689d6a"
-readonly property color lockLabelClockColor: "#504945"
-readonly property color lockHeaderAccentColor: "#504945"
-readonly property color lockPromptLabelColor: "#d79921"
-readonly property color lockPromptInputActiveColor: "#8ec07c"
-readonly property color lockPromptInputInactiveColor: "#689d6a"
-readonly property color lockPromptErrorColor: "#cc241d"
-readonly property color lockScreenBackgroundColor: "#282828"
+readonly property color lockClockColor: ThemeEngine.palette.green
+readonly property color lockLabelClockColor: ThemeEngine.palette.surfaceVariant
+readonly property color lockHeaderAccentColor: ThemeEngine.palette.surfaceVariant
+readonly property color lockPromptLabelColor: ThemeEngine.palette.yellow
+readonly property color lockPromptInputActiveColor: ThemeEngine.palette.greenSoft
+readonly property color lockPromptInputInactiveColor: ThemeEngine.palette.green
+readonly property color lockPromptErrorColor: ThemeEngine.palette.red
+readonly property color lockScreenBackgroundColor: ThemeEngine.palette.background
 }

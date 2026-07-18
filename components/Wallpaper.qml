@@ -5,6 +5,7 @@ import QtCore
 import Quickshell
 import Quickshell.Wayland
 import Qt.labs.folderlistmodel
+import "../core"
 
 PanelWindow {
 id: wallpaperWindow
@@ -36,7 +37,6 @@ property url savedPath: ""
 }
 
 property bool useA: true
-
 property bool isFullyLoaded: false
 
 Component.onCompleted: {
@@ -107,7 +107,6 @@ if (!obj) continue;
 list.push({
 type: "action",
 text: obj.name,
-icon: "",
 enabled: true,
 preventClose: false,
 actionType: "change_wallpaper",
@@ -141,7 +140,6 @@ readonly property var desktopMenuStructure: [
 {
 type: "action",
 text: "Trocar Wallpaper",
-icon: "",
 preventClose: true,
 onTrigger: () => {
 if (wallpaperWindow.globalMenu) {
@@ -149,6 +147,19 @@ wallpaperWindow.globalMenu.pushMenu(
 wallpaperWindow.subMenuStructure,
 "wallpapers",
 () => wallpaperWindow.subMenuStructure
+);
+}
+}
+},
+{
+type: "action",
+text: "Temas",
+preventClose: true,
+onTrigger: () => {
+if (wallpaperWindow.globalMenu) {
+wallpaperWindow.globalMenu.pushMenu(
+ThemeEngine.menuStructure,
+"themes"
 );
 }
 }
@@ -165,10 +176,8 @@ id: imgA
 sourceSize: Qt.size(wallpaperWindow.width, wallpaperWindow.height)
 anchors.fill: parent
 fillMode: Image.PreserveAspectCrop
-
 asynchronous: wallpaperWindow.isFullyLoaded
 cache: true
-
 visible: imgA.source !== "" || imgA.opacity > 0
 opacity: (wallpaperWindow.useA && imgA.status === Image.Ready) ? 1.0 : 0.0
 
@@ -176,7 +185,6 @@ Behavior on opacity {
 NumberAnimation {
 duration: 100;
 easing.type: Easing.OutQuad
-
 onFinished: {
 if (!wallpaperWindow.useA && imgA.opacity === 0) {
 imgA.source = ""
@@ -199,7 +207,6 @@ anchors.fill: parent
 fillMode: Image.PreserveAspectCrop
 asynchronous: true
 cache: true
-
 visible: imgB.source !== "" || imgB.opacity > 0
 opacity: (!wallpaperWindow.useA && imgB.status === Image.Ready) ? 1.0 : 0.0
 
@@ -207,7 +214,6 @@ Behavior on opacity {
 NumberAnimation {
 duration: 100;
 easing.type: Easing.OutQuad
-
 onFinished: {
 if (wallpaperWindow.useA && imgB.opacity === 0) {
 imgB.source = ""
