@@ -11,7 +11,7 @@ required property var parentWindow
 
 readonly property var dev: UPower.displayDevice
 readonly property int realPercentage: (dev && dev.ready) ? Math.round(dev.percentage * 100) : 0
-readonly property bool isFull: dev ? (dev.state === UPowerDeviceState.FullyCharged || (realPercentage >= 95 && dev.changeRate === 0)) : false
+readonly property bool isFull: dev ? (dev.state === UPowerDeviceState.FullyCharged || realPercentage >= 100) : false
 
 property int lastNotifiedLevel: 100
 
@@ -65,12 +65,11 @@ text: "--%"
 }
 
 const pct = batteryModule.realPercentage;
-const rate = Math.round(Math.abs(dev.changeRate));
 
 if (!UPower.onBattery) {
 return {
 color: ThemeRegistry.batteryChargingColor,
-text: batteryModule.isFull ? "AC/ON" : `${pct}% - ${rate}W`
+text: batteryModule.isFull ? "AC/ON" : `${pct}%`
 };
 }
 
@@ -83,7 +82,7 @@ uiColor = ThemeRegistry.batteryLowColor;
 
 return {
 color: uiColor,
-text: `${pct}% - ${rate}W`
+text: `${pct}%`
 };
 }
 
