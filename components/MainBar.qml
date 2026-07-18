@@ -25,7 +25,7 @@ right: true
 }
 
 implicitHeight: barWindow.barHeight
-exclusiveZone: barWindow.barHeight
+exclusionMode: ExclusionMode.Auto
 WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
 PasswordPrompt { id: wifiPasswordPromptInstance }

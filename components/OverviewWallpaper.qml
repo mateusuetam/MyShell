@@ -16,7 +16,7 @@ right: true
 bottom: true
 left: true
 }
-exclusiveZone: -1
+exclusionMode: ExclusionMode.Ignore
 focusable: false
 
 property url wallpaperPath: ""
