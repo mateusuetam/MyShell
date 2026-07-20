@@ -23,15 +23,8 @@ onClicked: sharedContextMenu.close()
 }
 
 Wallpaper {
-id: normalWallpaper
 screen: Quickshell.screens[0]
 globalMenu: sharedContextMenu
-}
-
-OverviewWallpaper {
-id: overviewWallpaper
-screen: Quickshell.screens[0]
-wallpaperPath: normalWallpaper.currentWallpaperPath
 }
 
 LockScreen {
