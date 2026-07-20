@@ -4,6 +4,7 @@ import QtQml
 import QtCore
 import Quickshell
 import Quickshell.Wayland
+import "../core"
 
 PanelWindow {
 id: wallpaperWindow
@@ -32,7 +33,7 @@ color: "transparent"
 
 Settings {
 id: wallpaperSettings
-location: `file://${Quickshell.env("HOME")}/.wallpaper.conf`
+location: ConfigPaths.wallpaperConfig
 category: "Wallpaper"
 property url savedPath: ""
 }

@@ -1,8 +1,6 @@
 pragma Singleton
 import QtQuick
 import QtCore
-import Quickshell
-
 import "./Palettes"
 
 QtObject {
@@ -31,7 +29,7 @@ onTrigger: () => themeEngine.changeTheme(tName)
 property string savedTheme: defaultTheme
 
 property var themeSettings: Settings {
-location: "file://" + Quickshell.env("HOME") + "/.theme.conf"
+location: ConfigPaths.themeConfig
 category: "Theme"
 property alias savedTheme: themeEngine.savedTheme
 }
