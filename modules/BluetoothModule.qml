@@ -414,7 +414,7 @@ const dev = bluetoothModule.getConnectedDevice();
 if (!dev) return { color: ThemeRegistry.bluetoothDisconnectedColor, text: "idle" };
 
 if (dev.batteryAvailable) {
-return { color: ThemeRegistry.bluetoothConnectedColor, text: `up (${Math.round(dev.battery * 100)}%)` };
+return { color: ThemeRegistry.bluetoothConnectedColor, text: `up ${Math.round(dev.battery * 100)}%` };
 }
 
 return { color: ThemeRegistry.bluetoothConnectedColor, text: "up" };
@@ -452,17 +452,10 @@ anchors.verticalCenter: parent.verticalCenter
 readonly property var btState: bluetoothModule.getBluetoothState()
 
 Text {
-id: btPrefix
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.bluetoothLabelColor
-text: "BT: "
-}
-
-Text {
-font: btPrefix.font
 color: bluetoothRow.btState.color
-text: bluetoothRow.btState.text
+text: `{ BT: ${bluetoothRow.btState.text} }`
 }
 }
 }

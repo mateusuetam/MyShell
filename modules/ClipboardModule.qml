@@ -112,7 +112,7 @@ Text {
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
 color: ThemeRegistry.clipboardLabelColor
-text: "CLIP"
+text: "{ CLIP }"
 }
 }
 }

@@ -56,19 +56,11 @@ node.volume = Math.max(0.0, currentVolume - step);
 Row {
 id: micRow
 anchors.verticalCenter: parent.verticalCenter
-
 Text {
-id: micPrefix
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.microphoneLabelColor
-text: "MC: "
-}
-
-Text {
-font: micPrefix.font
 color: micModule.micMuted ? ThemeRegistry.microphoneMutedColor : ThemeRegistry.microphoneActiveColor
-text: micModule.micMuted ? "off" : `${micModule.micPercent}%`
+text: micModule.micMuted ? "{ MC: off }" : `{ MC: ${micModule.micPercent}% }`
 }
 }
 }

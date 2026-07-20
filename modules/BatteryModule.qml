@@ -87,17 +87,10 @@ text: `${pct}%`
 }
 
 Text {
-id: batteryPrefix
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.batteryLabelColor
-text: "BA: "
-}
-
-Text {
-font: batteryPrefix.font
 color: batteryRow.batteryState.color
-text: batteryRow.batteryState.text
+text: `{ BA: ${batteryRow.batteryState.text} }`
 }
 }
 }

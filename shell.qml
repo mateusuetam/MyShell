@@ -11,6 +11,17 @@ ContextMenu {
 id: sharedContextMenu
 }
 
+MainBar {
+id: mainBarWindow
+screen: Quickshell.screens[0]
+globalMenu: sharedContextMenu
+}
+
+NotificationPopup {
+targetWindow: mainBarWindow
+onClicked: sharedContextMenu.close()
+}
+
 Wallpaper {
 id: normalWallpaper
 screen: Quickshell.screens[0]
@@ -21,17 +32,6 @@ OverviewWallpaper {
 id: overviewWallpaper
 screen: Quickshell.screens[0]
 wallpaperPath: normalWallpaper.currentWallpaperPath
-}
-
-MainBar {
-id: mainBarWindow
-screen: Quickshell.screens[0]
-globalMenu: sharedContextMenu
-}
-
-NotificationPopup {
-targetWindow: mainBarWindow
-onClicked: sharedContextMenu.close()
 }
 
 LockScreen {

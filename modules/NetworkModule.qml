@@ -356,16 +356,10 @@ networkModule.handleStateChange(stateText);
 }
 
 Text {
-id: networkPrefix
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.networkLabelColor
-text: "NW: "
-}
-Text {
-font: networkPrefix.font
 color: networkRow.nwState.color
-text: networkRow.stateText
+text: `{ NW: ${networkRow.stateText} }`
 }
 }
 }

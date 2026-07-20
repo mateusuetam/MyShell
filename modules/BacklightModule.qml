@@ -171,16 +171,10 @@ Row {
 id: backlightRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
-id: backlightPrefix
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.backlightLabelColor
-text: "BL: "
-}
-Text {
-font: backlightPrefix.font
 color: ThemeRegistry.backlightBrightnessColor
-text: `${backlightModule.brightnessPercent}%`
+text: `{ BL: ${backlightModule.brightnessPercent}% }`
 }
 }
 }

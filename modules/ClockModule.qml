@@ -35,7 +35,7 @@ id: clockBase
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
 color: ThemeRegistry.clockLabelColor
-text: `${clockRow.formattedParts.weekday} `
+text: `{ ${clockRow.formattedParts.weekday} `
 }
 Text {
 font: clockBase.font
@@ -55,7 +55,7 @@ text: clockRow.formattedParts.month
 Text {
 font: clockBase.font
 color: clockBase.color
-text: ` - ${clockRow.formattedParts.time}`
+text: ` | ${clockRow.formattedParts.time} }`
 }
 }
 }

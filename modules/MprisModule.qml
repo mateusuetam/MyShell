@@ -134,10 +134,19 @@ font.pixelSize: ThemeRegistry.appliedFontSize
 readonly property var player: mprisModule.activePlayer
 readonly property bool isPlaying: player ? player.isPlaying : false
 readonly property string title: player ? player.trackTitle : ""
-readonly property string artist: player && player.trackArtist ? player.trackArtist : "Desconhecido"
+readonly property string artist: player && player.trackArtist ? player.trackArtist : ""
 
 color: isPlaying ? ThemeRegistry.mprisPlayingColor : ThemeRegistry.mprisPausedColor
-text: title ? `${isPlaying ? "|| " : "> "}${title} - ${artist}` : ""
+
+text: {
+if (!title) return ""
+
+const prefix = isPlaying ? "|| " : "> "
+const hasArtist = artist && artist.trim() !== "" && artist !== "Desconhecido"
+const artistPart = hasArtist ? ` - ${artist}` : ""
+
+return `{ ${prefix}${title}${artistPart} }`
+}
 }
 }
 }

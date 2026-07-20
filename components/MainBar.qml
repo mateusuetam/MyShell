@@ -66,28 +66,19 @@ RowLayout {
 anchors.fill: parent
 anchors.leftMargin: barWindow.sideMargins
 anchors.rightMargin: barWindow.sideMargins
-spacing: 0
+spacing: barWindow.layoutSpacing
 z: 1
 
 // <<< LADO ESQUERDO <<<
-MprisModule {
-Layout.fillHeight: true
-Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-}
+StartModule { id: startModuleInstance; parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+MprisModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 
+// <<< ESPAÇADOR >>>
 Item {
 Layout.fillWidth: true
 }
 
 // >>> LADO DIREITO >>>
-Row {
-id: rightModules
-Layout.fillHeight: true
-spacing: barWindow.layoutSpacing
-Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-
 TrayModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 IdleModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 ClipboardModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
@@ -97,16 +88,7 @@ BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; passwordPrompt: wifiPasswordPromptInstance }
 BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
-StartModule { id: startModuleInstance; parentWindow: barWindow; globalMenu: barWindow.globalMenu }
-}
-}
-
-// --- CENTRO ---
-ClockModule {
-parentWindow: barWindow
-globalMenu: barWindow.globalMenu
-anchors.centerIn: parent
-z: 2
+ClockModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 }
 }
 }

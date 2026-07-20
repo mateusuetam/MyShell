@@ -134,14 +134,11 @@ Text {
 id: prefixText
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.startSeparatorColor
-text: "["
 }
-Text { font: prefixText.font; color: ThemeRegistry.sLabelColor; text: "S" }
+Text { font: prefixText.font; color: ThemeRegistry.sLabelColor; text: "{ S" }
 Text { font: prefixText.font; color: ThemeRegistry.t1LabelColor; text: "T" }
 Text { font: prefixText.font; color: ThemeRegistry.aLabelColor; text: "A" }
 Text { font: prefixText.font; color: ThemeRegistry.rLabelColor; text: "R" }
-Text { font: prefixText.font; color: ThemeRegistry.t2LabelColor; text: "T" }
-Text { font: prefixText.font; color: prefixText.color; text: "]" }
+Text { font: prefixText.font; color: ThemeRegistry.t2LabelColor; text: "T }" }
 }
 }

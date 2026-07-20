@@ -41,10 +41,10 @@ anchors.verticalCenter: parent.verticalCenter
 readonly property var idleState: {
 return idleModule.isActive ? {
 color: ThemeRegistry.idleActivatedColor,
-text: "ACTIVE"
+text: "{ ACTIVE }"
 } : {
 color: ThemeRegistry.idleDeactivatedColor,
-text: "IDLING"
+text: "{ IDLING }"
 };
 }
 Text {
