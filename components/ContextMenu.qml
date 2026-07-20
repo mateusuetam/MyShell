@@ -25,6 +25,8 @@ property int _pendingX: 0
 property int _pendingY: 0
 property bool _isAnchorMode: false
 property bool _isInternalReset: false
+property bool _isPreparing: false
+readonly property bool isMenuFocused: visible || _isPreparing
 
 property var menuStack: []
 
@@ -160,6 +162,8 @@ repositionTimer.restart();
 }
 
 function _prepareToOpen(targetWindow, modelData, tag, refreshFn) {
+_isPreparing = true;
+
 repositionTimer.stop();
 _pendingAnchorItem = null;
 menuPopup.menuModel = null;
@@ -217,6 +221,7 @@ menuPopup.anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
 menuPopup.anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
 }
 menuPopup.visible = true;
+_isPreparing = false;
 }
 
 QsMenuOpener {

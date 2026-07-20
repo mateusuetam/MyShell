@@ -26,7 +26,10 @@ right: true
 
 implicitHeight: barWindow.barHeight
 exclusionMode: ExclusionMode.Auto
-WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMenuFocused && barWindow.globalMenu._pendingWindow === barWindow) ||
+(wifiPasswordPromptInstance && wifiPasswordPromptInstance.visible))
+? WlrKeyboardFocus.OnDemand
+: WlrKeyboardFocus.None
 
 PasswordPrompt { id: wifiPasswordPromptInstance }
 
