@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQml
 import Quickshell
+import Qt.labs.folderlistmodel
 import "../core"
 
 Item {
@@ -11,6 +13,137 @@ required property var parentWindow
 
 implicitWidth: startRow.implicitWidth
 implicitHeight: startModule.parentWindow ? startModule.parentWindow.barHeight : 30
+
+component WallpaperDelegate: QtObject {
+required property var model
+readonly property string name: model.fileName
+readonly property url urlPath: model.fileUrl
+}
+
+FolderListModel {
+id: folderModel
+folder: "file://" + Quickshell.env("HOME") + "/Imagens"
+nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+showDirs: false
+showDotAndDotDot: false
+showOnlyReadable: true
+}
+
+Instantiator {
+id: fileInstantiator
+model: folderModel
+delegate: WallpaperDelegate {}
+onObjectAdded: rebuildDebounce.restart()
+onObjectRemoved: rebuildDebounce.restart()
+}
+
+Timer {
+id: rebuildDebounce
+interval: 32
+repeat: false
+onTriggered: startModule.rebuildWallpaperMenu()
+}
+
+property var wallpaperMenuStructure: []
+
+function rebuildWallpaperMenu() {
+let list = [
+{
+type: "action",
+text: "< Customizações",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.popMenu();
+}
+}
+},
+{ type: "separator" }
+];
+
+for (var i = 0; i < fileInstantiator.count; i++) {
+const obj = fileInstantiator.objectAt(i) as WallpaperDelegate;
+if (!obj) continue;
+
+list.push({
+type: "action",
+text: obj.name,
+enabled: true,
+preventClose: false,
+actionType: "change_wallpaper",
+actionData: obj.urlPath
+});
+}
+startModule.wallpaperMenuStructure = list;
+}
+
+function getThemeMenuStructure() {
+let list = [
+{
+type: "action",
+text: "< Customizações",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.popMenu();
+}
+}
+},
+{ type: "separator" }
+];
+
+if (Array.isArray(ThemeEngine.menuStructure)) {
+return list.concat(ThemeEngine.menuStructure);
+}
+return list;
+}
+
+readonly property var customizationsMenuModel: [
+{
+type: "action",
+text: "< Menu de Apps",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = true;
+startModule.globalMenu.popMenu();
+}
+}
+},
+{ type: "separator" },
+{
+type: "action",
+text: "Trocar Wallpaper >",
+preventClose: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.pushMenu(
+startModule.wallpaperMenuStructure,
+"wallpapers",
+() => startModule.wallpaperMenuStructure
+);
+}
+}
+},
+{
+type: "action",
+text: "Trocar Tema >",
+preventClose: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.pushMenu(
+startModule.getThemeMenuStructure(),
+"themes"
+);
+}
+}
+}
+]
 
 readonly property var powerMenuModel: [
 {
@@ -89,9 +222,25 @@ item.launch();
 processedModel.sort((a, b) => a.text.localeCompare(b.text));
 
 processedModel.push({ type: "separator" });
+
 processedModel.push({
 type: "action",
-text: "< Menu de Sessão",
+text: "Customizações >",
+preventClose: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.pushMenu(
+startModule.customizationsMenuModel,
+"customizations"
+);
+}
+}
+});
+
+processedModel.push({
+type: "action",
+text: "Menu de Sessão >",
 onTrigger: () => startModule.openSessionMenu()
 });
 

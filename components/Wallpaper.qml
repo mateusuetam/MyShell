@@ -4,14 +4,11 @@ import QtQml
 import QtCore
 import Quickshell
 import Quickshell.Wayland
-import Qt.labs.folderlistmodel
-import "../core"
 
 PanelWindow {
 id: wallpaperWindow
 
 required property var globalMenu
-property var subMenuStructure: []
 
 property alias wallpaperSettings: wallpaperSettings
 
@@ -68,54 +65,6 @@ imgA.source = newPath;
 }
 }
 
-component WallpaperDelegate: QtObject {
-required property var model
-readonly property string name: model.fileName
-readonly property url urlPath: model.fileUrl
-}
-
-FolderListModel {
-id: folderModel
-folder: "file://" + Quickshell.env("HOME") + "/Imagens"
-nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-showDirs: false
-showDotAndDotDot: false
-showOnlyReadable: true
-}
-
-Instantiator {
-id: fileInstantiator
-model: folderModel
-delegate: WallpaperDelegate {}
-onObjectAdded: rebuildDebounce.restart()
-onObjectRemoved: rebuildDebounce.restart()
-}
-
-Timer {
-id: rebuildDebounce
-interval: 32
-repeat: false
-onTriggered: wallpaperWindow.rebuildMenu()
-}
-
-function rebuildMenu() {
-let list = [];
-for (var i = 0; i < fileInstantiator.count; i++) {
-const obj = fileInstantiator.objectAt(i) as WallpaperDelegate;
-if (!obj) continue;
-
-list.push({
-type: "action",
-text: obj.name,
-enabled: true,
-preventClose: false,
-actionType: "change_wallpaper",
-actionData: obj.urlPath
-});
-}
-wallpaperWindow.subMenuStructure = list;
-}
-
 Connections {
 target: wallpaperWindow.globalMenu
 
@@ -135,36 +84,6 @@ wallpaperWindow.focusable = false;
 }
 }
 }
-
-readonly property var desktopMenuStructure: [
-{
-type: "action",
-text: "Trocar Wallpaper",
-preventClose: true,
-onTrigger: () => {
-if (wallpaperWindow.globalMenu) {
-wallpaperWindow.globalMenu.pushMenu(
-wallpaperWindow.subMenuStructure,
-"wallpapers",
-() => wallpaperWindow.subMenuStructure
-);
-}
-}
-},
-{
-type: "action",
-text: "Temas",
-preventClose: true,
-onTrigger: () => {
-if (wallpaperWindow.globalMenu) {
-wallpaperWindow.globalMenu.pushMenu(
-ThemeEngine.menuStructure,
-"themes"
-);
-}
-}
-}
-]
 
 Rectangle {
 anchors.fill: parent
@@ -225,24 +144,6 @@ imgB.source = ""
 onStatusChanged: {
 if (imgB.status === Image.Ready && wallpaperWindow.useA) {
 wallpaperWindow.useA = false;
-}
-}
-}
-
-MouseArea {
-anchors.fill: parent
-acceptedButtons: Qt.LeftButton | Qt.RightButton
-onPressed: mouse => {
-let menu = wallpaperWindow.globalMenu;
-if (!menu) return;
-
-mouse.accepted = true;
-if (mouse.button === Qt.RightButton) {
-wallpaperWindow.focusable = true;
-menu.showSearchInput = false;
-menu.openAtPosition(wallpaperWindow, mouse.x, mouse.y, wallpaperWindow.desktopMenuStructure);
-} else if (mouse.button === Qt.LeftButton) {
-menu.close();
 }
 }
 }
