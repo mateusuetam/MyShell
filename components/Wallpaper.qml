@@ -10,9 +10,11 @@ id: wallpaperWindow
 
 required property var globalMenu
 
-property alias wallpaperSettings: wallpaperSettings
+property bool useA: true
+property bool isFullyLoaded: false
 
-readonly property url currentWallpaperPath: wallpaperWindow.wallpaperSettings.savedPath
+property alias wallpaperSettings: wallpaperSettings
+readonly property size wallpaperSize: Qt.size(width, height)
 
 WlrLayershell.layer: WlrLayer.Background
 WlrLayershell.namespace: "wallpaper"
@@ -23,21 +25,25 @@ right: true
 bottom: true
 left: true
 }
+
 exclusionMode: ExclusionMode.Ignore
-focusable: false
+
+color: "transparent"
 
 Settings {
 id: wallpaperSettings
-location: "file://" + Quickshell.env("HOME") + "/.wallpaper.conf"
+location: `file://${Quickshell.env("HOME")}/.wallpaper.conf`
 category: "Wallpaper"
 property url savedPath: ""
 }
 
-property bool useA: true
-property bool isFullyLoaded: false
+component FadeAnimation: NumberAnimation {
+duration: 600
+easing.type: Easing.InOutSine
+}
 
 Component.onCompleted: {
-if (wallpaperWindow.wallpaperSettings.savedPath.toString() !== "") {
+if (wallpaperWindow.wallpaperSettings.savedPath !== "") {
 imgA.source = wallpaperWindow.wallpaperSettings.savedPath;
 }
 wallpaperWindow.isFullyLoaded = true;
@@ -47,16 +53,16 @@ Connections {
 target: wallpaperWindow.wallpaperSettings
 function onSavedPathChanged() {
 var newPath = wallpaperWindow.wallpaperSettings.savedPath;
-if (newPath.toString() === "") return;
+if (newPath === "") return;
 
 if (wallpaperWindow.useA) {
-if (imgB.source.toString() === newPath.toString() && imgB.status === Image.Ready) {
+if (imgB.source === newPath && imgB.status === Image.Ready) {
 wallpaperWindow.useA = false;
 } else {
 imgB.source = newPath;
 }
 } else {
-if (imgA.source.toString() === newPath.toString() && imgA.status === Image.Ready) {
+if (imgA.source === newPath && imgA.status === Image.Ready) {
 wallpaperWindow.useA = true;
 } else {
 imgA.source = newPath;
@@ -69,51 +75,40 @@ Connections {
 target: wallpaperWindow.globalMenu
 
 function onItemDataActionTriggered(actionType, data) {
-switch (actionType) {
-case "change_wallpaper":
+if (actionType === "change_wallpaper")
 wallpaperWindow.wallpaperSettings.savedPath = data;
-break;
 }
 }
 
-function onVisibleChanged() {
-if (wallpaperWindow.globalMenu && !wallpaperWindow.globalMenu.visible) {
-if (!wallpaperWindow.globalMenu._isInternalReset) {
-wallpaperWindow.focusable = false;
-}
-}
-}
-}
-
-Rectangle {
-anchors.fill: parent
-color: "black"
+function shouldFadeIn(active, status, otherOpacity) {
+return (active && status === Image.Ready) || (!active && otherOpacity < 1);
 }
 
 Image {
 id: imgA
-sourceSize: Qt.size(wallpaperWindow.width, wallpaperWindow.height)
+readonly property bool hasSource: source !== ""
+
+sourceSize: wallpaperWindow.wallpaperSize
 anchors.fill: parent
 fillMode: Image.PreserveAspectCrop
 asynchronous: wallpaperWindow.isFullyLoaded
-cache: true
-visible: imgA.source !== "" || imgA.opacity > 0
-opacity: (wallpaperWindow.useA && imgA.status === Image.Ready) ? 1.0 : 0.0
+visible: hasSource || opacity > 0
+z: wallpaperWindow.useA ? 1 : 0
+
+opacity: wallpaperWindow.shouldFadeIn(wallpaperWindow.useA, status, imgB.opacity) ? 1 : 0
 
 Behavior on opacity {
-NumberAnimation {
-duration: 100;
-easing.type: Easing.OutQuad
+FadeAnimation {
 onFinished: {
-if (!wallpaperWindow.useA && imgA.opacity === 0) {
-imgA.source = ""
+if (!wallpaperWindow.useA && imgA.opacity === 0.0) {
+imgA.source = "";
 }
 }
 }
 }
 
 onStatusChanged: {
-if (imgA.status === Image.Ready && !wallpaperWindow.useA) {
+if (status === Image.Ready && !wallpaperWindow.useA && hasSource) {
 wallpaperWindow.useA = true;
 }
 }
@@ -121,28 +116,29 @@ wallpaperWindow.useA = true;
 
 Image {
 id: imgB
-sourceSize: Qt.size(wallpaperWindow.width, wallpaperWindow.height)
+readonly property bool hasSource: source !== ""
+
+sourceSize: wallpaperWindow.wallpaperSize
 anchors.fill: parent
 fillMode: Image.PreserveAspectCrop
 asynchronous: true
-cache: true
-visible: imgB.source !== "" || imgB.opacity > 0
-opacity: (!wallpaperWindow.useA && imgB.status === Image.Ready) ? 1.0 : 0.0
+visible: hasSource || opacity > 0
+z: !wallpaperWindow.useA ? 1 : 0
+
+opacity: wallpaperWindow.shouldFadeIn(!wallpaperWindow.useA, status, imgA.opacity) ? 1 : 0
 
 Behavior on opacity {
-NumberAnimation {
-duration: 100;
-easing.type: Easing.OutQuad
+FadeAnimation {
 onFinished: {
-if (wallpaperWindow.useA && imgB.opacity === 0) {
-imgB.source = ""
+if (wallpaperWindow.useA && imgB.opacity === 0.0) {
+imgB.source = "";
 }
 }
 }
 }
 
 onStatusChanged: {
-if (imgB.status === Image.Ready && wallpaperWindow.useA) {
+if (status === Image.Ready && wallpaperWindow.useA && hasSource) {
 wallpaperWindow.useA = false;
 }
 }
