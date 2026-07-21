@@ -69,7 +69,7 @@ const pct = batteryModule.realPercentage;
 if (!UPower.onBattery) {
 return {
 color: ThemeRegistry.batteryChargingColor,
-text: batteryModule.isFull ? "AC/ON" : `${pct}%`
+text: batteryModule.isFull ? "AC/ON" : `+${pct}%`
 };
 }
 

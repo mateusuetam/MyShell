@@ -72,7 +72,7 @@ readonly property color t2LabelColor: neutral_purple
 
 // Mpris
 readonly property color mprisPlayingColor: neutral_green
-readonly property color mprisPausedColor: neutral_blue
+readonly property color mprisPausedColor: bright_blue
 
 // Idle
 readonly property color idleActivatedColor: neutral_green
@@ -90,14 +90,14 @@ readonly property color volumeMutedColor: faded_orange
 readonly property color volumeActiveColor: neutral_green
 
 // Bluetooth
-readonly property color bluetoothDisabledColor: bright_red
+readonly property color bluetoothDisabledColor: faded_red
 readonly property color bluetoothDisconnectedColor: gray0
 readonly property color bluetoothConnectedColor: neutral_blue
 
 // Network
-readonly property color networkDisabledColor: bright_red
+readonly property color networkDisabledColor: faded_red
 readonly property color networkDisconnectedColor: gray0
-readonly property color networkConnectedColor: bright_blue
+readonly property color networkConnectedColor: neutral_blue
 
 // Backlight
 readonly property color backlightBrightnessColor: neutral_yellow
@@ -111,8 +111,8 @@ readonly property color batteryNormalColor: neutral_aqua
 
 // Clock
 readonly property color clockLabelColor: light1
-readonly property color clockDayColor: neutral_green
-readonly property color clockMonthColor: neutral_purple
+readonly property color clockDayColor: bright_aqua
+readonly property color clockMonthColor: bright_purple
 
 // Lockscreen
 readonly property color lockClockColor: faded_green

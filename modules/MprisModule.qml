@@ -123,11 +123,20 @@ player.previous();
 Row {
 id: mprisRow
 anchors.verticalCenter: parent.verticalCenter
+visible: mainText.text !== ""
 
 Text {
-id: mprisText
-width: Math.min(implicitWidth, mprisModule.maxWidth)
+id: prefixText
+text: "{ "
+font: mainText.font
+color: mainText.color
+}
+
+Text {
+id: mainText
+width: Math.min(implicitWidth, mprisModule.maxWidth - prefixText.implicitWidth - suffixText.implicitWidth)
 elide: Text.ElideRight
+
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: ThemeRegistry.appliedFontSize
 
@@ -140,13 +149,19 @@ color: isPlaying ? ThemeRegistry.mprisPlayingColor : ThemeRegistry.mprisPausedCo
 
 text: {
 if (!title) return ""
-
 const prefix = isPlaying ? "|| " : "> "
 const hasArtist = artist && artist.trim() !== "" && artist !== "Desconhecido"
 const artistPart = hasArtist ? ` - ${artist}` : ""
 
-return `{ ${prefix}${title}${artistPart} }`
+return `${prefix}${title}${artistPart}`
 }
+}
+
+Text {
+id: suffixText
+text: " }"
+font: mainText.font
+color: mainText.color
 }
 }
 }
