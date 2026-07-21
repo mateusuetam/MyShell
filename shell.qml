@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "components"
+import "core"
 
 ShellRoot {
 id: shellScope
@@ -24,7 +25,7 @@ onClicked: sharedContextMenu.close()
 
 Wallpaper {
 screen: Quickshell.screens[0]
-globalMenu: sharedContextMenu
+wallpaperPath: WallpaperEngine.currentWallpaper
 }
 
 LockScreen {

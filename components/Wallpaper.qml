@@ -1,20 +1,14 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQml
-import QtCore
 import Quickshell
 import Quickshell.Wayland
-import "../core"
 
 PanelWindow {
 id: wallpaperWindow
 
-required property var globalMenu
-
 property bool useA: true
-property bool isFullyLoaded: false
-
-property alias wallpaperSettings: wallpaperSettings
+property url wallpaperPath: ""
 readonly property size wallpaperSize: Qt.size(width, height)
 
 WlrLayershell.layer: WlrLayer.Background
@@ -26,120 +20,80 @@ right: true
 bottom: true
 left: true
 }
-
 exclusionMode: ExclusionMode.Ignore
-
 color: "transparent"
-
-Settings {
-id: wallpaperSettings
-location: ConfigPaths.wallpaperConfig
-category: "Wallpaper"
-property url savedPath: ""
-}
 
 component FadeAnimation: NumberAnimation {
 duration: 600
 easing.type: Easing.InOutSine
 }
 
-Component.onCompleted: {
-if (wallpaperWindow.wallpaperSettings.savedPath !== "") {
-imgA.source = wallpaperWindow.wallpaperSettings.savedPath;
-}
-wallpaperWindow.isFullyLoaded = true;
-}
+onWallpaperPathChanged: applyWallpaper(wallpaperPath)
 
-Connections {
-target: wallpaperWindow.wallpaperSettings
-function onSavedPathChanged() {
-var newPath = wallpaperWindow.wallpaperSettings.savedPath;
-if (newPath === "") return;
+function applyWallpaper(path) {
+if (!path || path === "")
+return;
 
-if (wallpaperWindow.useA) {
-if (imgB.source === newPath && imgB.status === Image.Ready) {
-wallpaperWindow.useA = false;
-} else {
-imgB.source = newPath;
-}
-} else {
-if (imgA.source === newPath && imgA.status === Image.Ready) {
-wallpaperWindow.useA = true;
-} else {
-imgA.source = newPath;
-}
-}
+const activeImg = useA ? imgA : imgB;
+const targetImg = useA ? imgB : imgA;
+
+if (activeImg.source === path)
+return;
+
+targetImg.source = path;
+
+if (targetImg.status === Image.Ready) {
+useA = !useA;
 }
 }
 
-Connections {
-target: wallpaperWindow.globalMenu
-
-function onItemDataActionTriggered(actionType, data) {
-if (actionType === "change_wallpaper")
-wallpaperWindow.wallpaperSettings.savedPath = data;
-}
-}
-
-function shouldFadeIn(active, status, otherOpacity) {
-return (active && status === Image.Ready) || (!active && otherOpacity < 1);
-}
-
-Image {
-id: imgA
-readonly property bool hasSource: source !== ""
-
-sourceSize: wallpaperWindow.wallpaperSize
-anchors.fill: parent
-fillMode: Image.PreserveAspectCrop
-asynchronous: wallpaperWindow.isFullyLoaded
-visible: hasSource || opacity > 0
-z: wallpaperWindow.useA ? 1 : 0
-
-opacity: wallpaperWindow.shouldFadeIn(wallpaperWindow.useA, status, imgB.opacity) ? 1 : 0
-
-Behavior on opacity {
-FadeAnimation {
-onFinished: {
-if (!wallpaperWindow.useA && imgA.opacity === 0.0) {
-imgA.source = "";
-}
-}
-}
-}
-
-onStatusChanged: {
-if (status === Image.Ready && !wallpaperWindow.useA && hasSource) {
-wallpaperWindow.useA = true;
-}
-}
-}
-
-Image {
-id: imgB
-readonly property bool hasSource: source !== ""
-
+component WallpaperImage : Image {
 sourceSize: wallpaperWindow.wallpaperSize
 anchors.fill: parent
 fillMode: Image.PreserveAspectCrop
 asynchronous: true
-visible: hasSource || opacity > 0
-z: !wallpaperWindow.useA ? 1 : 0
+cache: false
+}
 
-opacity: wallpaperWindow.shouldFadeIn(!wallpaperWindow.useA, status, imgA.opacity) ? 1 : 0
+WallpaperImage {
+id: imgA
+
+z: wallpaperWindow.useA ? 1 : 0
+opacity: wallpaperWindow.useA ? 1 : 0
 
 Behavior on opacity {
 FadeAnimation {
 onFinished: {
-if (wallpaperWindow.useA && imgB.opacity === 0.0) {
-imgB.source = "";
-}
+if (!wallpaperWindow.useA)
+imgA.source = "";
 }
 }
 }
 
 onStatusChanged: {
-if (status === Image.Ready && wallpaperWindow.useA && hasSource) {
+if (status === Image.Ready && !wallpaperWindow.useA && source !== "") {
+wallpaperWindow.useA = true;
+}
+}
+}
+
+WallpaperImage {
+id: imgB
+
+z: wallpaperWindow.useA ? 0 : 1
+opacity: wallpaperWindow.useA ? 0 : 1
+
+Behavior on opacity {
+FadeAnimation {
+onFinished: {
+if (wallpaperWindow.useA)
+imgB.source = "";
+}
+}
+}
+
+onStatusChanged: {
+if (status === Image.Ready && wallpaperWindow.useA && source !== "") {
 wallpaperWindow.useA = false;
 }
 }

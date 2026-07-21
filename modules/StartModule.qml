@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQml
 import Quickshell
-import Qt.labs.folderlistmodel
 import "../core"
 
 Item {
@@ -17,72 +16,12 @@ pixelSize: ThemeRegistry.appliedFontSize
 })
 
 property var cachedAppMenu: []
-property var cachedThemeMenu: []
-property var wallpaperMenuStructure: []
 
 implicitWidth: startRow.implicitWidth
 implicitHeight: startModule.parentWindow ? startModule.parentWindow.barHeight : 30
 
 component AppDelegate: QtObject {
 required property DesktopEntry modelData
-}
-
-FolderListModel {
-id: folderModel
-folder: `file://${Quickshell.env("HOME")}/Imagens`
-nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-showDirs: false
-showDotAndDotDot: false
-showOnlyReadable: true
-onCountChanged: rebuildDebounce.restart()
-}
-
-Timer {
-id: rebuildDebounce
-interval: 100
-repeat: false
-onTriggered: startModule.rebuildWallpaperMenu()
-}
-
-function rebuildWallpaperMenu() {
-let list = [
-{
-type: "action",
-text: "< Customizações",
-preventClose: true,
-__internalBackItem: true,
-onTrigger: () => startModule.globalMenu?.popMenu()
-},
-{ type: "separator" }
-];
-
-for (let i = 0; i < folderModel.count; i++) {
-list.push({
-type: "action",
-text: folderModel.get(i, "fileName"),
-preventClose: false,
-actionType: "change_wallpaper",
-actionData: folderModel.get(i, "fileUrl")
-});
-}
-startModule.wallpaperMenuStructure = list;
-}
-
-function rebuildThemeMenu() {
-cachedThemeMenu = [
-{
-type: "action",
-text: "< Customizações",
-preventClose: true,
-__internalBackItem: true,
-onTrigger: () => startModule.globalMenu?.popMenu()
-},
-{ type: "separator" }
-];
-
-if (Array.isArray(ThemeEngine.menuStructure)) {
-cachedThemeMenu = cachedThemeMenu.concat(ThemeEngine.menuStructure);
-}
 }
 
 readonly property var customizationsMenuModel: [
@@ -104,14 +43,30 @@ type: "action",
 text: "Trocar Wallpaper >",
 preventClose: true,
 onTrigger: () => {
-if (startModule.globalMenu) {
+if (!startModule.globalMenu)
+return;
+
+const wallpaperMenuItems = WallpaperEngine.menuStructure.map(item => ({
+type: item.type,
+text: item.text,
+preventClose: item.preventClose,
+onTrigger: () => WallpaperEngine.changeWallpaper(item.path)
+}));
+
 startModule.globalMenu.showSearchInput = false;
 startModule.globalMenu.pushMenu(
-startModule.wallpaperMenuStructure,
-"wallpapers",
-() => startModule.wallpaperMenuStructure
+[
+{
+type: "action",
+text: "< Customizações",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => startModule.globalMenu?.popMenu()
+},
+{ type: "separator" }
+].concat(wallpaperMenuItems),
+"wallpapers"
 );
-}
 }
 },
 {
@@ -119,11 +74,22 @@ type: "action",
 text: "Trocar Tema >",
 preventClose: true,
 onTrigger: () => {
-if (startModule.globalMenu) {
+if (!startModule.globalMenu)
+return;
 startModule.globalMenu.showSearchInput = false;
-if (cachedThemeMenu.length === 0) rebuildThemeMenu();
-startModule.globalMenu.pushMenu(cachedThemeMenu, "themes");
-}
+startModule.globalMenu.pushMenu(
+[
+{
+type: "action",
+text: "< Customizações",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => startModule.globalMenu?.popMenu()
+},
+{ type: "separator" }
+].concat(ThemeEngine.menuStructure),
+"themes"
+);
 }
 }
 ]
