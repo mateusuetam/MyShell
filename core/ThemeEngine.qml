@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import QtCore
+import Quickshell
 import "./Palettes"
 
 QtObject {
@@ -44,6 +45,10 @@ changeTheme(defaultTheme);
 }
 }
 
+function sendNotification(summary, body, urgency = "normal") {
+Quickshell.execDetached(["notify-send", "-u", urgency, summary, body]);
+}
+
 function hasTheme(themeName) {
 return palettes.hasOwnProperty(themeName);
 }
@@ -52,7 +57,7 @@ function changeTheme(themeName) {
 var selectedPalette = palettes[themeName];
 
 if (!selectedPalette) {
-console.warn("[ThemeEngine] Falha ao trocar de tema:", themeName);
+sendNotification("Theme Engine", "Falha ao trocar de tema: " + themeName, "critical");
 return false;
 }
 
@@ -64,7 +69,7 @@ currentTheme = themeName;
 palette = selectedPalette;
 savedTheme = themeName;
 
-console.log("[ThemeEngine] Tema aplicado com sucesso:", themeName);
+sendNotification("Theme Engine", "Tema aplicado: " + themeName, "normal");
 return true;
 }
 }

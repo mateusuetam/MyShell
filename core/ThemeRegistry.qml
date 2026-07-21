@@ -17,80 +17,80 @@ REGISTRO DE CORES
 ================= */
 
 // ContextMenu
-readonly property color menuBackgroundColor: ThemeEngine.palette.background
-readonly property color menuBorderColor: ThemeEngine.palette.surface
-readonly property color menuTextHoverColor: ThemeEngine.palette.surfaceVariant
-readonly property color menuTextColor: ThemeEngine.palette.foreground
-readonly property color menuHoverColor: ThemeEngine.palette.orange
-readonly property color menuErrorColor: ThemeEngine.palette.redBright
+readonly property color menuBackgroundColor: ThemeEngine.palette.menuBackgroundColor
+readonly property color menuBorderColor: ThemeEngine.palette.menuBorderColor
+readonly property color menuTextHoverColor: ThemeEngine.palette.menuTextHoverColor
+readonly property color menuTextColor: ThemeEngine.palette.menuTextColor
+readonly property color menuHoverColor: ThemeEngine.palette.menuHoverColor
+readonly property color menuErrorColor: ThemeEngine.palette.menuErrorColor
 
 // Mainbar/Notifications
-readonly property color backgroundColor: ThemeEngine.palette.background
-readonly property color borderColor: ThemeEngine.palette.surface
-readonly property color borderLowColor: ThemeEngine.palette.greenBright
-readonly property color borderNormalColor: ThemeEngine.palette.cyan
-readonly property color borderCriticalColor: ThemeEngine.palette.redBright
-readonly property color notificationContentColor: ThemeEngine.palette.foreground
+readonly property color backgroundColor: ThemeEngine.palette.backgroundColor
+readonly property color borderColor: ThemeEngine.palette.borderColor
+readonly property color borderLowColor: ThemeEngine.palette.borderLowColor
+readonly property color borderNormalColor: ThemeEngine.palette.borderNormalColor
+readonly property color borderCriticalColor: ThemeEngine.palette.borderCriticalColor
+readonly property color notificationContentColor: ThemeEngine.palette.notificationContentColor
 property color dynamicBorderColor: borderColor
 
 // Start
-readonly property color sLabelColor: ThemeEngine.palette.orange
-readonly property color t1LabelColor: ThemeEngine.palette.greenBright
-readonly property color aLabelColor: ThemeEngine.palette.cyan
-readonly property color rLabelColor: ThemeEngine.palette.yellowBright
-readonly property color t2LabelColor: ThemeEngine.palette.purpleBright
+readonly property color sLabelColor: ThemeEngine.palette.sLabelColor
+readonly property color t1LabelColor: ThemeEngine.palette.t1LabelColor
+readonly property color aLabelColor: ThemeEngine.palette.aLabelColor
+readonly property color rLabelColor: ThemeEngine.palette.rLabelColor
+readonly property color t2LabelColor: ThemeEngine.palette.t2LabelColor
 
 // Mpris
-readonly property color mprisPlayingColor: ThemeEngine.palette.green
-readonly property color mprisPausedColor: ThemeEngine.palette.blue
+readonly property color mprisPlayingColor: ThemeEngine.palette.mprisPlayingColor
+readonly property color mprisPausedColor: ThemeEngine.palette.mprisPausedColor
 
 // Idle
-readonly property color idleActivatedColor: ThemeEngine.palette.greenSoft
-readonly property color idleDeactivatedColor: ThemeEngine.palette.gray
+readonly property color idleActivatedColor: ThemeEngine.palette.idleActivatedColor
+readonly property color idleDeactivatedColor: ThemeEngine.palette.idleDeactivatedColor
 
 // Clipboard
-readonly property color clipboardLabelColor: ThemeEngine.palette.purple
+readonly property color clipboardLabelColor: ThemeEngine.palette.clipboardLabelColor
 
 // Microphone
-readonly property color microphoneMutedColor: ThemeEngine.palette.orange
-readonly property color microphoneActiveColor: ThemeEngine.palette.greenBright
+readonly property color microphoneMutedColor: ThemeEngine.palette.microphoneMutedColor
+readonly property color microphoneActiveColor: ThemeEngine.palette.microphoneActiveColor
 
 // Volume
-readonly property color volumeMutedColor: ThemeEngine.palette.orange
-readonly property color volumeActiveColor: ThemeEngine.palette.greenBright
+readonly property color volumeMutedColor: ThemeEngine.palette.volumeMutedColor
+readonly property color volumeActiveColor: ThemeEngine.palette.volumeActiveColor
 
 // Bluetooth
-readonly property color bluetoothDisabledColor: ThemeEngine.palette.redBright
-readonly property color bluetoothDisconnectedColor: ThemeEngine.palette.gray
-readonly property color bluetoothConnectedColor: ThemeEngine.palette.blue
+readonly property color bluetoothDisabledColor: ThemeEngine.palette.bluetoothDisabledColor
+readonly property color bluetoothDisconnectedColor: ThemeEngine.palette.bluetoothDisconnectedColor
+readonly property color bluetoothConnectedColor: ThemeEngine.palette.bluetoothConnectedColor
 
 // Network
-readonly property color networkDisabledColor: ThemeEngine.palette.redBright
-readonly property color networkDisconnectedColor: ThemeEngine.palette.gray
-readonly property color networkConnectedColor: ThemeEngine.palette.blue
+readonly property color networkDisabledColor: ThemeEngine.palette.networkDisabledColor
+readonly property color networkDisconnectedColor: ThemeEngine.palette.networkDisconnectedColor
+readonly property color networkConnectedColor: ThemeEngine.palette.networkConnectedColor
 
 // Backlight
-readonly property color backlightBrightnessColor: ThemeEngine.palette.yellowBright
+readonly property color backlightBrightnessColor: ThemeEngine.palette.backlightBrightnessColor
 
 // Battery
-readonly property color batteryErrorColor: ThemeEngine.palette.red
-readonly property color batteryChargingColor: ThemeEngine.palette.greenBright
-readonly property color batteryCriticalColor: ThemeEngine.palette.redBright
-readonly property color batteryLowColor: ThemeEngine.palette.orange
-readonly property color batteryNormalColor: ThemeEngine.palette.yellowBright
+readonly property color batteryErrorColor: ThemeEngine.palette.batteryErrorColor
+readonly property color batteryChargingColor: ThemeEngine.palette.batteryChargingColor
+readonly property color batteryCriticalColor: ThemeEngine.palette.batteryCriticalColor
+readonly property color batteryLowColor: ThemeEngine.palette.batteryLowColor
+readonly property color batteryNormalColor: ThemeEngine.palette.batteryNormalColor
 
 // Clock
-readonly property color clockLabelColor: ThemeEngine.palette.foreground
-readonly property color clockDayColor: ThemeEngine.palette.greenSoft
-readonly property color clockMonthColor: ThemeEngine.palette.purple
+readonly property color clockLabelColor: ThemeEngine.palette.clockLabelColor
+readonly property color clockDayColor: ThemeEngine.palette.clockDayColor
+readonly property color clockMonthColor: ThemeEngine.palette.clockMonthColor
 
 // Lockscreen
-readonly property color lockClockColor: ThemeEngine.palette.green
-readonly property color lockLabelClockColor: ThemeEngine.palette.surfaceVariant
-readonly property color lockHeaderAccentColor: ThemeEngine.palette.surfaceVariant
-readonly property color lockPromptLabelColor: ThemeEngine.palette.yellow
-readonly property color lockPromptInputActiveColor: ThemeEngine.palette.greenSoft
-readonly property color lockPromptInputInactiveColor: ThemeEngine.palette.green
-readonly property color lockPromptErrorColor: ThemeEngine.palette.red
-readonly property color lockScreenBackgroundColor: ThemeEngine.palette.background
+readonly property color lockClockColor: ThemeEngine.palette.lockClockColor
+readonly property color lockLabelClockColor: ThemeEngine.palette.lockLabelClockColor
+readonly property color lockHeaderAccentColor: ThemeEngine.palette.lockHeaderAccentColor
+readonly property color lockPromptLabelColor: ThemeEngine.palette.lockPromptLabelColor
+readonly property color lockPromptInputActiveColor: ThemeEngine.palette.lockPromptInputActiveColor
+readonly property color lockPromptInputInactiveColor: ThemeEngine.palette.lockPromptInputInactiveColor
+readonly property color lockPromptErrorColor: ThemeEngine.palette.lockPromptErrorColor
+readonly property color lockScreenBackgroundColor: ThemeEngine.palette.lockScreenBackgroundColor
 }
