@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
@@ -7,6 +8,10 @@ import "core"
 
 ShellRoot {
 id: shellScope
+
+SplashWindow {
+screen: Quickshell.screens[0]
+}
 
 ContextMenu {
 id: sharedContextMenu

@@ -8,13 +8,22 @@ id: theme
 REGISTRO DE TIPOGRAFIA
 ====================== */
 readonly property string appliedFontFamily: "Monaspace Krypton NF"
+readonly property int appliedSplashTitleFontSize: 30
+readonly property int appliedSplashStartFontSize: 20
+readonly property int appliedSplashLabelFontSize: 18
 readonly property int appliedFontSize: 14
 readonly property int appliedMenuFontSize: 12
 readonly property int appliedHeaderFontSize: 16
 
+
 /* ==============
 REGISTRO DE CORES
 ================= */
+
+// SplashWindow
+readonly property color splashBackground: "#030a03"
+readonly property color splashCanvas: "#1aff1a"
+readonly property color splashText: "#4AF626"
 
 // ContextMenu
 readonly property color menuBackgroundColor: ThemeEngine.palette.menuBackgroundColor
