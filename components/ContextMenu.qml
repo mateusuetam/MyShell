@@ -15,7 +15,7 @@ readonly property int menuMaxHeight: 450
 
 property bool showSearchInput: false
 
-readonly property string filterText: searchLoader.item ? searchLoader.item.text : ""
+readonly property string filterText: searchInput.text
 
 property var menuModel: null
 property var _pendingModel: null
@@ -109,16 +109,14 @@ signal itemTriggered(var itemData)
 signal itemDataActionTriggered(string actionType, var data)
 
 implicitWidth: menuWidth
-implicitHeight: Math.min((menuPopup.showSearchInput ? searchLoader.height + 4 : 0) + menuView.contentHeight + (menuMargins * 2), menuMaxHeight)
+implicitHeight: Math.min((menuPopup.showSearchInput ? searchInput.height + 4 : 0) + menuView.contentHeight + (menuMargins * 2), menuMaxHeight)
 grabFocus: true
 
 onVisibleChanged: {
 if (visible) {
 if (showSearchInput) {
 Qt.callLater(() => {
-if (searchLoader.item) {
-searchLoader.item.forceFocusNow();
-}
+searchInput.forceFocusNow();
 });
 } else {
 Qt.callLater(() => {
@@ -127,9 +125,7 @@ menuBackground.forceActiveFocus();
 }
 } else {
 if (!_isInternalReset) {
-if (searchLoader.item) {
-searchLoader.item.text = "";
-}
+searchInput.text = "";
 menuPopup.showSearchInput = false;
 menuPopup.anchor.window = null;
 menuPopup.menuModel = null;
@@ -167,8 +163,7 @@ _isPreparing = true;
 repositionTimer.stop();
 _pendingAnchorItem = null;
 menuPopup.menuModel = null;
-if (searchLoader.item)
-searchLoader.item.text = "";
+searchInput.text = "";
 
 _isInternalReset = true;
 visible = false;
@@ -295,8 +290,8 @@ menuPopup.close();
 event.accepted = true;
 break;
 case Qt.Key_Tab:
-if (menuPopup.showSearchInput && searchLoader.item) {
-searchLoader.item.forceFocusNow();
+if (menuPopup.showSearchInput) {
+searchInput.forceFocusNow();
 }
 event.accepted = true;
 break;
@@ -329,33 +324,19 @@ break;
 }
 }
 
-Loader {
-id: searchLoader
+MenuSearchInput {
+id: searchInput
 anchors.top: parent.top
 anchors.left: parent.left
 anchors.right: parent.right
 anchors.margins: menuPopup.menuMargins
 anchors.bottomMargin: 0
 visible: menuPopup.showSearchInput
-active: menuPopup.showSearchInput
-source: "MenuSearchInput.qml"
+enabled: visible
+itemHeight: menuPopup.itemHeight
 
-onLoaded: {
-if (item) {
-item.itemHeight = menuPopup.itemHeight;
-}
-}
-}
-
-Connections {
-target: searchLoader.item
-ignoreUnknownSignals: true
-
-function onNavigationDownRequested() {
-menuPopup.focusListView();
-}
-
-function onActionTriggeredRequested() {
+onNavigationDownRequested: menuPopup.focusListView()
+onActionTriggeredRequested: {
 if (menuView.count > 0) {
 const targetItem = menuView.currentItem ? menuView.currentItem : menuView.itemAtIndex(0);
 if (targetItem && targetItem.itemData) {
@@ -367,12 +348,12 @@ menuPopup.handleItemTrigger(targetItem.itemData);
 
 ListView {
 id: menuView
-anchors.top: searchLoader.visible ? searchLoader.bottom : parent.top
+anchors.top: searchInput.visible ? searchInput.bottom : parent.top
 anchors.bottom: parent.bottom
 anchors.left: parent.left
 anchors.right: parent.right
 anchors.margins: menuPopup.menuMargins
-anchors.topMargin: searchLoader.visible ? 4 : menuPopup.menuMargins
+anchors.topMargin: searchInput.visible ? 4 : menuPopup.menuMargins
 highlightMoveDuration: 0
 spacing: 2
 interactive: true
