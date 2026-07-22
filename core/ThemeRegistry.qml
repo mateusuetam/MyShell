@@ -34,11 +34,7 @@ readonly property color notificationContentColor: ThemeEngine.palette.notificati
 property color dynamicBorderColor: borderColor
 
 // Start
-readonly property color sLabelColor: ThemeEngine.palette.sLabelColor
-readonly property color t1LabelColor: ThemeEngine.palette.t1LabelColor
-readonly property color aLabelColor: ThemeEngine.palette.aLabelColor
-readonly property color rLabelColor: ThemeEngine.palette.rLabelColor
-readonly property color t2LabelColor: ThemeEngine.palette.t2LabelColor
+readonly property color startLabelColor: ThemeEngine.palette.startLabelColor
 
 // Mpris
 readonly property color mprisPlayingColor: ThemeEngine.palette.mprisPlayingColor
@@ -85,12 +81,9 @@ readonly property color clockDayColor: ThemeEngine.palette.clockDayColor
 readonly property color clockMonthColor: ThemeEngine.palette.clockMonthColor
 
 // Lockscreen
-readonly property color lockClockColor: ThemeEngine.palette.lockClockColor
-readonly property color lockLabelClockColor: ThemeEngine.palette.lockLabelClockColor
-readonly property color lockHeaderAccentColor: ThemeEngine.palette.lockHeaderAccentColor
+readonly property color lockLabelColor: ThemeEngine.palette.lockLabelColor
 readonly property color lockPromptLabelColor: ThemeEngine.palette.lockPromptLabelColor
 readonly property color lockPromptInputActiveColor: ThemeEngine.palette.lockPromptInputActiveColor
-readonly property color lockPromptInputInactiveColor: ThemeEngine.palette.lockPromptInputInactiveColor
 readonly property color lockPromptErrorColor: ThemeEngine.palette.lockPromptErrorColor
 readonly property color lockScreenBackgroundColor: ThemeEngine.palette.lockScreenBackgroundColor
 }

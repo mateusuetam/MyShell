@@ -64,11 +64,7 @@ readonly property color notificationContentColor: light1
 property color dynamicBorderColor: borderColor
 
 // Start
-readonly property color sLabelColor: neutral_orange
-readonly property color t1LabelColor: neutral_green
-readonly property color aLabelColor: neutral_aqua
-readonly property color rLabelColor: neutral_yellow
-readonly property color t2LabelColor: neutral_purple
+readonly property color startLabelColor: light1
 
 // Mpris
 readonly property color mprisPlayingColor: bright_aqua
@@ -115,12 +111,9 @@ readonly property color clockDayColor: bright_aqua
 readonly property color clockMonthColor: bright_purple
 
 // Lockscreen
-readonly property color lockClockColor: gray0
-readonly property color lockLabelClockColor: gray0
-readonly property color lockHeaderAccentColor: gray0
+readonly property color lockLabelColor: gray0
 readonly property color lockPromptLabelColor: bright_yellow
 readonly property color lockPromptInputActiveColor: faded_green
-readonly property color lockPromptInputInactiveColor: dark4
 readonly property color lockPromptErrorColor: bright_red
 readonly property color lockScreenBackgroundColor: dark0
 }

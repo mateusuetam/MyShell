@@ -67,13 +67,13 @@ text: "MU-TH-UR 6000 // INTERFACE DE SESSÃO SEGURA"
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: 14
 font.bold: true
-color: ThemeRegistry.lockHeaderAccentColor
+color: ThemeRegistry.lockLabelColor
 }
 
 Rectangle {
 Layout.fillWidth: true
 implicitHeight: 1
-color: ThemeRegistry.lockHeaderAccentColor
+color: ThemeRegistry.lockLabelColor
 }
 }
 
@@ -93,7 +93,7 @@ renderType: Text.NativeRendering
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: 110
 font.bold: true
-color: ThemeRegistry.lockClockColor
+color: ThemeRegistry.lockLabelColor
 text: {
 const hours = clock.date.getHours().toString().padStart(2, '0');
 const minutes = clock.date.getMinutes().toString().padStart(2, '0');
@@ -112,7 +112,7 @@ text: "SOBREPOSIÇÃO DE HORA DO SISTEMA"
 font.family: ThemeRegistry.appliedFontFamily
 font.pixelSize: 12
 font.letterSpacing: 4
-color: ThemeRegistry.lockLabelClockColor
+color: ThemeRegistry.lockLabelColor
 }
 }
 
@@ -182,7 +182,7 @@ onTriggered: parent.opacity = parent.opacity === 1.0 ? 0.0 : 1.0
 Rectangle {
 implicitWidth: 415
 implicitHeight: 2
-color: passwordBox.activeFocus ? ThemeRegistry.lockPromptInputActiveColor : ThemeRegistry.lockPromptInputInactiveColor
+color: ThemeRegistry.lockPromptInputActiveColor
 }
 
 Text {

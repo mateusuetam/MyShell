@@ -10,11 +10,6 @@ id: startModule
 required property var globalMenu
 required property var parentWindow
 
-readonly property font startFont: Qt.font({
-family: ThemeRegistry.appliedFontFamily,
-pixelSize: ThemeRegistry.appliedFontSize
-})
-
 property var cachedAppMenu: []
 
 implicitWidth: startRow.implicitWidth
@@ -188,10 +183,11 @@ startModule.openAppMenu();
 Row {
 id: startRow
 anchors.verticalCenter: parent.verticalCenter
-Text { font: startModule.startFont; color: ThemeRegistry.sLabelColor; text: "{ S" }
-Text { font: startModule.startFont; color: ThemeRegistry.t1LabelColor; text: "T" }
-Text { font: startModule.startFont; color: ThemeRegistry.aLabelColor; text: "A" }
-Text { font: startModule.startFont; color: ThemeRegistry.rLabelColor; text: "R" }
-Text { font: startModule.startFont; color: ThemeRegistry.t2LabelColor; text: "T }" }
+Text {
+font.family: ThemeRegistry.appliedFontFamily
+font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeRegistry.startLabelColor;
+text: "{ START }"
+}
 }
 }

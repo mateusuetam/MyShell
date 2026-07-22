@@ -53,11 +53,7 @@ readonly property color notificationContentColor: textFg
 property color dynamicBorderColor: borderColor
 
 // Start
-readonly property color sLabelColor: peach
-readonly property color t1LabelColor: green
-readonly property color aLabelColor: teal
-readonly property color rLabelColor: yellow
-readonly property color t2LabelColor: mauve
+readonly property color startLabelColor: textFg
 
 // Mpris
 readonly property color mprisPlayingColor: yellow
@@ -104,12 +100,9 @@ readonly property color clockDayColor: yellow
 readonly property color clockMonthColor: peach
 
 // Lockscreen
-readonly property color lockClockColor: textFg
-readonly property color lockLabelClockColor: surface2
-readonly property color lockHeaderAccentColor: surface1
-readonly property color lockPromptLabelColor: subtext0
+readonly property color lockLabelColor: surface2
+readonly property color lockPromptLabelColor: yellow
 readonly property color lockPromptInputActiveColor: textFg
-readonly property color lockPromptInputInactiveColor: overlay0
 readonly property color lockPromptErrorColor: red
 readonly property color lockScreenBackgroundColor: base
 }
