@@ -51,7 +51,7 @@ readonly property color menuBackgroundColor: dark0
 readonly property color menuBorderColor: dark0_hard
 readonly property color menuTextHoverColor: dark0_soft
 readonly property color menuTextColor: light1
-readonly property color menuHoverColor: bright_orange
+readonly property color menuHoverColor: bright_blue
 readonly property color menuErrorColor: bright_red
 
 // Mainbar/Notifications
@@ -71,31 +71,31 @@ readonly property color rLabelColor: neutral_yellow
 readonly property color t2LabelColor: neutral_purple
 
 // Mpris
-readonly property color mprisPlayingColor: neutral_green
+readonly property color mprisPlayingColor: bright_aqua
 readonly property color mprisPausedColor: bright_blue
 
 // Idle
-readonly property color idleActivatedColor: neutral_green
+readonly property color idleActivatedColor: bright_yellow
 readonly property color idleDeactivatedColor: gray0
 
 // Clipboard
 readonly property color clipboardLabelColor: neutral_purple
 
 // Microphone
-readonly property color microphoneMutedColor: faded_orange
+readonly property color microphoneMutedColor: neutral_orange
 readonly property color microphoneActiveColor: neutral_green
 
 // Volume
-readonly property color volumeMutedColor: faded_orange
+readonly property color volumeMutedColor: neutral_orange
 readonly property color volumeActiveColor: neutral_green
 
 // Bluetooth
-readonly property color bluetoothDisabledColor: faded_red
+readonly property color bluetoothDisabledColor: neutral_red
 readonly property color bluetoothDisconnectedColor: gray0
 readonly property color bluetoothConnectedColor: neutral_blue
 
 // Network
-readonly property color networkDisabledColor: faded_red
+readonly property color networkDisabledColor: neutral_red
 readonly property color networkDisconnectedColor: gray0
 readonly property color networkConnectedColor: neutral_blue
 
@@ -105,8 +105,8 @@ readonly property color backlightBrightnessColor: neutral_yellow
 // Battery
 readonly property color batteryErrorColor: bright_red
 readonly property color batteryChargingColor: bright_green
-readonly property color batteryCriticalColor: neutral_red
-readonly property color batteryLowColor: neutral_orange
+readonly property color batteryCriticalColor: bright_red
+readonly property color batteryLowColor: bright_orange
 readonly property color batteryNormalColor: neutral_aqua
 
 // Clock
@@ -115,12 +115,12 @@ readonly property color clockDayColor: bright_aqua
 readonly property color clockMonthColor: bright_purple
 
 // Lockscreen
-readonly property color lockClockColor: faded_green
+readonly property color lockClockColor: gray0
 readonly property color lockLabelClockColor: gray0
 readonly property color lockHeaderAccentColor: gray0
 readonly property color lockPromptLabelColor: bright_yellow
-readonly property color lockPromptInputActiveColor: bright_green
-readonly property color lockPromptInputInactiveColor: faded_green
+readonly property color lockPromptInputActiveColor: faded_green
+readonly property color lockPromptInputInactiveColor: dark4
 readonly property color lockPromptErrorColor: bright_red
 readonly property color lockScreenBackgroundColor: dark0
 }
