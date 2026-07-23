@@ -77,13 +77,13 @@ bodyText.text = currentNotify.body;
 notifyPopup.visible = true;
 animateIn.start();
 
-let timeout = 7000;
+let timeout = 3000;
 if (currentNotify.expireTimeout > 0) {
 timeout = currentNotify.expireTimeout * 1000;
 } else if (currentNotify.urgency === NotificationUrgency.Critical) {
-timeout = 14000;
-} else if (currentNotify.urgency === NotificationUrgency.Low) {
 timeout = 4000;
+} else if (currentNotify.urgency === NotificationUrgency.Low) {
+timeout = 2000;
 }
 
 dismissTimer.interval = timeout;
