@@ -41,6 +41,8 @@ readonly property var backSeparator: ({
 type: "separator"
 })
 
+color: "transparent"
+
 function pushMenu(modelData, tag, refreshFn) {
 menuStack.push({
 model: modelData,
@@ -269,10 +271,12 @@ onTriggered: menuPopup._applyPositioning()
 Rectangle {
 id: menuBackground
 anchors.fill: parent
-color: ThemeEngine.palette.menuBackgroundColor
-border.color: ThemeEngine.palette.menuBorderColor
+color: ThemeEngine.palette.backgroundColor
+border.color: ThemeEngine.dynamicBorderColor
 border.width: 1
 focus: true
+radius: ThemeEngine.palette.shellRadius
+clip: true
 
 MouseArea {
 anchors.fill: parent

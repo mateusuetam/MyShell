@@ -42,21 +42,19 @@ readonly property color splashCanvas: green
 readonly property color splashText: textFg
 
 // ContextMenu
-readonly property color menuBackgroundColor: base
-readonly property color menuBorderColor: surface1
 readonly property color menuTextHoverColor: crust
 readonly property color menuTextColor: textFg
 readonly property color menuHoverColor: lavender
 readonly property color menuErrorColor: red
 
-// Mainbar/Notifications
+// Shell
+readonly property int shellRadius: 12
 readonly property color backgroundColor: base
 readonly property color borderColor: surface1
 readonly property color borderLowColor: green
 readonly property color borderNormalColor: sapphire
 readonly property color borderCriticalColor: red
 readonly property color notificationContentColor: textFg
-property color dynamicBorderColor: borderColor
 
 // Start
 readonly property color startLabelColor: textFg

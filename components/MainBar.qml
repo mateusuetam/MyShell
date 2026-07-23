@@ -44,13 +44,7 @@ anchors.bottom: parent.bottom
 anchors.left: parent.left
 anchors.right: parent.right
 height: 1
-color: ThemeEngine.palette.dynamicBorderColor
-
-Behavior on color {
-ColorAnimation {
-duration: 200
-}
-}
+color: ThemeEngine.dynamicBorderColor
 }
 
 MouseArea {

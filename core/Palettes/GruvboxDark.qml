@@ -53,21 +53,19 @@ readonly property color splashCanvas: neutral_green
 readonly property color splashText: light1
 
 // ContextMenu
-readonly property color menuBackgroundColor: dark0
-readonly property color menuBorderColor: dark0_hard
 readonly property color menuTextHoverColor: dark0_soft
 readonly property color menuTextColor: light1
 readonly property color menuHoverColor: bright_orange
 readonly property color menuErrorColor: bright_red
 
-// Mainbar/Notifications
+// Shell
+readonly property int shellRadius: 0
 readonly property color backgroundColor: dark0
 readonly property color borderColor: dark0_hard
 readonly property color borderLowColor: bright_green
 readonly property color borderNormalColor: bright_blue
 readonly property color borderCriticalColor: bright_red
 readonly property color notificationContentColor: light1
-property color dynamicBorderColor: borderColor
 
 // Start
 readonly property color startLabelColor: light1

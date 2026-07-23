@@ -21,9 +21,10 @@ height: itemHeight + 8
 Rectangle {
 anchors.fill: parent
 anchors.margins: 4
-color: Qt.darker(ThemeEngine.palette.menuBackgroundColor, 1.15)
-border.color: ThemeEngine.palette.menuBorderColor
+color: Qt.darker(ThemeEngine.palette.backgroundColor, 1.15)
+border.color: ThemeEngine.palette.borderColor
 border.width: 1
+radius: ThemeEngine.palette.shellRadius
 
 TextInput {
 id: textInput

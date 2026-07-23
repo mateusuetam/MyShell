@@ -49,6 +49,27 @@ category: "Theme"
 property alias savedTheme: themeEngine.savedTheme
 }
 
+readonly property var externalApps: [
+{
+name: "Niri",
+templateFileName: "myshell.kdl",
+configDir: `${Quickshell.env("HOME")}/.config/niri`
+},
+{
+name: "Alacritty",
+templateFileName: "myshell.toml",
+configDir: `${Quickshell.env("HOME")}/.config/alacritty`
+}
+]
+
+property color dynamicBorderColor: palette.borderColor
+Behavior on dynamicBorderColor {
+ColorAnimation {
+duration: 500
+easing.type: Easing.OutCubic
+}
+}
+
 Component.onCompleted: {
 Qt.application.name = "Quickshell";
 
@@ -57,6 +78,17 @@ changeTheme(savedTheme);
 } else {
 changeTheme(defaultTheme);
 }
+}
+
+function applyExternalTemplates(themeName) {
+externalApps.forEach(app => {
+let sourceFile = `${Quickshell.env("HOME")}/Repos/NixOS/quickshell/shell/core/Templates/${themeName}/${app.templateFileName}`;
+let destFile = `${app.configDir}/${app.templateFileName}`;
+
+let cmd = `if [ -d "${app.configDir}" ]; then cp -f "${sourceFile}" "${destFile}"; fi`;
+
+Quickshell.execDetached(["sh", "-c", cmd]);
+});
 }
 
 function sendNotification(summary, body, urgency = "normal") {
@@ -82,6 +114,8 @@ return true;
 currentTheme = themeName;
 palette = selectedPalette;
 savedTheme = themeName;
+
+applyExternalTemplates(themeName);
 
 sendNotification("Theme Engine", "Tema aplicado: " + themeName, "normal");
 return true;

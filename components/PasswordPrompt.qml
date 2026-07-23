@@ -70,8 +70,8 @@ passwordInput.forceActiveFocus();
 
 Rectangle {
 anchors.fill: parent
-color: ThemeEngine.palette.menuBackgroundColor
-border.color: passwordPopup.statusState === "error" ? ThemeEngine.palette.menuErrorColor : ThemeEngine.palette.menuBorderColor
+color: ThemeEngine.palette.backgroundColor
+border.color: passwordPopup.statusState === "error" ? ThemeEngine.palette.menuErrorColor : ThemeEngine.dynamicBorderColor
 border.width: 1
 
 RowLayout {

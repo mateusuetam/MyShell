@@ -7,6 +7,12 @@ import "../core"
 PopupWindow {
 id: notifyPopup
 
+readonly property int cardWidth: 350
+readonly property int contentPadding: 25
+
+readonly property int verticalMargin: 10
+readonly property int horizontalMargin: 10
+
 signal clicked()
 
 readonly property color notifyColor: {
@@ -28,19 +34,20 @@ return ThemeEngine.palette.borderColor;
 property var notifyQueue: []
 property var currentNotify: null
 
-required property QtObject targetWindow
+required property var targetWindow
+readonly property var currentScreen: targetWindow?.screen ?? (Quickshell.screens[0] ?? null)
 
 Binding {
-target: ThemeEngine.palette
+target: ThemeEngine
 property: "dynamicBorderColor"
 value: notifyPopup.notifyColor
 }
 
 anchor.window: targetWindow
-anchor.rect.y: 29
-anchor.rect.x: Quickshell.screens[0] ? Math.round((Quickshell.screens[0].width - implicitWidth) / 2) : 0
-implicitWidth: 350
-implicitHeight: contentColumn.implicitHeight + 14
+anchor.rect.y: targetWindow ? (targetWindow.height + verticalMargin) : 0
+anchor.rect.x: currentScreen ? (currentScreen.width - implicitWidth) : 0
+implicitWidth: cardWidth + horizontalMargin
+implicitHeight: contentColumn.implicitHeight + 20
 
 color: "transparent"
 visible: false
@@ -72,17 +79,20 @@ function nextNotification() {
 if (notifyQueue.length > 0) {
 currentNotify = notifyQueue.shift();
 
+if (headerText.text !== currentNotify.summary)
 headerText.text = currentNotify.summary;
+
+if (bodyText.text !== currentNotify.body)
 bodyText.text = currentNotify.body;
 
 notifyPopup.visible = true;
 animateIn.start();
 
-let timeout = 3000;
+let timeout = 4000;
 if (currentNotify.expireTimeout > 0) {
 timeout = currentNotify.expireTimeout * 1000;
 } else if (currentNotify.urgency === NotificationUrgency.Critical) {
-timeout = 4000;
+timeout = 8000;
 } else if (currentNotify.urgency === NotificationUrgency.Low) {
 timeout = 2000;
 }
@@ -103,21 +113,21 @@ onTriggered: animateOut.start()
 NumberAnimation {
 id: animateIn
 target: visualBox
-property: "y"
-from: -visualBox.height
+property: "x"
+from: notifyPopup.width
 to: 0
-duration: 180
-easing.type: Easing.OutQuad
+duration: 350
+easing.type: Easing.OutCubic
 }
 
 NumberAnimation {
 id: animateOut
 target: visualBox
-property: "y"
+property: "x"
 from: 0
-to: -visualBox.height
-duration: 150
-easing.type: Easing.InQuad
+to: notifyPopup.width
+duration: 300
+easing.type: Easing.InCubic
 onFinished: {
 if (notifyPopup.currentNotify) {
 notifyPopup.currentNotify.dismiss();
@@ -129,35 +139,14 @@ notifyPopup.nextNotification();
 
 Rectangle {
 id: visualBox
-width: parent.width
+width: notifyPopup.cardWidth
 height: parent.height
-y: -height
+x: parent.width
 
 color: ThemeEngine.palette.backgroundColor
-
-Rectangle {
-anchors.left: parent.left
-anchors.top: parent.top
-anchors.bottom: parent.bottom
-width: 1
-color: notifyPopup.notifyColor
-}
-
-Rectangle {
-anchors.right: parent.right
-anchors.top: parent.top
-anchors.bottom: parent.bottom
-width: 1
-color: notifyPopup.notifyColor
-}
-
-Rectangle {
-anchors.bottom: parent.bottom
-anchors.left: parent.left
-anchors.right: parent.right
-height: 1
-color: notifyPopup.notifyColor
-}
+border.color: ThemeEngine.dynamicBorderColor
+border.width: 1
+radius: ThemeEngine.palette.shellRadius
 
 MouseArea {
 anchors.fill: parent
@@ -172,13 +161,14 @@ notifyPopup.currentNotify.activate();
 }
 
 dismissTimer.stop();
+if (!animateOut.running)
 animateOut.start();
 }
 }
 
 Column {
 id: contentColumn
-width: parent.width - 24
+width: parent.width - notifyPopup.contentPadding
 anchors.centerIn: parent
 spacing: 6
 
@@ -196,7 +186,7 @@ horizontalAlignment: Text.AlignHCenter
 Rectangle {
 width: parent.width
 height: 1
-color: notifyPopup.notifyColor
+color: ThemeEngine.dynamicBorderColor
 visible: bodyText.text !== ""
 }
 

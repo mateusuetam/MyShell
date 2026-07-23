@@ -24,7 +24,7 @@ visible: delegateRoot.isSeparator
 width: parent.width - 12
 height: 1
 anchors.centerIn: parent
-color: ThemeEngine.palette.menuBorderColor
+color: ThemeEngine.dynamicBorderColor
 opacity: 0.6
 }
 
@@ -32,9 +32,9 @@ Rectangle {
 id: actionVisual
 anchors.fill: parent
 visible: !delegateRoot.isSeparator
-
 opacity: delegateRoot.isEnabled ? 1.0 : 0.5
 color: (delegateRoot.isEnabled && (mouseArea.containsMouse || delegateRoot.isCurrentKeyboardItem)) ? ThemeEngine.palette.menuHoverColor : "transparent"
+radius: ThemeEngine.palette.shellRadius
 
 Text {
 anchors.fill: parent
