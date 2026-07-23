@@ -12,6 +12,8 @@ id: engine
 property alias currentWallpaper: wallpaperSettings.savedPath
 property var menuStructure: []
 
+signal transitionRequested(string path)
+
 Settings {
 id: wallpaperSettings
 location: ConfigPaths.wallpaperConfig
@@ -52,6 +54,10 @@ preventClose: false
 });
 }
 engine.menuStructure = list;
+}
+
+function requestWallpaperChange(path) {
+engine.transitionRequested(path);
 }
 
 function changeWallpaper(path) {

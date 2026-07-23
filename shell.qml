@@ -9,7 +9,7 @@ import "core"
 ShellRoot {
 id: shellScope
 
-SplashWindow {
+SplashManager {
 screen: Quickshell.screens[0]
 }
 

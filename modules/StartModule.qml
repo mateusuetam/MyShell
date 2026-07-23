@@ -45,7 +45,7 @@ const wallpaperMenuItems = WallpaperEngine.menuStructure.map(item => ({
 type: item.type,
 text: item.text,
 preventClose: item.preventClose,
-onTrigger: () => WallpaperEngine.changeWallpaper(item.path)
+onTrigger: () => WallpaperEngine.requestWallpaperChange(item.path)
 }));
 
 startModule.globalMenu.showSearchInput = false;

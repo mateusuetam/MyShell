@@ -7,11 +7,34 @@ import "../core"
 PanelWindow {
 id: splashWindow
 
+property string mode: "boot"
+property url nextWallpaper: ""
 property int currentStep: 0
 
+readonly property bool isBoot: mode === "boot"
+readonly property bool isWallpaper: mode === "wallpaper"
+
+readonly property var bootMessages: [
+"W A Y L A N D - Y U T A N I   C O R P .",
+"INTERFACE DO SISTEMA",
+"CARREGANDO NÚCLEO CENTRAL.............. OK",
+"VERIFICANDO SUPORTE DE VIDA............ OK",
+"SISTEMA OPERACIONAL ESTÁVEL............ PRONTO"
+]
+
+readonly property var wallpaperMessages: [
+"S I S T E M A   O P T I C O .",
+"RECALIBRANDO MATRIZ DE VÍDEO",
+"DESCARREGANDO CACHE.............. OK",
+"APLICANDO NOVO FEED VISUAL....... OK",
+"SINCRONIZAÇÃO COMPLETA........... PRONTO"
+]
+
+readonly property var messages: isBoot ? bootMessages : wallpaperMessages
+
 WlrLayershell.namespace: "splash"
-WlrLayershell.layer: WlrLayer.Overlay
-WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+WlrLayershell.layer: splashWindow.isBoot ? WlrLayer.Overlay : WlrLayer.Bottom
+WlrLayershell.keyboardFocus: splashWindow.isBoot ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
 exclusionMode: ExclusionMode.Ignore
 
@@ -31,8 +54,11 @@ splashWindow.destroy();
 
 MouseArea {
 anchors.fill: parent
+enabled: splashWindow.isBoot
+visible: splashWindow.isBoot
+hoverEnabled: true
+acceptedButtons: Qt.NoButton
 cursorShape: Qt.BlankCursor
-onClicked: splashWindow.closeSplash()
 }
 
 Canvas {
@@ -63,69 +89,57 @@ duration: 100
 }
 }
 
+Timer {
+id: sequenceTimer
+interval: splashWindow.isBoot ? 500 : 250
+running: true
+repeat: true
+
+onTriggered: {
+splashWindow.currentStep++
+
+if (splashWindow.isWallpaper && splashWindow.currentStep === 4)
+WallpaperEngine.currentWallpaper = splashWindow.nextWallpaper
+
+if ((splashWindow.isBoot && splashWindow.currentStep === 8) ||
+(splashWindow.isWallpaper && splashWindow.currentStep === 6)) {
+
+stop()
+splashWindow.closeSplash()
+}
+}
+}
+
 Column {
 anchors.centerIn: parent
 spacing: 20
 
 BootText {
-text: "W A Y L A N D - Y U T A N I   C O R P ."
+text: splashWindow.messages[0]
 font.pixelSize: ThemeRegistry.appliedSplashTitleFontSize
 font.bold: true
 opacity: splashWindow.currentStep >= 1 ? 1 : 0
 }
 
 BootText {
-text: "INTERFACE DO SISTEMA"
+text: splashWindow.messages[1]
 font.pixelSize: ThemeRegistry.appliedSplashStartFontSize
 opacity: splashWindow.currentStep >= 2 ? 1 : 0
 }
 
 BootText {
-text: "CARREGANDO NÚCLEO CENTRAL.............. OK"
+text: splashWindow.messages[2]
 opacity: splashWindow.currentStep >= 3 ? 1 : 0
 }
 
 BootText {
-text: "VERIFICANDO SUPORTE DE VIDA............ OK"
+text: splashWindow.messages[3]
 opacity: splashWindow.currentStep >= 4 ? 1 : 0
 }
 
 BootText {
-text: "SISTEMA OPERACIONAL ESTÁVEL............ PRONTO"
+text: splashWindow.messages[4]
 opacity: splashWindow.currentStep >= 5 ? 1 : 0
-}
-}
-
-Timer {
-id: bootSequence
-interval: 400
-running: true
-repeat: true
-
-property int tick: 0
-
-onTriggered: {
-switch (++tick) {
-case 1:
-splashWindow.currentStep = 1
-break
-case 2:
-splashWindow.currentStep = 2
-break
-case 4:
-splashWindow.currentStep = 3
-break
-case 5:
-splashWindow.currentStep = 4
-break
-case 6:
-splashWindow.currentStep = 5
-break
-case 9:
-stop()
-splashWindow.closeSplash()
-break
-}
 }
 }
 }
