@@ -110,9 +110,9 @@ Row {
 id: clipboardRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.clipboardLabelColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: ThemeEngine.palette.clipboardLabelColor
 text: "{ CLIP }"
 }
 }

@@ -10,8 +10,21 @@ id: themeEngine
 
 property var palette: GruvboxDark
 property string currentTheme: defaultTheme
-
 readonly property string defaultTheme: "GruvboxDark"
+
+readonly property string appliedFontFamily: "Monaspace Krypton NF"
+readonly property int appliedSplashTitleFontSize: 30
+readonly property int appliedSplashStartFontSize: 20
+readonly property int appliedSplashLabelFontSize: 18
+readonly property int appliedFontSize: 14
+readonly property int appliedMenuFontSize: 12
+readonly property int appliedNotificationHeaderFontSize: 16
+readonly property int appliedLockLabelFontSize: 14
+readonly property int appliedLockClockFontSize: 110
+readonly property int appliedLockPromptFontSize: 16
+readonly property int appliedLockInputFontSize: 22
+readonly property int appliedLockPromptInputFontSize: 22
+readonly property int appliedLockPromptErrorFontSize: 14
 
 readonly property var palettes: ({
 GruvboxDark: GruvboxDark,
@@ -31,7 +44,7 @@ onTrigger: () => themeEngine.changeTheme(tName)
 property string savedTheme: defaultTheme
 
 property var themeSettings: Settings {
-location: ConfigPaths.themeConfig
+location: `file://${Quickshell.env("HOME")}/.local/share/MyShell/theme.conf`
 category: "Theme"
 property alias savedTheme: themeEngine.savedTheme
 }

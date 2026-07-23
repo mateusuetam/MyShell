@@ -269,8 +269,8 @@ onTriggered: menuPopup._applyPositioning()
 Rectangle {
 id: menuBackground
 anchors.fill: parent
-color: ThemeRegistry.menuBackgroundColor
-border.color: ThemeRegistry.menuBorderColor
+color: ThemeEngine.palette.menuBackgroundColor
+border.color: ThemeEngine.palette.menuBorderColor
 border.width: 1
 focus: true
 

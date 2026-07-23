@@ -11,17 +11,17 @@ signal clicked()
 
 readonly property color notifyColor: {
 if (!currentNotify) {
-return ThemeRegistry.borderColor;
+return ThemeEngine.palette.borderColor;
 }
 switch (currentNotify.urgency) {
 case NotificationUrgency.Low:
-return ThemeRegistry.borderLowColor;
+return ThemeEngine.palette.borderLowColor;
 case NotificationUrgency.Normal:
-return ThemeRegistry.borderNormalColor;
+return ThemeEngine.palette.borderNormalColor;
 case NotificationUrgency.Critical:
-return ThemeRegistry.borderCriticalColor;
+return ThemeEngine.palette.borderCriticalColor;
 default:
-return ThemeRegistry.borderColor;
+return ThemeEngine.palette.borderColor;
 }
 }
 
@@ -31,7 +31,7 @@ property var currentNotify: null
 required property QtObject targetWindow
 
 Binding {
-target: ThemeRegistry
+target: ThemeEngine.palette
 property: "dynamicBorderColor"
 value: notifyPopup.notifyColor
 }
@@ -133,7 +133,7 @@ width: parent.width
 height: parent.height
 y: -height
 
-color: ThemeRegistry.backgroundColor
+color: ThemeEngine.palette.backgroundColor
 
 Rectangle {
 anchors.left: parent.left
@@ -185,9 +185,9 @@ spacing: 6
 Text {
 id: headerText
 width: parent.width
-color: ThemeRegistry.notificationContentColor
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedHeaderFontSize
+color: ThemeEngine.palette.notificationContentColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedNotificationHeaderFontSize
 font.bold: true
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
@@ -203,9 +203,9 @@ visible: bodyText.text !== ""
 Text {
 id: bodyText
 width: parent.width
-color: ThemeRegistry.notificationContentColor
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeEngine.palette.notificationContentColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
 }

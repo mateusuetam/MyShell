@@ -21,8 +21,8 @@ height: itemHeight + 8
 Rectangle {
 anchors.fill: parent
 anchors.margins: 4
-color: Qt.darker(ThemeRegistry.menuBackgroundColor, 1.15)
-border.color: ThemeRegistry.menuBorderColor
+color: Qt.darker(ThemeEngine.palette.menuBackgroundColor, 1.15)
+border.color: ThemeEngine.palette.menuBorderColor
 border.width: 1
 
 TextInput {
@@ -32,9 +32,9 @@ anchors.right: parent.right
 anchors.leftMargin: 8
 anchors.rightMargin: 8
 anchors.verticalCenter: parent.verticalCenter
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedMenuFontSize
-color: ThemeRegistry.menuTextColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedMenuFontSize
+color: ThemeEngine.palette.menuTextColor
 focus: true
 selectByMouse: true
 clip: true
@@ -60,7 +60,7 @@ anchors.fill: textInput
 verticalAlignment: Text.AlignVCenter
 text: "Pesquisar..."
 font: textInput.font
-color: ThemeRegistry.menuTextColor
+color: ThemeEngine.palette.menuTextColor
 opacity: 0.4
 visible: textInput.text === ""
 }

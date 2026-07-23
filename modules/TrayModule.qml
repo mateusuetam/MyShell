@@ -28,9 +28,9 @@ implicitHeight: trayModule.parentWindow ? trayModule.parentWindow.barHeight : 30
 Text {
 id: trayText
 text: "<"
-color: ThemeRegistry.menuTextColor
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+color: ThemeEngine.palette.menuTextColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 anchors.centerIn: parent
 verticalAlignment: Text.AlignVCenter
 horizontalAlignment: Text.AlignHCenter

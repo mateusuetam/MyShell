@@ -33,14 +33,14 @@ time: clockModule.ptBr.toString(d, "HH:mm")
 }
 Text {
 id: clockBase
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.clockLabelColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: ThemeEngine.palette.clockLabelColor
 text: `{ ${clockRow.formattedParts.weekday} `
 }
 Text {
 font: clockBase.font
-color: ThemeRegistry.clockDayColor
+color: ThemeEngine.palette.clockDayColor
 text: clockRow.formattedParts.day
 }
 Text {
@@ -50,7 +50,7 @@ text: " de "
 }
 Text {
 font: clockBase.font
-color: ThemeRegistry.clockMonthColor
+color: ThemeEngine.palette.clockMonthColor
 text: clockRow.formattedParts.month
 }
 Text {

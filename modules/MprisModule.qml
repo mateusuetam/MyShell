@@ -138,15 +138,15 @@ id: mainText
 width: Math.min(implicitWidth, mprisModule.maxWidth - prefixText.implicitWidth - suffixText.implicitWidth)
 elide: Text.ElideRight
 
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 
 readonly property var player: mprisModule.activePlayer
 readonly property bool isPlaying: player ? player.isPlaying : false
 readonly property string title: player ? player.trackTitle : ""
 readonly property string artist: player && player.trackArtist ? player.trackArtist : ""
 
-color: isPlaying ? ThemeRegistry.mprisPlayingColor : ThemeRegistry.mprisPausedColor
+color: isPlaying ? ThemeEngine.palette.mprisPlayingColor : ThemeEngine.palette.mprisPausedColor
 
 text: {
 if (!title) return ""

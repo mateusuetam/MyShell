@@ -45,7 +45,7 @@ left: true
 right: true
 }
 
-color: ThemeRegistry.splashBackground
+color: ThemeEngine.palette.splashBackground
 
 function closeSplash(): void {
 splashWindow.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None;
@@ -67,8 +67,8 @@ renderStrategy: Canvas.Cooperative
 onPaint: {
 const ctx = getContext("2d")
 ctx.clearRect(0, 0, width, height)
-ctx.strokeStyle = ThemeRegistry.splashCanvas
-ctx.globalAlpha = 0.03
+ctx.strokeStyle = ThemeEngine.palette.splashCanvas
+ctx.globalAlpha = 0.1
 ctx.beginPath()
 for (let y = 0; y < height; y += 4) {
 ctx.moveTo(0, y)
@@ -79,9 +79,9 @@ ctx.stroke()
 }
 
 component BootText : Text {
-color: ThemeRegistry.splashText
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedSplashLabelFontSize
+color: ThemeEngine.palette.splashText
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedSplashLabelFontSize
 Behavior on opacity {
 NumberAnimation {
 duration: 100
@@ -116,14 +116,14 @@ spacing: 20
 
 BootText {
 text: splashWindow.messages[0]
-font.pixelSize: ThemeRegistry.appliedSplashTitleFontSize
+font.pixelSize: ThemeEngine.appliedSplashTitleFontSize
 font.bold: true
 opacity: splashWindow.currentStep >= 1 ? 1 : 0
 }
 
 BootText {
 text: splashWindow.messages[1]
-font.pixelSize: ThemeRegistry.appliedSplashStartFontSize
+font.pixelSize: ThemeEngine.appliedSplashStartFontSize
 opacity: splashWindow.currentStep >= 2 ? 1 : 0
 }
 

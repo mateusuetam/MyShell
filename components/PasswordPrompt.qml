@@ -70,8 +70,8 @@ passwordInput.forceActiveFocus();
 
 Rectangle {
 anchors.fill: parent
-color: ThemeRegistry.menuBackgroundColor
-border.color: passwordPopup.statusState === "error" ? ThemeRegistry.menuErrorColor : ThemeRegistry.menuBorderColor
+color: ThemeEngine.palette.menuBackgroundColor
+border.color: passwordPopup.statusState === "error" ? ThemeEngine.palette.menuErrorColor : ThemeEngine.palette.menuBorderColor
 border.width: 1
 
 RowLayout {
@@ -82,9 +82,9 @@ spacing: 10
 Text {
 id: promptLabel
 Layout.alignment: Qt.AlignVCenter
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: passwordPopup.statusState === "error" ? ThemeRegistry.menuErrorColor : ThemeRegistry.menuTextColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: passwordPopup.statusState === "error" ? ThemeEngine.palette.menuErrorColor : ThemeEngine.palette.menuTextColor
 text: {
 if (passwordPopup.statusState === "error")
 return "Tente novamente:";
@@ -102,9 +102,9 @@ TextInput {
 id: passwordInput
 Layout.alignment: Qt.AlignVCenter
 Layout.fillWidth: true
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: ThemeRegistry.menuTextColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: ThemeEngine.palette.menuTextColor
 echoMode: TextInput.Password
 selectByMouse: true
 clip: true

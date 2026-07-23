@@ -41,16 +41,16 @@ id: idleRow
 anchors.verticalCenter: parent.verticalCenter
 readonly property var idleState: {
 return idleModule.isActive ? {
-color: ThemeRegistry.idleActivatedColor,
+color: ThemeEngine.palette.idleActivatedColor,
 text: "{ ACTIVE }"
 } : {
-color: ThemeRegistry.idleDeactivatedColor,
+color: ThemeEngine.palette.idleDeactivatedColor,
 text: "{ IDLING }"
 };
 }
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 color: idleRow.idleState.color
 text: idleRow.idleState.text
 }

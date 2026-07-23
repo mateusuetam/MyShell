@@ -16,7 +16,7 @@ signal transitionRequested(string path)
 
 Settings {
 id: wallpaperSettings
-location: ConfigPaths.wallpaperConfig
+location: `file://${Quickshell.env("HOME")}/.local/share/MyShell/wallpaper.conf`
 category: "Wallpaper"
 property url savedPath: ""
 }

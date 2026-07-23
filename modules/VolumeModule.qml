@@ -59,9 +59,9 @@ id: volRow
 anchors.verticalCenter: parent.verticalCenter
 
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: volumeModule.volMuted ? ThemeRegistry.volumeMutedColor : ThemeRegistry.volumeActiveColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: volumeModule.volMuted ? ThemeEngine.palette.volumeMutedColor : ThemeEngine.palette.volumeActiveColor
 text: volumeModule.volMuted ? "{ VL: off }" : `{ VL: ${volumeModule.volPercent}% }`
 }
 }

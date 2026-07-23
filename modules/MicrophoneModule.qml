@@ -58,9 +58,9 @@ Row {
 id: micRow
 anchors.verticalCenter: parent.verticalCenter
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
-color: micModule.micMuted ? ThemeRegistry.microphoneMutedColor : ThemeRegistry.microphoneActiveColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
+color: micModule.micMuted ? ThemeEngine.palette.microphoneMutedColor : ThemeEngine.palette.microphoneActiveColor
 text: micModule.micMuted ? "{ MC: off }" : `{ MC: ${micModule.micPercent}% }`
 }
 }

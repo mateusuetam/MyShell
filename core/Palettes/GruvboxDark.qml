@@ -47,12 +47,17 @@ readonly property color bright_purple: "#d3869b"
 readonly property color bright_aqua: "#8ec07c"
 readonly property color bright_orange: "#fe8019"
 
+// SplashWindow
+readonly property color splashBackground: dark0
+readonly property color splashCanvas: neutral_green
+readonly property color splashText: light1
+
 // ContextMenu
 readonly property color menuBackgroundColor: dark0
 readonly property color menuBorderColor: dark0_hard
 readonly property color menuTextHoverColor: dark0_soft
 readonly property color menuTextColor: light1
-readonly property color menuHoverColor: bright_blue
+readonly property color menuHoverColor: bright_orange
 readonly property color menuErrorColor: bright_red
 
 // Mainbar/Notifications
@@ -114,7 +119,7 @@ readonly property color clockMonthColor: bright_purple
 // Lockscreen
 readonly property color lockLabelColor: gray0
 readonly property color lockPromptLabelColor: bright_yellow
-readonly property color lockPromptInputActiveColor: faded_green
+readonly property color lockInputLabelColor: faded_green
 readonly property color lockPromptErrorColor: bright_red
 readonly property color lockScreenBackgroundColor: dark0
 }

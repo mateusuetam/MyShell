@@ -407,17 +407,17 @@ bluetoothModule.generateMainMenu(),
 function getBluetoothState() {
 if (!bluetoothModule.isBluetoothOn) {
 let offText = bluetoothModule.isRfkillBlocked ? "off (B)" : "off";
-return { color: ThemeRegistry.bluetoothDisabledColor, text: offText };
+return { color: ThemeEngine.palette.bluetoothDisabledColor, text: offText };
 }
 
 const dev = bluetoothModule.getConnectedDevice();
-if (!dev) return { color: ThemeRegistry.bluetoothDisconnectedColor, text: "idle" };
+if (!dev) return { color: ThemeEngine.palette.bluetoothDisconnectedColor, text: "idle" };
 
 if (dev.batteryAvailable) {
-return { color: ThemeRegistry.bluetoothConnectedColor, text: `up ${Math.round(dev.battery * 100)}%` };
+return { color: ThemeEngine.palette.bluetoothConnectedColor, text: `up ${Math.round(dev.battery * 100)}%` };
 }
 
-return { color: ThemeRegistry.bluetoothConnectedColor, text: "up" };
+return { color: ThemeEngine.palette.bluetoothConnectedColor, text: "up" };
 }
 
 MouseArea {
@@ -452,8 +452,8 @@ anchors.verticalCenter: parent.verticalCenter
 readonly property var btState: bluetoothModule.getBluetoothState()
 
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 color: bluetoothRow.btState.color
 text: `{ BT: ${bluetoothRow.btState.text} }`
 }

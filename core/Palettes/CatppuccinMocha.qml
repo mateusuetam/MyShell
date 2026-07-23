@@ -36,6 +36,11 @@ readonly property color base: "#1e1e2e"
 readonly property color mantle: "#181825"
 readonly property color crust: "#11111b"
 
+// SplashWindow
+readonly property color splashBackground: base
+readonly property color splashCanvas: green
+readonly property color splashText: textFg
+
 // ContextMenu
 readonly property color menuBackgroundColor: base
 readonly property color menuBorderColor: surface1
@@ -103,7 +108,7 @@ readonly property color clockMonthColor: peach
 // Lockscreen
 readonly property color lockLabelColor: surface2
 readonly property color lockPromptLabelColor: yellow
-readonly property color lockPromptInputActiveColor: textFg
+readonly property color lockInputLabelColor: textFg
 readonly property color lockPromptErrorColor: red
 readonly property color lockScreenBackgroundColor: base
 }

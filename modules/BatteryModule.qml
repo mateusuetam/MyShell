@@ -60,7 +60,7 @@ readonly property var batteryState: {
 const dev = batteryModule.dev;
 if (!dev || !dev.ready) {
 return {
-color: ThemeRegistry.batteryErrorColor,
+color: ThemeEngine.palette.batteryErrorColor,
 text: "--%"
 };
 }
@@ -69,16 +69,16 @@ const pct = batteryModule.realPercentage;
 
 if (!UPower.onBattery) {
 return {
-color: ThemeRegistry.batteryChargingColor,
+color: ThemeEngine.palette.batteryChargingColor,
 text: batteryModule.isFull ? "AC/ON" : `+${pct}%`
 };
 }
 
-let uiColor = ThemeRegistry.batteryNormalColor;
+let uiColor = ThemeEngine.palette.batteryNormalColor;
 if (pct <= 20) {
-uiColor = ThemeRegistry.batteryCriticalColor;
+uiColor = ThemeEngine.palette.batteryCriticalColor;
 } else if (pct <= 30) {
-uiColor = ThemeRegistry.batteryLowColor;
+uiColor = ThemeEngine.palette.batteryLowColor;
 }
 
 return {
@@ -88,8 +88,8 @@ text: `${pct}%`
 }
 
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 color: batteryRow.batteryState.color
 text: `{ BA: ${batteryRow.batteryState.text} }`
 }

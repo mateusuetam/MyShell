@@ -37,14 +37,14 @@ PasswordPrompt { id: wifiPasswordPromptInstance }
 // --- RENDERIZAÇÃO DA BARRA ---
 Rectangle {
 anchors.fill: parent
-color: ThemeRegistry.backgroundColor
+color: ThemeEngine.palette.backgroundColor
 
 Rectangle {
 anchors.bottom: parent.bottom
 anchors.left: parent.left
 anchors.right: parent.right
 height: 1
-color: ThemeRegistry.dynamicBorderColor
+color: ThemeEngine.palette.dynamicBorderColor
 
 Behavior on color {
 ColorAnimation {

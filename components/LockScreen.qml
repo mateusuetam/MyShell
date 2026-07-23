@@ -48,7 +48,7 @@ id: sessionLock
 
 WlSessionLockSurface {
 id: lockSurface
-color: ThemeRegistry.lockScreenBackgroundColor
+color: ThemeEngine.palette.lockScreenBackgroundColor
 
 ColumnLayout {
 anchors.fill: parent
@@ -64,16 +64,16 @@ spacing: 5
 
 Text {
 text: "MU-TH-UR 6000 // INTERFACE DE SESSÃO SEGURA"
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 14
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockLabelFontSize
 font.bold: true
-color: ThemeRegistry.lockLabelColor
+color: ThemeEngine.palette.lockLabelColor
 }
 
 Rectangle {
 Layout.fillWidth: true
 implicitHeight: 1
-color: ThemeRegistry.lockLabelColor
+color: ThemeEngine.palette.lockLabelColor
 }
 }
 
@@ -90,10 +90,10 @@ id: clock
 property var date: new Date()
 Layout.alignment: Qt.AlignHCenter
 renderType: Text.NativeRendering
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 110
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockClockFontSize
 font.bold: true
-color: ThemeRegistry.lockLabelColor
+color: ThemeEngine.palette.lockLabelColor
 text: {
 const hours = clock.date.getHours().toString().padStart(2, '0');
 const minutes = clock.date.getMinutes().toString().padStart(2, '0');
@@ -109,10 +109,10 @@ onTriggered: clock.date = new Date()
 Text {
 Layout.alignment: Qt.AlignHCenter
 text: "SOBREPOSIÇÃO DE HORA DO SISTEMA"
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 12
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockLabelFontSize
 font.letterSpacing: 4
-color: ThemeRegistry.lockLabelColor
+color: ThemeEngine.palette.lockLabelColor
 }
 }
 
@@ -130,9 +130,9 @@ spacing: 15
 
 Text {
 text: lockRoot.unlockInProgress ? "AUTENTICANDO DIRETÓRIO DE SESSÃO..." : "NOSTROMO_LOGIN_node7 > INSIRA A CHAVE DE ACESSO:"
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 16
-color: ThemeRegistry.lockPromptLabelColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockPromptFontSize
+color: ThemeEngine.palette.lockPromptLabelColor
 }
 
 RowLayout {
@@ -148,9 +148,9 @@ echoMode: TextInput.Password
 cursorDelegate: Item {}
 background: Item {}
 
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 22
-color: ThemeRegistry.lockPromptInputActiveColor
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockInputFontSize
+color: ThemeEngine.palette.lockInputLabelColor
 
 onTextChanged: if (lockRoot.showFailure) lockRoot.showFailure = false
 
@@ -168,8 +168,8 @@ passwordBox.text = "";
 
 Text {
 text: "▒"
-font.pixelSize: 22
-color: ThemeRegistry.lockPromptInputActiveColor
+font.pixelSize: ThemeEngine.appliedLockPromptInputFontSize
+color: ThemeEngine.palette.lockInputLabelColor
 visible: !lockRoot.unlockInProgress
 
 Timer {
@@ -182,17 +182,17 @@ onTriggered: parent.opacity = parent.opacity === 1.0 ? 0.0 : 1.0
 Rectangle {
 implicitWidth: 415
 implicitHeight: 2
-color: ThemeRegistry.lockPromptInputActiveColor
+color: ThemeEngine.palette.lockInputLabelColor
 }
 
 Text {
 anchors.horizontalCenter: parent.horizontalCenter
 visible: lockRoot.showFailure
 text: "!! ERRO: CHAVE DE ACESSO INVÁLIDA // ACESSO NEGADO !!"
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: 14
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedLockPromptErrorFontSize
 font.bold: true
-color: ThemeRegistry.lockPromptErrorColor
+color: ThemeEngine.palette.lockPromptErrorColor
 
 Timer {
 running: lockRoot.showFailure; repeat: true; interval: 400

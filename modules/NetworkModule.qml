@@ -314,16 +314,16 @@ networkModule.generateMainMenu(),
 
 function getNetworkState() {
 if (networkModule.isRfkillBlocked) {
-return { color: ThemeRegistry.networkDisabledColor, text: "off (B)" };
+return { color: ThemeEngine.palette.networkDisabledColor, text: "off (B)" };
 }
 if (!networkModule.isWifiOn) {
-return { color: ThemeRegistry.networkDisabledColor, text: "off" };
+return { color: ThemeEngine.palette.networkDisabledColor, text: "off" };
 }
 const dev = networkModule.getActiveDevice();
 if (!dev) {
-return { color: ThemeRegistry.networkDisconnectedColor, text: "down" };
+return { color: ThemeEngine.palette.networkDisconnectedColor, text: "down" };
 }
-return { color: ThemeRegistry.networkConnectedColor, text: "up" };
+return { color: ThemeEngine.palette.networkConnectedColor, text: "up" };
 }
 
 MouseArea {
@@ -357,8 +357,8 @@ networkModule.handleStateChange(stateText);
 }
 
 Text {
-font.family: ThemeRegistry.appliedFontFamily
-font.pixelSize: ThemeRegistry.appliedFontSize
+font.family: ThemeEngine.appliedFontFamily
+font.pixelSize: ThemeEngine.appliedFontSize
 color: networkRow.nwState.color
 text: `{ NW: ${networkRow.stateText} }`
 }

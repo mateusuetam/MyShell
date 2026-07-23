@@ -1,4 +1,2 @@
-singleton ConfigPaths ConfigPaths.qml
 singleton WallpaperEngine WallpaperEngine.qml
-singleton ThemeRegistry ThemeRegistry.qml
 singleton ThemeEngine ThemeEngine.qml
