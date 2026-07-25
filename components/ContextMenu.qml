@@ -43,6 +43,17 @@ type: "separator"
 
 color: "transparent"
 
+function _restoreFocus() {
+Qt.callLater(() => {
+if (!visible) return;
+if (showSearchInput) {
+searchInput.forceFocusNow();
+} else {
+menuBackground.forceActiveFocus();
+}
+});
+}
+
 function pushMenu(modelData, tag, refreshFn) {
 menuStack.push({
 model: modelData,
@@ -50,12 +61,14 @@ tag: tag || "",
 refreshFn: refreshFn || null
 });
 _updateMenuFromStack();
+_restoreFocus();
 }
 
 function popMenu() {
 if (menuStack.length > 1) {
 menuStack.pop();
 _updateMenuFromStack();
+_restoreFocus();
 } else {
 close();
 }

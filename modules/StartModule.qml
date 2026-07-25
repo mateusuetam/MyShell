@@ -38,13 +38,12 @@ type: "action",
 text: "Trocar Wallpaper >",
 preventClose: true,
 onTrigger: () => {
-if (!startModule.globalMenu)
-return;
+if (!startModule.globalMenu) return;
 
 const wallpaperMenuItems = WallpaperEngine.menuStructure.map(item => ({
 type: item.type,
 text: item.text,
-preventClose: item.preventClose,
+preventClose: true,
 onTrigger: () => WallpaperEngine.requestWallpaperChange(item.path)
 }));
 
@@ -56,7 +55,10 @@ type: "action",
 text: "< Customizações",
 preventClose: true,
 __internalBackItem: true,
-onTrigger: () => startModule.globalMenu?.popMenu()
+onTrigger: () => {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.popMenu();
+}
 },
 { type: "separator" }
 ].concat(wallpaperMenuItems),
@@ -69,8 +71,15 @@ type: "action",
 text: "Trocar Tema >",
 preventClose: true,
 onTrigger: () => {
-if (!startModule.globalMenu)
-return;
+if (!startModule.globalMenu) return;
+
+const themeMenuItems = ThemeEngine.menuStructure.map(item => ({
+type: item.type,
+text: item.text,
+preventClose: true,
+onTrigger: item.onTrigger
+}));
+
 startModule.globalMenu.showSearchInput = false;
 startModule.globalMenu.pushMenu(
 [
@@ -79,10 +88,13 @@ type: "action",
 text: "< Customizações",
 preventClose: true,
 __internalBackItem: true,
-onTrigger: () => startModule.globalMenu?.popMenu()
+onTrigger: () => {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.popMenu();
+}
 },
 { type: "separator" }
-].concat(ThemeEngine.menuStructure),
+].concat(themeMenuItems),
 "themes"
 );
 }
@@ -90,7 +102,18 @@ onTrigger: () => startModule.globalMenu?.popMenu()
 ]
 
 readonly property var powerMenuModel: [
-{ type: "action", text: "< Menu de Apps", onTrigger: () => startModule.openAppMenu() },
+{
+type: "action",
+text: "< Menu de Apps",
+preventClose: true,
+__internalBackItem: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = true;
+startModule.globalMenu.popMenu();
+}
+}
+},
 { type: "separator" },
 { type: "action", text: "Sair", onTrigger: () => Quickshell.execDetached(["niri", "msg", "action", "quit", "--skip-confirmation"]) },
 { type: "action", text: "Bloquear", onTrigger: () => Quickshell.execDetached(["quickshell", "ipc", "call", "lock_manager", "lock"]) },
@@ -146,7 +169,13 @@ startModule.globalMenu.pushMenu(startModule.customizationsMenuModel, "customizat
 {
 type: "action",
 text: "Menu de Sessão >",
-onTrigger: () => startModule.openSessionMenu()
+preventClose: true,
+onTrigger: () => {
+if (startModule.globalMenu) {
+startModule.globalMenu.showSearchInput = false;
+startModule.globalMenu.pushMenu(startModule.powerMenuModel, "session");
+}
+}
 }
 );
 
@@ -159,13 +188,6 @@ if (cachedAppMenu.length === 0) rebuildAppMenu();
 if (cachedAppMenu.length > 0 && startModule.globalMenu) {
 startModule.globalMenu.showSearchInput = true;
 startModule.globalMenu.openMenu(startModule.parentWindow, startModule, cachedAppMenu);
-}
-}
-
-function openSessionMenu() {
-if (startModule.globalMenu) {
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.openMenu(startModule.parentWindow, startModule, startModule.powerMenuModel);
 }
 }
 
