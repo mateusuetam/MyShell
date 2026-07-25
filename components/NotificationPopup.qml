@@ -191,8 +191,18 @@ break;
 
 MouseArea {
 anchors.fill: parent
+hoverEnabled: true
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+onEntered: {
+dismissTimer.stop();
+}
+
+onExited: {
+dismissTimer.restart();
+}
+
 onPressed: mouse => {
 notifyPopup.clicked();
 mouse.accepted = true;
