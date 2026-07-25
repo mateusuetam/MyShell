@@ -9,17 +9,34 @@ id: notifyPopup
 
 readonly property int cardWidth: 350
 readonly property int contentPadding: 25
-
 readonly property int verticalMargin: 10
 readonly property int horizontalMargin: 10
 
 signal clicked()
 
+required property var targetWindow
+readonly property var currentScreen: targetWindow?.screen ?? (Quickshell.screens[0] ?? null)
+
+visible: notifyModel.count > 0
+color: "transparent"
+
+anchor.window: targetWindow
+anchor.rect.y: targetWindow ? (targetWindow.height + verticalMargin) : 0
+anchor.rect.x: currentScreen ? (currentScreen.width - implicitWidth) : 0
+implicitWidth: cardWidth + horizontalMargin
+
+implicitHeight: listView.contentHeight
+
+property var notifMap: ({})
+property int nextNotifId: 0
+
 readonly property color notifyColor: {
-if (!currentNotify) {
+if (notifyModel.count === 0) {
 return ThemeEngine.palette.borderColor;
 }
-switch (currentNotify.urgency) {
+let topUrgency = notifyModel.get(0).urgencyLevel;
+
+switch (topUrgency) {
 case NotificationUrgency.Low:
 return ThemeEngine.palette.borderLowColor;
 case NotificationUrgency.Normal:
@@ -31,26 +48,11 @@ return ThemeEngine.palette.borderColor;
 }
 }
 
-property var notifyQueue: []
-property var currentNotify: null
-
-required property var targetWindow
-readonly property var currentScreen: targetWindow?.screen ?? (Quickshell.screens[0] ?? null)
-
 Binding {
 target: ThemeEngine
 property: "dynamicBorderColor"
 value: notifyPopup.notifyColor
 }
-
-anchor.window: targetWindow
-anchor.rect.y: targetWindow ? (targetWindow.height + verticalMargin) : 0
-anchor.rect.x: currentScreen ? (currentScreen.width - implicitWidth) : 0
-implicitWidth: cardWidth + horizontalMargin
-implicitHeight: contentColumn.implicitHeight + 20
-
-color: "transparent"
-visible: false
 
 NotificationServer {
 id: notifyServer
@@ -63,90 +65,129 @@ bodyMarkupSupported: true
 bodyHyperlinksSupported: true
 
 onNotification: notification => {
-notification.tracked = true;
 notifyPopup.addNotification(notification);
 }
 }
 
+ListModel {
+id: notifyModel
+}
+
 function addNotification(n) {
-notifyQueue.push(n);
-if (!currentNotify && !animateIn.running && !animateOut.running) {
-nextNotification();
-}
-}
-
-function nextNotification() {
-if (notifyQueue.length > 0) {
-currentNotify = notifyQueue.shift();
-
-if (headerText.text !== currentNotify.summary)
-headerText.text = currentNotify.summary;
-
-if (bodyText.text !== currentNotify.body)
-bodyText.text = currentNotify.body;
-
-notifyPopup.visible = true;
-animateIn.start();
+n.tracked = true;
 
 let timeout = 4000;
-if (currentNotify.expireTimeout > 0) {
-timeout = currentNotify.expireTimeout * 1000;
-} else if (currentNotify.urgency === NotificationUrgency.Critical) {
+if (n.expireTimeout > 0) {
+timeout = n.expireTimeout * 1000;
+} else if (n.urgency === NotificationUrgency.Critical) {
 timeout = 8000;
-} else if (currentNotify.urgency === NotificationUrgency.Low) {
+} else if (n.urgency === NotificationUrgency.Low) {
 timeout = 2000;
 }
 
-dismissTimer.interval = timeout;
-dismissTimer.start();
-} else {
-notifyPopup.visible = false;
+let currentId = nextNotifId++;
+notifMap[currentId] = n;
+
+let borderColor = ThemeEngine.palette.borderColor;
+if (n.urgency === NotificationUrgency.Low) {
+borderColor = ThemeEngine.palette.borderLowColor;
+} else if (n.urgency === NotificationUrgency.Normal) {
+borderColor = ThemeEngine.palette.borderNormalColor;
+} else if (n.urgency === NotificationUrgency.Critical) {
+borderColor = ThemeEngine.palette.borderCriticalColor;
 }
+
+notifyModel.append({
+"notifId": currentId,
+"summaryText": n.summary,
+"bodyText": n.body,
+"urgencyLevel": n.urgency,
+"timeoutMs": timeout,
+"resolvedBorderColor": borderColor
+});
+}
+
+ListView {
+id: listView
+width: notifyPopup.cardWidth
+height: contentHeight
+
+interactive: false
+spacing: 10
+clip: false
+
+model: notifyModel
+
+add: Transition {
+NumberAnimation { property: "x"; from: notifyPopup.width; to: 0; duration: 350; easing.type: Easing.OutCubic }
+}
+
+delegate: Rectangle {
+id: delegateCard
+
+required property int index
+required property int notifId
+required property string summaryText
+required property string bodyText
+required property int urgencyLevel
+required property int timeoutMs
+required property color resolvedBorderColor
+
+property bool isClosing: false
+
+width: listView.width
+implicitHeight: Math.ceil(contentColumn.implicitHeight + (notifyPopup.contentPadding * 1.5))
+
+color: ThemeEngine.palette.backgroundColor
+border.width: 1
+radius: ThemeEngine.palette.shellRadius
+
+border.color: delegateCard.resolvedBorderColor
+
+NumberAnimation {
+id: slideOutAnim
+target: delegateCard
+property: "x"
+to: notifyPopup.width
+duration: 400
+easing.type: Easing.InCubic
+onFinished: delegateCard.finalizeRemoval()
 }
 
 Timer {
 id: dismissTimer
-repeat: false
-onTriggered: animateOut.start()
+running: true
+interval: delegateCard.timeoutMs
+onTriggered: delegateCard.requestClose()
 }
 
-NumberAnimation {
-id: animateIn
-target: visualBox
-property: "x"
-from: notifyPopup.width
-to: 0
-duration: 350
-easing.type: Easing.OutCubic
+function requestClose() {
+if (delegateCard.isClosing) return;
+delegateCard.isClosing = true;
+dismissTimer.stop();
+slideOutAnim.start();
 }
 
-NumberAnimation {
-id: animateOut
-target: visualBox
-property: "x"
-from: 0
-to: notifyPopup.width
-duration: 300
-easing.type: Easing.InCubic
-onFinished: {
-if (notifyPopup.currentNotify) {
-notifyPopup.currentNotify.dismiss();
-notifyPopup.currentNotify = null;
+function finalizeRemoval() {
+let n = notifyPopup.notifMap[notifId];
+if (n && typeof n.dismiss === "function") {
+n.dismiss();
 }
-notifyPopup.nextNotification();
-}
-}
+delete notifyPopup.notifMap[notifId];
 
-Rectangle {
-id: visualBox
-width: notifyPopup.cardWidth
-height: parent.height
-x: parent.width
-
-color: ThemeEngine.palette.backgroundColor
-border.color: ThemeEngine.dynamicBorderColor
-border.width: 1
-radius: ThemeEngine.palette.shellRadius
+let currentIdx = delegateCard.index;
+if (currentIdx >= 0 && currentIdx < notifyModel.count && notifyModel.get(currentIdx).notifId === notifId) {
+notifyModel.remove(currentIdx);
+}
+else {
+for (let i = 0; i < notifyModel.count; i++) {
+if (notifyModel.get(i).notifId === notifId) {
+notifyModel.remove(i);
+break;
+}
+}
+}
+}
 
 MouseArea {
 anchors.fill: parent
@@ -156,13 +197,12 @@ onPressed: mouse => {
 notifyPopup.clicked();
 mouse.accepted = true;
 
-if (mouse.button === Qt.LeftButton && notifyPopup.currentNotify && typeof notifyPopup.currentNotify.activate === "function") {
-notifyPopup.currentNotify.activate();
-}
+let n = notifyPopup.notifMap[delegateCard.notifId];
 
-dismissTimer.stop();
-if (!animateOut.running)
-animateOut.start();
+if (mouse.button === Qt.LeftButton && n && typeof n.activate === "function") {
+n.activate();
+}
+delegateCard.requestClose();
 }
 }
 
@@ -173,7 +213,8 @@ anchors.centerIn: parent
 spacing: 6
 
 Text {
-id: headerText
+id: headerLabel
+text: delegateCard.summaryText
 width: parent.width
 color: ThemeEngine.palette.notificationContentColor
 font.family: ThemeEngine.appliedFontFamily
@@ -186,18 +227,20 @@ horizontalAlignment: Text.AlignHCenter
 Rectangle {
 width: parent.width
 height: 1
-color: ThemeEngine.dynamicBorderColor
-visible: bodyText.text !== ""
+color: delegateCard.border.color
+visible: bodyLabel.text !== ""
 }
 
 Text {
-id: bodyText
+id: bodyLabel
+text: delegateCard.bodyText
 width: parent.width
 color: ThemeEngine.palette.notificationContentColor
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 wrapMode: Text.Wrap
 horizontalAlignment: Text.AlignHCenter
+}
 }
 }
 }
