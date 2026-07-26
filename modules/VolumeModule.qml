@@ -62,7 +62,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: volumeModule.volMuted ? ThemeEngine.palette.volumeMutedColor : ThemeEngine.palette.volumeActiveColor
-text: volumeModule.volMuted ? "{ VL: off }" : `{ VL: ${volumeModule.volPercent}% }`
+text: volumeModule.volMuted ? "VL: off" : `VL: ${volumeModule.volPercent}%`
 }
 }
 }

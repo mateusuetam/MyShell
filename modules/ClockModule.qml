@@ -22,26 +22,18 @@ precision: SystemClock.Minutes
 Row {
 id: clockRow
 anchors.verticalCenter: parent.verticalCenter
-readonly property var formattedParts: {
-const d = systemClock.date;
-return {
-weekday: clockModule.ptBr.toString(d, "ddd"),
-day: clockModule.ptBr.toString(d, "d"),
-month: clockModule.ptBr.toString(d, "MMM"),
-time: clockModule.ptBr.toString(d, "HH:mm")
-};
-}
+readonly property date currentDate: systemClock.date
 Text {
 id: clockBase
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: ThemeEngine.palette.clockLabelColor
-text: `{ ${clockRow.formattedParts.weekday} `
+text: `${clockModule.ptBr.toString(clockRow.currentDate, "ddd")} `
 }
 Text {
 font: clockBase.font
 color: ThemeEngine.palette.clockDayColor
-text: clockRow.formattedParts.day
+text: clockModule.ptBr.toString(clockRow.currentDate, "d")
 }
 Text {
 font: clockBase.font
@@ -51,12 +43,12 @@ text: " de "
 Text {
 font: clockBase.font
 color: ThemeEngine.palette.clockMonthColor
-text: clockRow.formattedParts.month
+text: clockModule.ptBr.toString(clockRow.currentDate, "MMM")
 }
 Text {
 font: clockBase.font
 color: clockBase.color
-text: ` | ${clockRow.formattedParts.time} }`
+text: ` - ${clockModule.ptBr.toString(clockRow.currentDate, "HH:mm")}`
 }
 }
 }

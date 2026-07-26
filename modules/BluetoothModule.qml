@@ -455,7 +455,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: bluetoothRow.btState.color
-text: `{ BT: ${bluetoothRow.btState.text} }`
+text: `BT: ${bluetoothRow.btState.text}`
 }
 }
 }

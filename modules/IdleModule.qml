@@ -39,20 +39,11 @@ inhibitor.enabled = !inhibitor.enabled;
 Row {
 id: idleRow
 anchors.verticalCenter: parent.verticalCenter
-readonly property var idleState: {
-return idleModule.isActive ? {
-color: ThemeEngine.palette.idleActivatedColor,
-text: "{ ACTIVE }"
-} : {
-color: ThemeEngine.palette.idleDeactivatedColor,
-text: "{ IDLING }"
-};
-}
 Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
-color: idleRow.idleState.color
-text: idleRow.idleState.text
+color: idleModule.isActive ? ThemeEngine.palette.idleActivatedColor : ThemeEngine.palette.idleDeactivatedColor
+text: idleModule.isActive ? "ACTIVE" : "IDLING"
 }
 }
 }

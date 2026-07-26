@@ -175,7 +175,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: ThemeEngine.palette.backlightBrightnessColor
-text: `{ BL: ${backlightModule.brightnessPercent}% }`
+text: `BL: ${backlightModule.brightnessPercent}%`
 }
 }
 }

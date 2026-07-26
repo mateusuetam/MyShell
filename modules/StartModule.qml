@@ -209,7 +209,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: ThemeEngine.palette.startLabelColor;
-text: "{ START }"
+text: "START"
 }
 }
 }

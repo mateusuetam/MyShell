@@ -61,7 +61,7 @@ readonly property color menuErrorColor: bright_red
 // Shell
 readonly property int shellRadius: 0
 readonly property color backgroundColor: dark0
-readonly property color borderColor: dark0_hard
+readonly property color borderColor: dark1
 readonly property color borderLowColor: bright_green
 readonly property color borderNormalColor: bright_blue
 readonly property color borderCriticalColor: bright_red

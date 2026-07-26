@@ -91,7 +91,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: batteryRow.batteryState.color
-text: `{ BA: ${batteryRow.batteryState.text} }`
+text: `BA: ${batteryRow.batteryState.text}`
 }
 }
 }

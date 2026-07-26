@@ -360,7 +360,7 @@ Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: networkRow.nwState.color
-text: `{ NW: ${networkRow.stateText} }`
+text: `NW: ${networkRow.stateText}`
 }
 }
 }

@@ -6,6 +6,7 @@ import "../core"
 
 Item {
 id: mprisModule
+
 required property var globalMenu
 required property var parentWindow
 
@@ -28,7 +29,7 @@ return p;
 return null;
 }
 
-implicitWidth: visible ? Math.min(mprisRow.implicitWidth, maxWidth) : 0
+implicitWidth: visible ? Math.min(mprisText.implicitWidth, maxWidth) : 0
 implicitHeight: mprisModule.parentWindow ? mprisModule.parentWindow.barHeight : 30
 visible: !!activePlayer
 
@@ -39,8 +40,7 @@ ignoreUnknownSignals: true
 function onPostTrackChanged() {
 const player = mprisModule.activePlayer;
 
-if (!player || !player.trackTitle)
-return;
+if (!player || !player.trackTitle) return;
 
 mprisModule.pendingTrackId = player.uniqueId;
 mprisModule.notifyRetries = 0;
@@ -51,23 +51,19 @@ notifyDebounce.restart();
 
 Timer {
 id: notifyDebounce
-
 interval: 200
 repeat: false
 
 onTriggered: {
 const player = mprisModule.activePlayer;
 
-if (!player)
-return;
+if (!player) return;
 
 const id = player.uniqueId;
 
-if (id !== mprisModule.pendingTrackId)
-return;
+if (id !== mprisModule.pendingTrackId) return;
 
-if (id === mprisModule.lastNotifiedTrackId)
-return;
+if (id === mprisModule.lastNotifiedTrackId) return;
 
 if (!player.isPlaying || !player.lengthSupported) {
 if (mprisModule.notifyRetries < 10) {
@@ -77,8 +73,7 @@ notifyDebounce.restart();
 return;
 }
 
-if (player.length > 0 && player.length < 15)
-return;
+if (player.length > 0 && player.length < 15) return;
 
 mprisModule.lastNotifiedTrackId = id;
 
@@ -106,7 +101,9 @@ let menu = mprisModule.globalMenu;
 if (menu) {
 menu.close();
 }
+
 mouse.accepted = true;
+
 const player = mprisModule.activePlayer;
 
 if (!player) return;
@@ -121,21 +118,10 @@ player.previous();
 }
 }
 
-Row {
-id: mprisRow
+Text {
+id: mprisText
 anchors.verticalCenter: parent.verticalCenter
-visible: mainText.text !== ""
-
-Text {
-id: prefixText
-text: "{ "
-font: mainText.font
-color: mainText.color
-}
-
-Text {
-id: mainText
-width: Math.min(implicitWidth, mprisModule.maxWidth - prefixText.implicitWidth - suffixText.implicitWidth)
+width: Math.min(implicitWidth, mprisModule.maxWidth)
 elide: Text.ElideRight
 
 font.family: ThemeEngine.appliedFontFamily
@@ -145,24 +131,12 @@ readonly property var player: mprisModule.activePlayer
 readonly property bool isPlaying: player ? player.isPlaying : false
 readonly property string title: player ? player.trackTitle : ""
 readonly property string artist: player && player.trackArtist ? player.trackArtist : ""
+readonly property bool hasArtist: artist && artist.trim() !== "" && artist !== "Desconhecido"
+readonly property string displayText: title
+? `${isPlaying ? "|| " : "> "}${title}${hasArtist ? ` - ${artist}` : ""}`
+: ""
 
 color: isPlaying ? ThemeEngine.palette.mprisPlayingColor : ThemeEngine.palette.mprisPausedColor
-
-text: {
-if (!title) return ""
-const prefix = isPlaying ? "|| " : "> "
-const hasArtist = artist && artist.trim() !== "" && artist !== "Desconhecido"
-const artistPart = hasArtist ? ` - ${artist}` : ""
-
-return `${prefix}${title}${artistPart}`
-}
-}
-
-Text {
-id: suffixText
-text: " }"
-font: mainText.font
-color: mainText.color
-}
+text: displayText
 }
 }
