@@ -212,24 +212,12 @@ _pendingWindow = targetWindow;
 }
 
 function handleItemTrigger(dataObj) {
-if (!dataObj || dataObj.enabled === false || dataObj.isSeparator || dataObj.type === "separator")
-return;
-
+if (!dataObj || dataObj.enabled === false || dataObj.isSeparator || dataObj.type === "separator") return;
 itemTriggered(dataObj);
-if (dataObj.actionType !== undefined) {
-itemDataActionTriggered(dataObj.actionType, dataObj.actionData);
-}
-
-if (typeof dataObj.onTrigger === 'function')
-dataObj.onTrigger();
-else if (typeof dataObj.triggered === 'function')
-dataObj.triggered();
-else if (typeof dataObj.trigger === 'function')
-dataObj.trigger();
-
-if (dataObj.closeOnTrigger !== false && dataObj.preventClose !== true) {
-close();
-}
+if (dataObj.actionType !== undefined) itemDataActionTriggered(dataObj.actionType, dataObj.actionData);
+if (dataObj.onTrigger) dataObj.onTrigger();
+else if (dataObj.triggered) dataObj.triggered();
+if (dataObj.closeOnTrigger !== false && !dataObj.preventClose) close();
 }
 
 function _applyPositioning() {

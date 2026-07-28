@@ -207,6 +207,18 @@ networkModule.generateActionMenu(net),
 return menuModel;
 }
 
+Connections {
+target: networkModule.globalMenu
+function onVisibleChanged() {
+if (!networkModule.globalMenu.visible) {
+let wifiDev = networkModule.getWifiDevice();
+if (wifiDev && wifiDev.scannerEnabled) {
+wifiDev.scannerEnabled = false;
+}
+}
+}
+}
+
 function generateScanMenu() {
 let menuModel = [];
 let wifiDev = networkModule.getWifiDevice();

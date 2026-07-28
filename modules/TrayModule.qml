@@ -10,15 +10,18 @@ id: trayModule
 required property var globalMenu
 required property var parentWindow
 
+component TrayDataDelegate: QtObject {
+required property var modelData
+readonly property var item: modelData
+}
+
 Instantiator {
 id: trayData
 model: SystemTray.items
 onObjectAdded: (index, object) => trayModule.updateMenu(false)
 onObjectRemoved: (index, object) => trayModule.updateMenu(false)
-delegate: QtObject {
-required property var modelData
-readonly property var item: modelData
-}
+
+delegate: TrayDataDelegate {}
 }
 
 visible: trayData.count > 0
@@ -69,7 +72,7 @@ const count = trayData.count;
 const parentWin = trayModule.parentWindow;
 
 for (let i = 0; i < count; i++) {
-const delegateObj = trayData.objectAt(i);
+const delegateObj = trayData.objectAt(i) as TrayDataDelegate;
 
 if (!delegateObj || !delegateObj.item) continue;
 
