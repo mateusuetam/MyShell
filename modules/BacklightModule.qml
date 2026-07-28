@@ -140,23 +140,25 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
 let menu = backlightModule.globalMenu;
-if (menu) {
-menu.close();
-}
 mouse.accepted = true;
+
+if (menu && !menu.shouldOpenFor(backlightModule)) return;
+
 if (mouse.button === Qt.LeftButton) {
 checkGammastep.running = true;
 } else if (mouse.button === Qt.RightButton) {
 gammastepToggleCheck.running = true;
 }
 }
+
 onWheel: wheel => {
 let menu = backlightModule.globalMenu;
-if (menu) {
-menu.close();
-}
+
+if (menu && menu.visible && menu._currentAnchorItem === backlightModule) menu.close();
+
 if (changeBrightness.running) return;
 
 if (wheel.angleDelta.y > 0) {

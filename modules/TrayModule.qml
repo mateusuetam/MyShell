@@ -103,17 +103,14 @@ const trayListModel = trayModule.buildTrayModel();
 
 menu.showSearchInput = false;
 
-if (!menu.visible) {
-if (forceOpen && trayListModel.length > 0) {
-menu.openMenu(parentWin, trayButton, trayListModel);
-}
-return;
-}
-
+if (menu.visible && menu._currentAnchorItem === trayButton) {
 if (trayListModel.length > 0) {
 menu.menuModel = trayListModel;
 } else {
 menu.close();
+}
+} else {
+if (forceOpen && trayListModel.length > 0) menu.openMenu(parentWin, trayButton, trayListModel);
 }
 }
 
@@ -122,10 +119,13 @@ id: trayButton
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
-onClicked: {
-if (trayModule.globalMenu) {
-trayModule.globalMenu.close();
-}
+
+onPressed: mouse => {
+let menu = trayModule.globalMenu;
+mouse.accepted = true;
+
+if (menu && !menu.shouldOpenFor(trayButton)) return;
+
 Qt.callLater(() => trayModule.updateMenu(true));
 }
 }

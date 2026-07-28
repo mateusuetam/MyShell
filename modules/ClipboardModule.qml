@@ -92,12 +92,13 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
 let menu = clipboardModule.globalMenu;
-if (menu) {
-menu.close();
-}
 mouse.accepted = true;
+
+if (menu && !menu.shouldOpenFor(clipboardModule)) return;
+
 if (mouse.button === Qt.LeftButton) {
 clipboardModule.refreshClipboardList();
 } else if (mouse.button === Qt.RightButton) {

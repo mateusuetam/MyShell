@@ -195,9 +195,13 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
+
 onPressed: mouse => {
+let menu = startModule.globalMenu;
 mouse.accepted = true;
-startModule.globalMenu?.close();
+
+if (menu && !menu.shouldOpenFor(startModule)) return;
+
 startModule.openAppMenu();
 }
 }

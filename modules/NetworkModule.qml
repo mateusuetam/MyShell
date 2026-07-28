@@ -299,7 +299,7 @@ if (!forceOpen && !networkModule.globalMenu.visible) return;
 
 networkModule.globalMenu.showSearchInput = false;
 
-if (networkModule.globalMenu.visible) {
+if (networkModule.globalMenu.visible && networkModule.globalMenu._currentAnchorItem === networkModule) {
 networkModule.globalMenu.refresh();
 } else {
 networkModule.globalMenu.openMenu(
@@ -332,8 +332,10 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-if (networkModule.globalMenu) networkModule.globalMenu.close();
+let menu = networkModule.globalMenu;
 mouse.accepted = true;
+
+if (menu && !menu.shouldOpenFor(networkModule)) return;
 
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];

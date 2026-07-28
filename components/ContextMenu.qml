@@ -18,15 +18,17 @@ property bool showSearchInput: false
 readonly property string filterText: searchInput.text
 
 property var menuModel: null
-property var _pendingModel: null
 property var _pendingWindow: null
 property var _pendingAnchorItem: null
+property var _currentAnchorItem: null
+property var _lastAnchorItem: null
 property int _pendingX: 0
 property int _pendingY: 0
 property bool _isAnchorMode: false
 property bool _isInternalReset: false
 property bool _isPreparing: false
 readonly property bool isMenuFocused: visible || _isPreparing
+readonly property bool isClosing: closeAnim.running
 
 property var menuStack: []
 
@@ -43,15 +45,27 @@ type: "separator"
 
 color: "transparent"
 
-function _restoreFocus() {
-Qt.callLater(() => {
-if (!visible) return;
-if (showSearchInput) {
-searchInput.forceFocusNow();
-} else {
-menuBackground.forceActiveFocus();
+function _dyn(obj) {
+return obj;
 }
-});
+
+function shouldOpenFor(anchorItem) {
+if (visible && _currentAnchorItem === anchorItem) {
+close();
+return false;
+}
+
+if (isClosing && _lastAnchorItem === anchorItem) return false;
+
+return true;
+}
+
+function _restoreFocus() {
+if (!visible) return;
+if (showSearchInput)
+searchInput.forceFocusNow();
+else
+menuBackground.forceActiveFocus();
 }
 
 function pushMenu(modelData, tag, refreshFn) {
@@ -128,30 +142,31 @@ implicitHeight: Math.min((menuPopup.showSearchInput ? searchInput.height + 4 : 0
 grabFocus: true
 
 onVisibleChanged: {
-if (visible) {
-if (showSearchInput) {
-Qt.callLater(() => {
-searchInput.forceFocusNow();
-});
-} else {
-Qt.callLater(() => {
-menuBackground.forceActiveFocus();
-});
-}
-} else {
-if (!_isInternalReset) {
+if (!visible && !_isInternalReset) {
 searchInput.text = "";
+menuView.currentIndex = -1;
 menuPopup.showSearchInput = false;
-menuPopup.anchor.window = null;
 menuPopup.menuModel = null;
 menuPopup.menuStack = [];
-menuView.currentIndex = -1;
 menuPopup._currentFilteredModel = [];
-}
+menuPopup._currentAnchorItem = null;
+menuPopup._pendingWindow = null;
+menuPopup._pendingAnchorItem = null;
+menuPopup._pendingX = 0;
+menuPopup._pendingY = 0;
+menuPopup._dyn(menuPopup).anchor.window = null;
+menuBackground.opacity = 0.0;
+menuBackground.scale = 0.95;
 }
 }
 
 function close() {
+if (!visible || isClosing) return;
+_lastAnchorItem = _currentAnchorItem;
+closeAnim.start();
+}
+
+function _finalizeClose() {
 visible = false;
 }
 
@@ -160,7 +175,7 @@ if (!anchorItem) return;
 _prepareToOpen(targetWindow, modelData, tag, refreshFn);
 _pendingAnchorItem = anchorItem;
 _isAnchorMode = true;
-repositionTimer.restart();
+Qt.callLater(_applyPositioning);
 }
 
 function openAtPosition(targetWindow, x, y, modelData, tag, refreshFn) {
@@ -169,14 +184,17 @@ _prepareToOpen(targetWindow, modelData, tag, refreshFn);
 _pendingX = x;
 _pendingY = y;
 _isAnchorMode = false;
-repositionTimer.restart();
+Qt.callLater(_applyPositioning);
 }
 
 function _prepareToOpen(targetWindow, modelData, tag, refreshFn) {
 _isPreparing = true;
 
-repositionTimer.stop();
+closeAnim.stop();
+
 _pendingAnchorItem = null;
+_currentAnchorItem = null;
+
 menuPopup.menuModel = null;
 searchInput.text = "";
 
@@ -190,7 +208,6 @@ tag: tag || "main",
 refreshFn: refreshFn || null
 }];
 
-_pendingModel = modelData;
 _pendingWindow = targetWindow;
 }
 
@@ -216,22 +233,40 @@ close();
 }
 
 function _applyPositioning() {
-if (!_pendingWindow) return;
+if (!_pendingWindow) {
+_isPreparing = false;
+return;
+}
 
 _updateMenuFromStack();
-menuPopup.anchor.window = _pendingWindow;
+menuPopup._dyn(menuPopup).anchor.window = _pendingWindow;
 
 if (_isAnchorMode) {
-if (!_pendingAnchorItem) return;
+if (!_pendingAnchorItem) {
+_isPreparing = false;
+return;
+}
 const windowPos = _pendingAnchorItem.mapToItem(null, 0, _pendingAnchorItem.height);
 const newX = windowPos.x - (implicitWidth / 2) + (_pendingAnchorItem.width / 2);
 const newY = windowPos.y + verticalOffset;
-menuPopup.anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
+menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
+menuBackground.transformOrigin = Item.Top;
 } else {
-menuPopup.anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
+menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
+menuBackground.transformOrigin = Item.Center;
 }
+
+_currentAnchorItem = _pendingAnchorItem;
+
+menuBackground.opacity = 0.0;
+menuBackground.scale = 0.95;
+
 menuPopup.visible = true;
+openAnim.restart();
+
 _isPreparing = false;
+
+Qt.callLater(_restoreFocus);
 }
 
 QsMenuOpener {
@@ -239,32 +274,34 @@ id: menuOpener
 menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
 }
 
+function _itemText(item) {
+if (!item) return "";
+if (typeof item === "string") return item;
+return item.text ?? item.name ?? item.label ?? item.modelData?.text ?? "";
+}
+
 function _updateFilteredModel() {
 const search = menuPopup.filterText.toLowerCase().trim();
+
 if (search === "") {
 _currentFilteredModel = [];
 return;
 }
 
 const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
+
 if (!rawSource) {
-menuPopup._currentFilteredModel = [];
+_currentFilteredModel = [];
 return;
 }
 
-const itemsArray = Array.from(rawSource);
-menuPopup._currentFilteredModel = itemsArray.filter(item => {
-let textToMatch = "";
-if (item && typeof item === 'object') {
-if (item.text !== undefined) textToMatch = item.text;
-else if (item.name !== undefined) textToMatch = item.name;
-else if (item.label !== undefined) textToMatch = item.label;
-else if (item.modelData !== undefined && item.modelData.text !== undefined) textToMatch = item.modelData.text;
-} else if (typeof item === 'string') {
-textToMatch = item;
+const filtered = [];
+
+for (const item of rawSource) {
+if (_itemText(item).toLowerCase().includes(search)) filtered.push(item);
 }
-return textToMatch.toLowerCase().includes(search);
-});
+
+_currentFilteredModel = filtered;
 }
 
 function focusListView() {
@@ -274,11 +311,43 @@ menuView.currentIndex = 0;
 menuView.forceActiveFocus();
 }
 
-Timer {
-id: repositionTimer
-interval: 32
-repeat: false
-onTriggered: menuPopup._applyPositioning()
+ParallelAnimation {
+id: openAnim
+NumberAnimation {
+target: menuBackground
+property: "opacity"
+to: 1.0
+duration: 150
+easing.type: Easing.OutBack
+easing.overshoot: 1.2
+}
+NumberAnimation {
+target: menuBackground
+property: "scale"
+to: 1.0
+duration: 150
+easing.type: Easing.OutBack
+easing.overshoot: 1.2
+}
+}
+
+ParallelAnimation {
+id: closeAnim
+NumberAnimation {
+target: menuBackground
+property: "opacity"
+to: 0.0
+duration: 120
+easing.type: Easing.OutCubic
+}
+NumberAnimation {
+target: menuBackground
+property: "scale"
+to: 0.95
+duration: 120
+easing.type: Easing.OutCubic
+}
+onFinished: menuPopup._finalizeClose()
 }
 
 Rectangle {
@@ -290,6 +359,9 @@ border.width: 1
 focus: true
 radius: ThemeEngine.palette.shellRadius
 clip: true
+
+opacity: 0.0
+scale: 0.95
 
 MouseArea {
 anchors.fill: parent
@@ -331,10 +403,8 @@ break;
 case Qt.Key_Return:
 case Qt.Key_Enter:
 if (menuView.currentIndex >= 0 && menuView.currentItem) {
-const dataObj = menuView.currentItem.itemData;
-if (dataObj) {
-menuPopup.handleItemTrigger(dataObj);
-}
+const dataObj = menuPopup._dyn(menuView.currentItem).itemData;
+if (dataObj) menuPopup.handleItemTrigger(dataObj);
 }
 event.accepted = true;
 break;
@@ -356,8 +426,9 @@ onNavigationDownRequested: menuPopup.focusListView()
 onActionTriggeredRequested: {
 if (menuView.count > 0) {
 const targetItem = menuView.currentItem ? menuView.currentItem : menuView.itemAtIndex(0);
-if (targetItem && targetItem.itemData) {
-menuPopup.handleItemTrigger(targetItem.itemData);
+if (targetItem) {
+const dynTarget = menuPopup._dyn(targetItem);
+if (dynTarget.itemData) menuPopup.handleItemTrigger(dynTarget.itemData);
 }
 }
 }

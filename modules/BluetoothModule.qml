@@ -387,11 +387,13 @@ bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
 
-if (!forceOpen && !bluetoothModule.globalMenu.visible) return;
+if (!forceOpen) {
+if (!bluetoothModule.globalMenu.visible || bluetoothModule.globalMenu._currentAnchorItem !== bluetoothModule) return;
+}
 
 bluetoothModule.globalMenu.showSearchInput = false;
 
-if (bluetoothModule.globalMenu.visible) {
+if (bluetoothModule.globalMenu.visible && bluetoothModule.globalMenu._currentAnchorItem === bluetoothModule) {
 bluetoothModule.globalMenu.refresh();
 } else {
 bluetoothModule.globalMenu.openMenu(
@@ -426,8 +428,10 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-if (bluetoothModule.globalMenu) bluetoothModule.globalMenu.close();
+let menu = bluetoothModule.globalMenu;
 mouse.accepted = true;
+
+if (menu && !menu.shouldOpenFor(bluetoothModule)) return;
 
 bluetoothModule.checkRfkill();
 
