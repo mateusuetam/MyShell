@@ -19,6 +19,8 @@ bottom: true
 left: true
 }
 
+color: "#000000"
+
 exclusionMode: ExclusionMode.Ignore
 
 Image {

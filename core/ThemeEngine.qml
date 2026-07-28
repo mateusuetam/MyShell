@@ -13,9 +13,9 @@ property string currentTheme: defaultTheme
 readonly property string defaultTheme: "GruvboxDark"
 
 readonly property string appliedFontFamily: "Monaspace Krypton NF"
-readonly property int appliedSplashTitleFontSize: 30
-readonly property int appliedSplashStartFontSize: 20
-readonly property int appliedSplashLabelFontSize: 18
+readonly property int appliedLoadingTitleFontSize: 30
+readonly property int appliedLoadingStartFontSize: 20
+readonly property int appliedLoadingLabelFontSize: 18
 readonly property int appliedFontSize: 14
 readonly property int appliedMenuFontSize: 12
 readonly property int appliedNotificationHeaderFontSize: 16

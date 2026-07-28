@@ -47,10 +47,10 @@ readonly property color bright_purple: "#d3869b"
 readonly property color bright_aqua: "#8ec07c"
 readonly property color bright_orange: "#fe8019"
 
-// SplashWindow
-readonly property color splashBackground: dark0
-readonly property color splashCanvas: neutral_green
-readonly property color splashText: light1
+// LoadingWindow
+readonly property color loadingBackground: dark0
+readonly property color loadingCanvas: neutral_green
+readonly property color loadingText: light1
 
 // ContextMenu
 readonly property color menuTextHoverColor: dark0_soft

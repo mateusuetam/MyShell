@@ -36,10 +36,10 @@ readonly property color base: "#1e1e2e"
 readonly property color mantle: "#181825"
 readonly property color crust: "#11111b"
 
-// SplashWindow
-readonly property color splashBackground: base
-readonly property color splashCanvas: green
-readonly property color splashText: textFg
+// LoadingWindow
+readonly property color loadingBackground: base
+readonly property color loadingCanvas: green
+readonly property color loadingText: textFg
 
 // ContextMenu
 readonly property color menuTextHoverColor: crust
