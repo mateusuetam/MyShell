@@ -82,7 +82,7 @@ changeTheme(defaultTheme);
 
 function applyExternalTemplates(themeName) {
 externalApps.forEach(app => {
-let sourceFile = `${Quickshell.env("HOME")}/Repos/NixOS/quickshell/shell/core/Templates/${themeName}/${app.templateFileName}`;
+let sourceFile = `${Quickshell.env("HOME")}/.config/quickshell/core/Templates/${themeName}/${app.templateFileName}`;
 let destFile = `${app.configDir}/${app.templateFileName}`;
 
 let cmd = `if [ -d "${app.configDir}" ]; then cp -f "${sourceFile}" "${destFile}"; fi`;
