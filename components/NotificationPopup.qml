@@ -17,26 +17,52 @@ signal clicked()
 required property var targetWindow
 readonly property var currentScreen: targetWindow?.screen ?? (Quickshell.screens[0] ?? null)
 
-visible: notifyModel.count > 0
 color: "transparent"
+
+ListModel {
+id: notifyModel
+}
+
+property alias notificationModel: notifyModel
+
+visible: notifyPopup.notificationModel.count > 0
 
 anchor.window: targetWindow
 anchor.rect.y: targetWindow ? (targetWindow.height + verticalMargin) : 0
 anchor.rect.x: currentScreen ? (currentScreen.width - implicitWidth) : 0
-implicitWidth: cardWidth + horizontalMargin
 
+implicitWidth: cardWidth + horizontalMargin
 implicitHeight: listView.contentHeight
 
 property var notifMap: ({})
 property int nextNotifId: 0
 
-readonly property color notifyColor: {
-if (notifyModel.count === 0) {
-return ThemeEngine.palette.borderColor;
-}
-let topUrgency = notifyModel.get(0).urgencyLevel;
+readonly property color notifyColor: notifyPopup.notificationModel.count > 0 ? notifyPopup.urgencyBorderColor(notifyPopup.notificationModel.get(0).urgencyLevel) : ThemeEngine.palette.borderColor
 
-switch (topUrgency) {
+Binding {
+target: ThemeEngine
+property: "dynamicBorderColor"
+value: notifyPopup.notifyColor
+}
+
+NotificationServer {
+id: notifyServer
+
+imageSupported: false
+actionsSupported: true
+actionIconsSupported: true
+bodySupported: true
+bodyImagesSupported: false
+bodyMarkupSupported: true
+bodyHyperlinksSupported: true
+
+onNotification: notification => {
+notifyPopup.addNotification(notification)
+}
+}
+
+function urgencyBorderColor(urgency) {
+switch (urgency) {
 case NotificationUrgency.Low:
 return ThemeEngine.palette.borderLowColor;
 case NotificationUrgency.Normal:
@@ -48,67 +74,32 @@ return ThemeEngine.palette.borderColor;
 }
 }
 
-Binding {
-target: ThemeEngine
-property: "dynamicBorderColor"
-value: notifyPopup.notifyColor
-}
-
-NotificationServer {
-id: notifyServer
-imageSupported: false
-actionsSupported: true
-actionIconsSupported: true
-bodySupported: true
-bodyImagesSupported: false
-bodyMarkupSupported: true
-bodyHyperlinksSupported: true
-
-onNotification: notification => {
-notifyPopup.addNotification(notification);
-}
-}
-
-ListModel {
-id: notifyModel
+function notificationTimeout(n) {
+if (n.urgency === NotificationUrgency.Critical) return 0;
+if (n.expireTimeout > 0) return n.expireTimeout * 1000;
+return n.urgency === NotificationUrgency.Low ? 2000 : 4000;
 }
 
 function addNotification(n) {
 n.tracked = true;
 
-let timeout = 4000;
-if (n.expireTimeout > 0) {
-timeout = n.expireTimeout * 1000;
-} else if (n.urgency === NotificationUrgency.Critical) {
-timeout = 8000;
-} else if (n.urgency === NotificationUrgency.Low) {
-timeout = 2000;
-}
-
-let currentId = nextNotifId++;
+const currentId = nextNotifId++;
 notifMap[currentId] = n;
 
-let borderColor = ThemeEngine.palette.borderColor;
-if (n.urgency === NotificationUrgency.Low) {
-borderColor = ThemeEngine.palette.borderLowColor;
-} else if (n.urgency === NotificationUrgency.Normal) {
-borderColor = ThemeEngine.palette.borderNormalColor;
-} else if (n.urgency === NotificationUrgency.Critical) {
-borderColor = ThemeEngine.palette.borderCriticalColor;
-}
-
-notifyModel.append({
-"notifId": currentId,
-"summaryText": n.summary,
-"bodyText": n.body,
-"urgencyLevel": n.urgency,
-"timeoutMs": timeout,
-"resolvedBorderColor": borderColor
+notifyPopup.notificationModel.append({
+notifId: currentId,
+summaryText: n.summary,
+bodyText: n.body,
+urgencyLevel: n.urgency,
+timeoutMs: notifyPopup.notificationTimeout(n),
+resolvedBorderColor:
+notifyPopup.urgencyBorderColor(n.urgency)
 });
 }
 
 ListView {
 id: listView
+
 width: notifyPopup.cardWidth
 height: contentHeight
 
@@ -116,10 +107,16 @@ interactive: false
 spacing: 10
 clip: false
 
-model: notifyModel
+model: notifyPopup.notificationModel
 
 add: Transition {
-NumberAnimation { property: "x"; from: notifyPopup.width; to: 0; duration: 350; easing.type: Easing.OutCubic }
+NumberAnimation {
+property: "x"
+from: notifyPopup.width
+to: 0
+duration: 350
+easing.type: Easing.OutCubic
+}
 }
 
 delegate: Rectangle {
@@ -156,8 +153,8 @@ onFinished: delegateCard.finalizeRemoval()
 
 Timer {
 id: dismissTimer
-running: true
 interval: delegateCard.timeoutMs
+running: interval > 0
 onTriggered: delegateCard.requestClose()
 }
 
@@ -169,22 +166,28 @@ slideOutAnim.start();
 }
 
 function finalizeRemoval() {
-let n = notifyPopup.notifMap[notifId];
-if (n && typeof n.dismiss === "function") {
-n.dismiss();
-}
-delete notifyPopup.notifMap[notifId];
+const n = notifyPopup.notifMap[delegateCard.notifId];
 
-let currentIdx = delegateCard.index;
-if (currentIdx >= 0 && currentIdx < notifyModel.count && notifyModel.get(currentIdx).notifId === notifId) {
-notifyModel.remove(currentIdx);
+if (n && typeof n.dismiss === "function") n.dismiss();
+
+delete notifyPopup.notifMap[delegateCard.notifId];
+
+const currentIdx = delegateCard.index;
+const model = notifyPopup.notificationModel;
+
+if (
+currentIdx >= 0 &&
+currentIdx < model.count &&
+model.get(currentIdx).notifId === delegateCard.notifId
+) {
+model.remove(currentIdx);
+return;
 }
-else {
-for (let i = 0; i < notifyModel.count; i++) {
-if (notifyModel.get(i).notifId === notifId) {
-notifyModel.remove(i);
+
+for (let i = 0; i < model.count; i++) {
+if (model.get(i).notifId === delegateCard.notifId) {
+model.remove(i);
 break;
-}
 }
 }
 }
@@ -195,23 +198,25 @@ hoverEnabled: true
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-onEntered: {
-dismissTimer.stop();
-}
+onEntered: dismissTimer.stop()
 
 onExited: {
-dismissTimer.restart();
+if (dismissTimer.interval > 0)
+dismissTimer.restart()
 }
 
 onPressed: mouse => {
-notifyPopup.clicked();
 mouse.accepted = true;
+notifyPopup.clicked();
 
-let n = notifyPopup.notifMap[delegateCard.notifId];
+const n = notifyPopup.notifMap[delegateCard.notifId];
 
-if (mouse.button === Qt.LeftButton && n && typeof n.activate === "function") {
+if (
+mouse.button === Qt.LeftButton && n && typeof n.activate === "function"
+) {
 n.activate();
 }
+
 delegateCard.requestClose();
 }
 }
