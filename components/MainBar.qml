@@ -79,6 +79,8 @@ z: 1
 // <<< LADO ESQUERDO <<<
 StartModule { id: startModuleInstance; parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
+WorkspaceModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+Separator {}
 MprisModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 
 // <<< ESPAÇADOR >>>
