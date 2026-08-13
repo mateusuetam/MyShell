@@ -49,6 +49,8 @@ readonly property color bright_orange: "#fe8019"
 
 // LoadingWindow
 readonly property color loadingBackground: dark0
+readonly property color loadingBarBackground: dark0_hard
+readonly property color loadingProgress: bright_orange
 readonly property color loadingCanvas: neutral_green
 readonly property color loadingText: light1
 

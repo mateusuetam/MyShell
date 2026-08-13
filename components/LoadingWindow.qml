@@ -7,7 +7,8 @@ import "../core"
 Item {
 id: loadingManager
 
-required property var screen
+required property ShellScreen screen
+property var activeLoading: null
 
 Component {
 id: loadingFactory
@@ -22,23 +23,11 @@ property int currentStep: 0
 readonly property bool isBoot: mode === "boot"
 readonly property bool isWallpaper: mode === "wallpaper"
 
-readonly property var bootMessages: [
-"W A Y L A N D - Y U T A N I   C O R P .",
-"INTERFACE DO SISTEMA",
-"CARREGANDO NÚCLEO CENTRAL.............. OK",
-"VERIFICANDO SUPORTE DE VIDA............ OK",
-"SISTEMA OPERACIONAL ESTÁVEL............ PRONTO"
-]
+readonly property int maxSteps: isBoot ? 8 : 6
+readonly property int smoothThreshold: Math.floor(maxSteps * 0.66)
+readonly property bool finalPhase: currentStep >= smoothThreshold
 
-readonly property var wallpaperMessages: [
-"S I S T E M A   O P T I C O .",
-"RECALIBRANDO MATRIZ DE VÍDEO",
-"DESCARREGANDO CACHE.............. OK",
-"APLICANDO NOVO FEED VISUAL....... OK",
-"SINCRONIZAÇÃO COMPLETA........... PRONTO"
-]
-
-readonly property var messages: isBoot ? bootMessages : wallpaperMessages
+readonly property string titleText: isBoot ? "W A Y L A N D - Y U T A N I   C O R P ." : "S I S T E M A   O P T I C O ."
 
 WlrLayershell.namespace: "loading"
 WlrLayershell.layer: loadingWindow.isBoot ? WlrLayer.Overlay : WlrLayer.Bottom
@@ -55,8 +44,9 @@ left: true
 
 color: "transparent"
 
+Component.onDestruction: {if (loadingManager.activeLoading === loadingWindow) loadingManager.activeLoading = null;}
+
 function closeLoading(): void {
-loadingWindow.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None;
 loadingWindow.destroy();
 }
 
@@ -116,50 +106,68 @@ anchors.centerIn: parent
 spacing: 20
 
 TerminalText {
-text: loadingWindow.messages[0]
+id: mainTitle
+anchors.horizontalCenter: parent.horizontalCenter
+text: loadingWindow.titleText
 font.pixelSize: ThemeEngine.appliedLoadingTitleFontSize
 font.bold: true
 opacity: loadingWindow.currentStep >= 1 ? 1 : 0
 }
 
-TerminalText {
-text: loadingWindow.messages[1]
-font.pixelSize: ThemeEngine.appliedLoadingStartFontSize
-opacity: loadingWindow.currentStep >= 2 ? 1 : 0
-}
+Rectangle {
+id: progressTrack
+anchors.horizontalCenter: parent.horizontalCenter
 
-TerminalText {
-text: loadingWindow.messages[2]
-opacity: loadingWindow.currentStep >= 3 ? 1 : 0
-}
+width: Math.max(mainTitle.implicitWidth, 300)
+height: 10
 
-TerminalText {
-text: loadingWindow.messages[3]
-opacity: loadingWindow.currentStep >= 4 ? 1 : 0
-}
+color: ThemeEngine.palette.loadingBarBackground
+radius: ThemeEngine.palette.shellRadius
+opacity: loadingWindow.currentStep >= 1 ? 1 : 0
 
-TerminalText {
-text: loadingWindow.messages[4]
-opacity: loadingWindow.currentStep >= 5 ? 1 : 0
+Rectangle {
+width: (parent.width / loadingWindow.maxSteps) * Math.min(loadingWindow.currentStep, loadingWindow.maxSteps)
+height: parent.height
+
+radius: ThemeEngine.palette.shellRadius
+color: ThemeEngine.palette.loadingProgress
+
+Behavior on width {
+NumberAnimation {
+duration: loadingWindow.finalPhase ? sequenceTimer.interval : sequenceTimer.interval * 0.6
+easing.type: loadingWindow.finalPhase ? Easing.Linear : Easing.OutCubic
+}
+}
+}
 }
 }
 }
 
 Timer {
 id: sequenceTimer
-interval: loadingWindow.isBoot ? 550 : 275
+readonly property int baseInterval: loadingWindow.isBoot ? 550 : 275
+interval: baseInterval
 running: true
 repeat: true
 
 onTriggered: {
 loadingWindow.currentStep++
 
-if (loadingWindow.isWallpaper && loadingWindow.currentStep === 4)
+if (loadingWindow.finalPhase) {
+interval = baseInterval * 0.7
+} else {
+interval = baseInterval * (0.6 + Math.random() * 0.9)
+}
+
+if (
+loadingWindow.isWallpaper && loadingWindow.currentStep === 4
+) {
 WallpaperEngine.currentWallpaper = loadingWindow.nextWallpaper
+}
 
-if ((loadingWindow.isBoot && loadingWindow.currentStep === 8) ||
-(loadingWindow.isWallpaper && loadingWindow.currentStep === 6)) {
-
+if (
+loadingWindow.currentStep > loadingWindow.maxSteps
+) {
 stop()
 fadeOutAnim.start()
 }
@@ -169,19 +177,17 @@ fadeOutAnim.start()
 }
 
 function spawnLoading(mode, newWallpaper) {
-loadingFactory.createObject(loadingManager, {
-screen: loadingManager.screen,
-mode: mode,
-nextWallpaper: newWallpaper || ""
-});
+if (loadingManager.activeLoading) loadingManager.activeLoading.destroy()
+loadingManager.activeLoading = loadingFactory.createObject
+(loadingManager,{screen: loadingManager.screen, mode: mode, nextWallpaper: newWallpaper ?? ""})
 }
 
-Component.onCompleted: spawnLoading("boot", "")
+Component.onCompleted: {spawnLoading("boot")}
 
 Connections {
 target: WallpaperEngine
 function onTransitionRequested(path) {
-loadingManager.spawnLoading("wallpaper", path);
+loadingManager.spawnLoading("wallpaper", path)
 }
 }
 }
