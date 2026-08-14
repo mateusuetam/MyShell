@@ -63,14 +63,11 @@ readonly property color menuErrorColor: bright_red
 // Shell
 readonly property int shellRadius: 0
 readonly property color backgroundColor: dark0
-readonly property color borderColor: dark1
+readonly property color borderColor: dark2
 readonly property color borderLowColor: bright_green
 readonly property color borderNormalColor: bright_blue
 readonly property color borderCriticalColor: bright_red
 readonly property color notificationContentColor: light1
-
-// Start
-readonly property color startLabelColor: light1
 
 // Mpris
 readonly property color mprisPlayingColor: bright_aqua
@@ -115,6 +112,9 @@ readonly property color batteryNormalColor: neutral_aqua
 readonly property color clockLabelColor: light1
 readonly property color clockDayColor: bright_aqua
 readonly property color clockMonthColor: bright_purple
+
+// Start
+readonly property color startLabelColor: light1
 
 // Lockscreen
 readonly property color lockLabelColor: gray0

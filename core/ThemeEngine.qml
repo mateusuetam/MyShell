@@ -27,8 +27,11 @@ readonly property int appliedLockPromptInputFontSize: 22
 readonly property int appliedLockPromptErrorFontSize: 14
 
 readonly property var palettes: ({
+CatppuccinMocha: CatppuccinMocha,
 GruvboxDark: GruvboxDark,
-CatppuccinMocha: CatppuccinMocha
+RosePine: RosePine,
+RosePineDawn: RosePineDawn,
+RosePineMoon: RosePineMoon
 })
 
 readonly property var availableThemes: Object.keys(palettes)

@@ -58,9 +58,6 @@ readonly property color borderNormalColor: sapphire
 readonly property color borderCriticalColor: red
 readonly property color notificationContentColor: textFg
 
-// Start
-readonly property color startLabelColor: textFg
-
 // Mpris
 readonly property color mprisPlayingColor: yellow
 readonly property color mprisPausedColor: sky
@@ -104,6 +101,9 @@ readonly property color batteryNormalColor: sapphire
 readonly property color clockLabelColor: textFg
 readonly property color clockDayColor: yellow
 readonly property color clockMonthColor: peach
+
+// Start
+readonly property color startLabelColor: textFg
 
 // Lockscreen
 readonly property color lockLabelColor: surface2

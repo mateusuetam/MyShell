@@ -1,2 +1,2 @@
-singleton WallpaperEngine WallpaperEngine.qml
 singleton ThemeEngine ThemeEngine.qml
+singleton WallpaperEngine WallpaperEngine.qml
