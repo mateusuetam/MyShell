@@ -18,9 +18,6 @@ implicitWidth: 440
 implicitHeight: 40
 grabFocus: true
 
-anchor.window: passwordPopup.targetWindow
-anchor.rect: Qt.rect(passwordPopup.targetX, passwordPopup.targetY, 1, 1)
-
 onVisibleChanged: {
 if (visible) {
 passwordPopup.statusState = "input";
@@ -34,12 +31,21 @@ passwordPopup.targetNetwork = null;
 }
 }
 
+function _dyn(obj) { return obj; }
+
 function openPrompt(network, parentWin) {
 if (!network || !parentWin)
 return;
 
 passwordPopup.targetNetwork = network;
 passwordPopup.targetWindow = parentWin;
+
+let pX = (parentWin.width / 2) - (passwordPopup.implicitWidth / 2);
+let pY = parentWin.height + 6;
+
+passwordPopup._dyn(passwordPopup).anchor.window = parentWin;
+passwordPopup._dyn(passwordPopup).anchor.rect = Qt.rect(pX, pY, 1, 1);
+
 passwordPopup.visible = true;
 }
 

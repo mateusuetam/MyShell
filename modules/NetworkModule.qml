@@ -17,6 +17,7 @@ property var forgottenNetworks: []
 
 property string lastStatus: ""
 property string pendingStatus: ""
+property var pendingNetworkForAuth: null
 property bool isReady: false
 
 property bool isManualBlock: false
@@ -61,6 +62,18 @@ Qt.callLater(() => { isReady = true; })
 }
 
 Process { id: notifyProcess }
+
+Timer {
+id: promptDelayTimer
+interval: 150
+repeat: false
+onTriggered: {
+if (networkModule.pendingNetworkForAuth) {
+networkModule.passwordPrompt.openPrompt(networkModule.pendingNetworkForAuth, networkModule.parentWindow);
+networkModule.pendingNetworkForAuth = null;
+}
+}
+}
 
 Timer {
 id: stabilizationTimer
@@ -262,9 +275,8 @@ if (net.known || net.security === WifiSecurityType.Open) {
 net.connect();
 } else {
 networkModule.globalMenu.close();
-Qt.callLater(() => {
-networkModule.passwordPrompt.openPrompt(net, networkModule.parentWindow);
-});
+networkModule.pendingNetworkForAuth = net;
+promptDelayTimer.start();
 }
 }
 });
