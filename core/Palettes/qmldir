@@ -1,5 +1,7 @@
 singleton CatppuccinMocha CatppuccinMocha.qml
 singleton GruvboxDark GruvboxDark.qml
+singleton MonochromeDark MonochromeDark.qml
+singleton MonochromeLight MonochromeLight.qml
 singleton RosePine RosePine.qml
 singleton RosePineDawn RosePineDawn.qml
 singleton RosePineMoon RosePineMoon.qml
