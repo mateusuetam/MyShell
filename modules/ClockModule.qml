@@ -10,8 +10,8 @@ required property var globalMenu
 required property var parentWindow
 
 readonly property var ptBr: Qt.locale("pt_BR")
-
 property bool showFullDate: false
+signal requestCalendar(var anchorItem)
 
 implicitWidth: clockRow.implicitWidth
 implicitHeight: clockModule.parentWindow ? clockModule.parentWindow.barHeight : 30
@@ -24,10 +24,12 @@ precision: SystemClock.Minutes
 MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
-acceptedButtons: Qt.RightButton
+acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: (mouse) => {
 if (mouse.button === Qt.RightButton) {
 clockModule.showFullDate = !clockModule.showFullDate
+} else if (mouse.button === Qt.LeftButton) {
+clockModule.requestCalendar(clockModule)
 }
 }
 }

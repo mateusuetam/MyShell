@@ -33,6 +33,7 @@ WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMe
 : WlrKeyboardFocus.None
 
 PasswordPrompt { id: wifiPasswordPromptInstance }
+CalendarManager { id: calendarManager; globalMenu: barWindow.globalMenu }
 
 // --- SEPARADOR ---
 component Separator: Item {
@@ -107,7 +108,7 @@ BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
-ClockModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+ClockModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; onRequestCalendar: anchorItem => calendarManager.toggleCalendar(barWindow, anchorItem) }
 }
 }
 }
