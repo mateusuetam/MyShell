@@ -28,11 +28,9 @@ left: true
 implicitHeight: barWindow.barHeight
 exclusionMode: ExclusionMode.Auto
 WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMenuFocused && barWindow.globalMenu._pendingWindow === barWindow) ||
-(wifiPasswordPromptInstance && wifiPasswordPromptInstance.visible))
-? WlrKeyboardFocus.OnDemand
-: WlrKeyboardFocus.None
+(textPromptInstance && textPromptInstance.visible)) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-PasswordPrompt { id: wifiPasswordPromptInstance }
+TextPrompt { id: textPromptInstance }
 CalendarManager { id: calendarManager; globalMenu: barWindow.globalMenu }
 
 // --- SEPARADOR ---
@@ -102,7 +100,7 @@ VolumeModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
 BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
-NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; passwordPrompt: wifiPasswordPromptInstance }
+NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: textPromptInstance }
 Separator {}
 BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}

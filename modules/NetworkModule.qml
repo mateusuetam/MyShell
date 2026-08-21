@@ -9,7 +9,7 @@ id: networkModule
 
 required property var globalMenu
 required property var parentWindow
-required property var passwordPrompt
+required property var textPrompt
 
 readonly property bool isWifiOn: Networking.wifiEnabled
 
@@ -63,14 +63,40 @@ Qt.callLater(() => { isReady = true; })
 
 Process { id: notifyProcess }
 
+Connections {
+target: networkModule.pendingNetworkForAuth
+ignoreUnknownSignals: true
+function onConnectedChanged() {
+if (networkModule.pendingNetworkForAuth?.connected) {
+networkAuthWatchdog.stop();
+networkModule.textPrompt.closePrompt();
+networkModule.pendingNetworkForAuth = null;
+}
+}
+}
+
+Timer {
+id: networkAuthWatchdog
+interval: 5000
+repeat: false
+onTriggered: {
+if (networkModule.pendingNetworkForAuth && !networkModule.pendingNetworkForAuth.connected) {
+networkModule.textPrompt.showError("Falha na conexão. Tente novamente:");
+}
+}
+}
+
 Timer {
 id: promptDelayTimer
 interval: 150
 repeat: false
 onTriggered: {
 if (networkModule.pendingNetworkForAuth) {
-networkModule.passwordPrompt.openPrompt(networkModule.pendingNetworkForAuth, networkModule.parentWindow);
-networkModule.pendingNetworkForAuth = null;
+let netName = networkModule.pendingNetworkForAuth.name;
+
+networkModule.textPrompt.openPrompt(`Senha para ${netName}:`, networkModule.parentWindow, true,
+(inputText) => {networkModule.pendingNetworkForAuth.connectWithPsk(inputText); networkAuthWatchdog.start();},
+`Conectando a ${netName}...`);
 }
 }
 }
