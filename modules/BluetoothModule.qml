@@ -71,6 +71,7 @@ if (bluetoothModule.isRfkillBlocked) {
 rfkillToggleProcess.exec(["rfkill", "unblock", "bluetooth"]);
 } else {
 rfkillToggleProcess.exec(["rfkill", "block", "bluetooth"]);
+bluetoothModule.sendNotification("Bluetooth", "Bluetooth bloqueado", "normal");
 }
 }
 

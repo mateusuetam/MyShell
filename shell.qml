@@ -4,12 +4,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "components"
-import "core"
 
 ShellRoot {
 id: shellScope
 
 LoadingWindow {
+screen: Quickshell.screens[0]
+}
+
+Wallpaper {
+id: shellWallpaper
 screen: Quickshell.screens[0]
 }
 
@@ -21,16 +25,15 @@ MainBar {
 id: mainBarWindow
 screen: Quickshell.screens[0]
 globalMenu: sharedContextMenu
+startModule.wallpaperMenuStructure: shellWallpaper.menuStructure
+startModule.onWallpaperChangeRequested: function(path) {
+shellWallpaper.requestWallpaperChange(path)
+}
 }
 
 NotificationPopup {
 targetWindow: mainBarWindow
 onClicked: sharedContextMenu.close()
-}
-
-Wallpaper {
-screen: Quickshell.screens[0]
-wallpaperPath: WallpaperEngine.currentWallpaper
 }
 
 LockScreen {

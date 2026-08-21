@@ -12,6 +12,9 @@ required property var parentWindow
 
 property var cachedAppMenu: []
 
+property var wallpaperMenuStructure: []
+signal wallpaperChangeRequested(string path)
+
 implicitWidth: startRow.implicitWidth
 implicitHeight: startModule.parentWindow ? startModule.parentWindow.barHeight : 30
 
@@ -40,11 +43,11 @@ preventClose: true,
 onTrigger: () => {
 if (!startModule.globalMenu) return;
 
-const wallpaperMenuItems = WallpaperEngine.menuStructure.map(item => ({
+const wallpaperMenuItems = startModule.wallpaperMenuStructure.map(item => ({
 type: item.type,
 text: item.text,
 preventClose: true,
-onTrigger: () => WallpaperEngine.requestWallpaperChange(item.path)
+onTrigger: () => startModule.wallpaperChangeRequested(item.path)
 }));
 
 startModule.globalMenu.showSearchInput = false;
