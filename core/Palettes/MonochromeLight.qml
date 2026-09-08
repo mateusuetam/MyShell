@@ -13,9 +13,6 @@ readonly property color fg4: "#cccccc"
 
 // LoadingWindow
 readonly property color loadingBackground: bg
-readonly property color loadingBarBackground: fg3
-readonly property color loadingProgress: fg
-readonly property color loadingCanvas: fg2
 readonly property color loadingText: fg
 
 // ContextMenu

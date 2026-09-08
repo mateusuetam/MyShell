@@ -25,9 +25,6 @@ readonly property color highlight_high: "#56526e"
 
 // LoadingWindow
 readonly property color loadingBackground: base
-readonly property color loadingBarBackground: _nc
-readonly property color loadingProgress: rose
-readonly property color loadingCanvas: leaf
 readonly property color loadingText: text
 
 // ContextMenu

@@ -38,9 +38,6 @@ readonly property color crust: "#11111b"
 
 // LoadingWindow
 readonly property color loadingBackground: base
-readonly property color loadingBarBackground: mantle
-readonly property color loadingProgress: lavender
-readonly property color loadingCanvas: green
 readonly property color loadingText: textFg
 
 // ContextMenu
