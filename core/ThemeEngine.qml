@@ -61,9 +61,9 @@ templateFileName: "myshell.kdl",
 configDir: `${Quickshell.env("HOME")}/.config/niri`
 },
 {
-name: "Alacritty",
-templateFileName: "myshell.toml",
-configDir: `${Quickshell.env("HOME")}/.config/alacritty`
+name: "Foot",
+templateFileName: "myshell.ini",
+configDir: `${Quickshell.env("HOME")}/.config/foot`
 }
 ]
 

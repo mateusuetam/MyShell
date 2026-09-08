@@ -8,10 +8,3 @@ urgent-color "#000000"
 window-rule {
 geometry-corner-radius 20
 }
-window-rule {
-match app-id="^Alacritty$"
-background-effect {
-blur true
-xray true
-}
-}
