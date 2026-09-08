@@ -114,9 +114,8 @@ readonly property color clockMonthColor: bright_purple
 readonly property color startLabelColor: light1
 
 // Lockscreen
-readonly property color lockLabelColor: gray0
-readonly property color lockPromptLabelColor: bright_yellow
-readonly property color lockInputLabelColor: faded_green
-readonly property color lockPromptErrorColor: bright_red
+readonly property color lockTextColor: light1
+readonly property color lockInputBorderColor: bright_orange
+readonly property color lockErrorColor: bright_red
 readonly property color lockScreenBackgroundColor: dark0
 }

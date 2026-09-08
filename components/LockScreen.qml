@@ -68,7 +68,7 @@ text: Qt.formatTime(systemClock.date, "HH:mm")
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedLockClockFontSize
 font.bold: true
-color: ThemeEngine.palette.lockLabelColor
+color: ThemeEngine.palette.lockTextColor
 renderType: Text.NativeRendering
 }
 
@@ -86,15 +86,15 @@ echoMode: TextInput.Password
 horizontalAlignment: TextInput.AlignHCenter
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedLockInputFontSize
-color: ThemeEngine.palette.lockInputLabelColor
-selectionColor: ThemeEngine.palette.lockInputLabelColor
+color: ThemeEngine.palette.lockTextColor
+selectionColor: ThemeEngine.palette.lockTextColor
 selectedTextColor: ThemeEngine.palette.lockScreenBackgroundColor
 padding: 8
 
 cursorDelegate: Rectangle {
 width: 1
 height: Math.round(passwordBox.font.pixelSize * 1.2)
-color: ThemeEngine.palette.lockInputLabelColor
+color: ThemeEngine.palette.lockTextColor
 SequentialAnimation on opacity {
 running: passwordBox.activeFocus
 loops: Animation.Infinite
@@ -112,8 +112,8 @@ duration: 500
 background: Rectangle {
 radius: ThemeEngine.palette.shellRadius
 color: ThemeEngine.palette.lockScreenBackgroundColor
-border.width: 1
-border.color: lockRoot.showFailure ? ThemeEngine.palette.lockPromptErrorColor : ThemeEngine.palette.lockInputLabelColor
+border.width: 2
+border.color: lockRoot.showFailure ? ThemeEngine.palette.lockErrorColor : ThemeEngine.palette.lockInputBorderColor
 opacity: lockRoot.showFailure ? 1.0 : 0.65
 }
 
@@ -133,7 +133,7 @@ Rectangle {
 Layout.alignment: Qt.AlignHCenter
 Layout.preferredWidth: lockRoot.unlockInProgress ? 24 : 0
 Layout.preferredHeight: 2
-color: ThemeEngine.palette.lockInputLabelColor
+color: ThemeEngine.palette.lockTextColor
 
 Behavior on Layout.preferredWidth {
 NumberAnimation {
@@ -162,9 +162,9 @@ Layout.alignment: Qt.AlignHCenter
 visible: lockRoot.showFailure
 text: "SENHA INVÁLIDA"
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLockPromptErrorFontSize
+font.pixelSize: ThemeEngine.appliedLockErrorFontSize
 font.bold: true
-color: ThemeEngine.palette.lockPromptErrorColor
+color: ThemeEngine.palette.lockErrorColor
 Timer {
 running: lockRoot.showFailure
 repeat: true

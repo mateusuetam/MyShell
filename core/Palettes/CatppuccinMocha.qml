@@ -103,9 +103,8 @@ readonly property color clockMonthColor: peach
 readonly property color startLabelColor: textFg
 
 // Lockscreen
-readonly property color lockLabelColor: surface2
-readonly property color lockPromptLabelColor: yellow
-readonly property color lockInputLabelColor: textFg
-readonly property color lockPromptErrorColor: red
+readonly property color lockTextColor: textFg
+readonly property color lockInputBorderColor: lavender
+readonly property color lockErrorColor: red
 readonly property color lockScreenBackgroundColor: base
 }

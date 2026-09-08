@@ -66,7 +66,7 @@ text: Qt.formatTime(clock.date, "HH:mm")
 color: ThemeEngine.palette.loadingText
 opacity: 0.65
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLoadingTitleFontSize
+font.pixelSize: ThemeEngine.appliedLoadingClockFontSize
 }
 
 Text {
@@ -74,7 +74,7 @@ anchors.horizontalCenter: parent.horizontalCenter
 text: loadingWindow.getGreeting(clock.hours)
 color: ThemeEngine.palette.loadingText
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLoadingLabelFontSize
+font.pixelSize: ThemeEngine.appliedLoadingGreetingsFontSize
 font.weight: Font.Bold
 opacity: 1.0
 }

@@ -49,7 +49,7 @@ horizontalAlignment: delegateRoot.safeData.align === "center" ? Text.AlignHCente
 text: delegateRoot.safeData.text || ""
 color: delegateRoot.isHighlighted ? ThemeEngine.palette.menuTextHoverColor : ThemeEngine.palette.menuTextColor
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedMenuFontSize
+font.pixelSize: ThemeEngine.appliedFontSize
 elide: delegateRoot.safeData.align === "center" ? Text.ElideNone : Text.ElideRight
 }
 
@@ -96,7 +96,7 @@ verticalAlignment: Text.AlignVCenter
 text: typeof gridDelegate.modelData === "string" ? gridDelegate.modelData : (gridDelegate.modelData?.text ?? "")
 color: gridDelegate.modelData?.isToday ? ThemeEngine.palette.menuTextHoverColor : ThemeEngine.palette.menuTextColor
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedMenuFontSize - 1
+font.pixelSize: ThemeEngine.appliedFontSize - 1
 fontSizeMode: Text.HorizontalFit
 minimumPixelSize: 8
 }
@@ -132,7 +132,7 @@ verticalAlignment: Text.AlignVCenter
 text: actionDelegate.modelData?.text ?? ""
 color: splitMouse.containsMouse ? ThemeEngine.palette.menuTextHoverColor : ThemeEngine.palette.menuTextColor
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedMenuFontSize - 1
+font.pixelSize: ThemeEngine.appliedFontSize - 1
 elide: Text.ElideRight
 }
 

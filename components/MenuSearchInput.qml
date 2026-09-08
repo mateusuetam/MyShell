@@ -34,7 +34,7 @@ anchors.leftMargin: 8
 anchors.rightMargin: 8
 anchors.verticalCenter: parent.verticalCenter
 font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedMenuFontSize
+font.pixelSize: ThemeEngine.appliedFontSize
 color: ThemeEngine.palette.menuTextColor
 focus: true
 selectByMouse: true

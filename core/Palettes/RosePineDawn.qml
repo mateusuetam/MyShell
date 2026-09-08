@@ -30,7 +30,7 @@ readonly property color loadingText: text
 // ContextMenu
 readonly property color menuTextHoverColor: surface
 readonly property color menuTextColor: text
-readonly property color menuHoverColor: love
+readonly property color menuHoverColor: rose
 readonly property color menuErrorColor: love
 
 // Shell
@@ -90,9 +90,8 @@ readonly property color clockMonthColor: love
 readonly property color startLabelColor: text
 
 // Lockscreen
-readonly property color lockLabelColor: muted
-readonly property color lockPromptLabelColor: rose
-readonly property color lockInputLabelColor: muted
-readonly property color lockPromptErrorColor: love
+readonly property color lockTextColor: text
+readonly property color lockInputBorderColor: rose
+readonly property color lockErrorColor: love
 readonly property color lockScreenBackgroundColor: base
 }

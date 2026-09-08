@@ -12,18 +12,14 @@ property var palette: GruvboxDark
 property string currentTheme: defaultTheme
 readonly property string defaultTheme: "GruvboxDark"
 
-readonly property string appliedFontFamily: "Monaspace Krypton NF"
-readonly property int appliedLoadingTitleFontSize: 84
-readonly property int appliedLoadingLabelFontSize: 36
+readonly property string appliedFontFamily: "Ubuntu Sans"
+readonly property int appliedLoadingClockFontSize: 96
+readonly property int appliedLoadingGreetingsFontSize: 40
 readonly property int appliedFontSize: 14
-readonly property int appliedMenuFontSize: 12
 readonly property int appliedNotificationHeaderFontSize: 16
-readonly property int appliedLockLabelFontSize: 14
 readonly property int appliedLockClockFontSize: 110
-readonly property int appliedLockPromptFontSize: 16
 readonly property int appliedLockInputFontSize: 22
-readonly property int appliedLockPromptInputFontSize: 22
-readonly property int appliedLockPromptErrorFontSize: 14
+readonly property int appliedLockErrorFontSize: 14
 
 readonly property var palettes: ({
 CatppuccinMocha: CatppuccinMocha,

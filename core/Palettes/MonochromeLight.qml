@@ -78,9 +78,8 @@ readonly property color clockMonthColor: fg2
 readonly property color startLabelColor: fg
 
 // Lockscreen
-readonly property color lockLabelColor: fg2
-readonly property color lockPromptLabelColor: fg2
-readonly property color lockInputLabelColor: fg
-readonly property color lockPromptErrorColor: fg3
+readonly property color lockTextColor: fg
+readonly property color lockInputBorderColor: fg2
+readonly property color lockErrorColor: fg3
 readonly property color lockScreenBackgroundColor: bg
 }
