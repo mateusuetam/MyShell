@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
+import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import "../core"
@@ -23,7 +24,14 @@ function tryUnlock(password) {
 if (password === "") return;
 lockRoot.currentText = password;
 lockRoot.unlockInProgress = true;
-pam.start();
+validationDelay.restart();
+}
+
+Timer {
+id: validationDelay
+interval: 300
+repeat: false
+onTriggered: pam.start()
 }
 
 PamContext {
@@ -31,7 +39,6 @@ id: pam
 configDirectory: "../core"
 config: "password.conf"
 onPamMessage: if (this.responseRequired) this.respond(lockRoot.currentText)
-
 onCompleted: result => {
 if (result === PamResult.Success) {
 sessionLock.locked = false;
@@ -51,156 +58,127 @@ id: lockSurface
 color: ThemeEngine.palette.lockScreenBackgroundColor
 
 ColumnLayout {
-anchors.fill: parent
-anchors.margins: 60
-spacing: 20
-
-// ==========================================
-// LOCK HEADER
-// ==========================================
-ColumnLayout {
-Layout.fillWidth: true
-spacing: 5
-
-Text {
-text: "MU-TH-UR 6000 // INTERFACE DE SESSÃO SEGURA"
-font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLockLabelFontSize
-font.bold: true
-color: ThemeEngine.palette.lockLabelColor
-}
-
-Rectangle {
-Layout.fillWidth: true
-implicitHeight: 1
-color: ThemeEngine.palette.lockLabelColor
-}
-}
-
-// ==========================================
-// LOCK CLOCK
-// ==========================================
-ColumnLayout {
-Layout.alignment: Qt.AlignHCenter
-Layout.topMargin: 40
-spacing: 0
+anchors.centerIn: parent
+spacing: 30
 
 Text {
 id: clock
-property var date: new Date()
 Layout.alignment: Qt.AlignHCenter
-renderType: Text.NativeRendering
+text: Qt.formatTime(systemClock.date, "HH:mm")
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedLockClockFontSize
 font.bold: true
 color: ThemeEngine.palette.lockLabelColor
-text: {
-const hours = clock.date.getHours().toString().padStart(2, '0');
-const minutes = clock.date.getMinutes().toString().padStart(2, '0');
-return `${hours}:${minutes}`;
+renderType: Text.NativeRendering
 }
 
-Timer {
-running: true; repeat: true; interval: 1000
-onTriggered: clock.date = new Date()
-}
-}
-
-Text {
+ColumnLayout {
 Layout.alignment: Qt.AlignHCenter
-text: "SOBREPOSIÇÃO DE HORA DO SISTEMA"
-font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLockLabelFontSize
-font.letterSpacing: 4
-color: ThemeEngine.palette.lockLabelColor
-}
-}
-
-Item {
-Layout.fillHeight: true
-}
-
-// ==========================================
-// LOCK PROMPT
-// ==========================================
-Column {
-Layout.alignment: Qt.AlignHCenter
-Layout.bottomMargin: 100
-spacing: 15
-
-Text {
-text: lockRoot.unlockInProgress ? "AUTENTICANDO DIRETÓRIO DE SESSÃO..." : "NOSTROMO_LOGIN_node7 > INSIRA A CHAVE DE ACESSO:"
-font.family: ThemeEngine.appliedFontFamily
-font.pixelSize: ThemeEngine.appliedLockPromptFontSize
-color: ThemeEngine.palette.lockPromptLabelColor
-}
-
-RowLayout {
-spacing: 0
+spacing: 8
 
 TextField {
 id: passwordBox
-implicitWidth: 400
-padding: 0
+implicitWidth: 320
+implicitHeight: 42
 focus: true
 enabled: !lockRoot.unlockInProgress
 echoMode: TextInput.Password
-cursorDelegate: Item {}
-background: Item {}
-
+horizontalAlignment: TextInput.AlignHCenter
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedLockInputFontSize
 color: ThemeEngine.palette.lockInputLabelColor
+selectionColor: ThemeEngine.palette.lockInputLabelColor
+selectedTextColor: ThemeEngine.palette.lockScreenBackgroundColor
+padding: 8
 
-onTextChanged: if (lockRoot.showFailure) lockRoot.showFailure = false
+cursorDelegate: Rectangle {
+width: 1
+height: Math.round(passwordBox.font.pixelSize * 1.2)
+color: ThemeEngine.palette.lockInputLabelColor
+SequentialAnimation on opacity {
+running: passwordBox.activeFocus
+loops: Animation.Infinite
+NumberAnimation {
+to: 0
+duration: 500
+}
+NumberAnimation {
+to: 1
+duration: 500
+}
+}
+}
 
-onAccepted: lockRoot.tryUnlock(passwordBox.text)
+background: Rectangle {
+radius: ThemeEngine.palette.shellRadius
+color: ThemeEngine.palette.lockScreenBackgroundColor
+border.width: 1
+border.color: lockRoot.showFailure ? ThemeEngine.palette.lockPromptErrorColor : ThemeEngine.palette.lockInputLabelColor
+opacity: lockRoot.showFailure ? 1.0 : 0.65
+}
+
+onTextChanged: if (lockRoot.showFailure) lockRoot.showFailure = false;
+onAccepted: lockRoot.tryUnlock(passwordBox.text);
 
 Connections {
 target: lockRoot
+
 function onCurrentTextChanged() {
-if (lockRoot.currentText === "") {
-passwordBox.text = "";
-}
-}
-}
-}
-
-Text {
-text: "▒"
-font.pixelSize: ThemeEngine.appliedLockPromptInputFontSize
-color: ThemeEngine.palette.lockInputLabelColor
-visible: !lockRoot.unlockInProgress
-
-Timer {
-running: true; repeat: true; interval: 600
-onTriggered: parent.opacity = parent.opacity === 1.0 ? 0.0 : 1.0
+if (lockRoot.currentText === "") passwordBox.text = "";
 }
 }
 }
 
 Rectangle {
-implicitWidth: 415
-implicitHeight: 2
+Layout.alignment: Qt.AlignHCenter
+Layout.preferredWidth: lockRoot.unlockInProgress ? 24 : 0
+Layout.preferredHeight: 2
 color: ThemeEngine.palette.lockInputLabelColor
+
+Behavior on Layout.preferredWidth {
+NumberAnimation {
+duration: 150
+}
+}
+
+SequentialAnimation on opacity {
+running: lockRoot.unlockInProgress
+loops: Animation.Infinite
+
+NumberAnimation {
+to: 0.25
+duration: 500
+}
+
+NumberAnimation {
+to: 1.0
+duration: 500
+}
+}
 }
 
 Text {
-anchors.horizontalCenter: parent.horizontalCenter
+Layout.alignment: Qt.AlignHCenter
 visible: lockRoot.showFailure
-text: "!! ERRO: CHAVE DE ACESSO INVÁLIDA // ACESSO NEGADO !!"
+text: "SENHA INVÁLIDA"
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedLockPromptErrorFontSize
 font.bold: true
 color: ThemeEngine.palette.lockPromptErrorColor
-
 Timer {
-running: lockRoot.showFailure; repeat: true; interval: 400
+running: lockRoot.showFailure
+repeat: true
+interval: 400
 onTriggered: parent.opacity = parent.opacity === 1.0 ? 0.3 : 1.0
 }
 }
 }
 }
 }
+}
+
+SystemClock {
+id: systemClock
+precision: SystemClock.Minutes
 }
 }
