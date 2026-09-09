@@ -259,7 +259,7 @@ if (pairedDevices.length > 0) {
 menuModel.push({ type: "separator" });
 for (let j = 0; j < pairedDevices.length; j++) {
 let pDev = pairedDevices[j];
-let label = (pDev.connected ? "! " : "? ") + (pDev.name || pDev.address);
+let label = (pDev.connected ? "Conectado: " : "Desconectado: ") + (pDev.name || pDev.address);
 
 if (pDev.connected && pDev.batteryAvailable) {
 label += ` (${Math.round(pDev.battery * 100)}%)`;
@@ -278,7 +278,7 @@ menuModel.push({ type: "separator" });
 for (let k = 0; k < newDevices.length; k++) {
 let nDev = newDevices[k];
 menuModel.push({
-text: "? " + (nDev.name || nDev.address),
+text: (nDev.name || nDev.address),
 preventClose: true,
 onTrigger: () => { bluetoothModule.openDeviceSubMenu(nDev); }
 });

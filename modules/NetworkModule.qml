@@ -225,7 +225,7 @@ for (let i = 0; i < nets.length; i++) {
 let net = nets[i];
 if (net && (net.known || net.connected)) {
 if (networkModule.forgottenNetworks.indexOf(net.name) !== -1) continue;
-let prefix = net.connected ? "! Conectado: " : "? ";
+let prefix = net.connected ? "Conectado: " : "Desconectado: ";
 menuModel.push({
 text: prefix + net.name,
 preventClose: true,
@@ -292,10 +292,9 @@ else if (net.signalStrength >= 0.6) signalIcon = "6";
 else if (net.signalStrength >= 0.4) signalIcon = "4";
 
 let secIcon = (net.security === WifiSecurityType.Open) ? "NOPWD" : "PWD";
-let activeIcon = net.connected ? "! " : "";
 
 menuModel.push({
-text: `${activeIcon}${signalIcon} ${net.name} - ${secIcon}`,
+text: `${net.name} | ${secIcon} | ${signalIcon}`,
 onTrigger: () => {
 if (net.known || net.security === WifiSecurityType.Open) {
 net.connect();
