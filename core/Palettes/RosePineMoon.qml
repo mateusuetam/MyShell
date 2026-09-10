@@ -5,12 +5,8 @@ import QtQuick
 QtObject {
 id: rosePineMoonPalette
 
-readonly property color _nc: "#1f1d30"
 readonly property color base: "#232136"
 readonly property color surface: "#2a273f"
-readonly property color overlay: "#393552"
-readonly property color muted: "#6e6a86"
-readonly property color subtle: "#908caa"
 readonly property color text: "#e0def4"
 readonly property color love: "#eb6f92"
 readonly property color gold: "#f6c177"
@@ -18,10 +14,7 @@ readonly property color rose: "#ea9a97"
 readonly property color pine: "#3e8fb0"
 readonly property color foam: "#9ccfd8"
 readonly property color iris: "#c4a7e7"
-readonly property color leaf: "#95b1ac"
-readonly property color highlight_low: "#2a283e"
 readonly property color highlight_med: "#44415a"
-readonly property color highlight_high: "#56526e"
 
 // LoadingWindow
 readonly property color loadingBackground: base
