@@ -39,7 +39,7 @@ readonly property color backgroundColor: base
 readonly property color borderColor: subtle
 readonly property color borderLowColor: pine
 readonly property color borderNormalColor: iris
-readonly property color borderCriticalColor: love
+readonly property color borderCriticalColor: rose
 readonly property color notificationContentColor: text
 
 // Mpris
@@ -91,7 +91,7 @@ readonly property color startLabelColor: text
 
 // Lockscreen
 readonly property color lockTextColor: text
-readonly property color lockInputBorderColor: rose
+readonly property color lockInputBorderColor: love
 readonly property color lockErrorColor: rose
 readonly property color lockScreenBackgroundColor: base
 }
