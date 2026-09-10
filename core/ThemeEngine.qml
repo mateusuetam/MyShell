@@ -24,6 +24,7 @@ readonly property int appliedLockErrorFontSize: 14
 readonly property var palettes: ({
 CatppuccinMocha: CatppuccinMocha,
 GruvboxDark: GruvboxDark,
+GruvboxLight: GruvboxLight,
 MonochromeDark: MonochromeDark,
 MonochromeLight: MonochromeLight,
 RosePine: RosePine,
