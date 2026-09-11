@@ -3,24 +3,24 @@ pragma ComponentBehavior: Bound
 import QtQuick
 
 QtObject {
-id: catppuccinMochaPalette
+id: catppuccinFrappePalette
 
-readonly property color flamingo: "#f2cdcd"
-readonly property color pink: "#f5c2e7"
-readonly property color mauve: "#cba6f7"
-readonly property color red: "#f38ba8"
-readonly property color maroon: "#eba0ac"
-readonly property color peach: "#fab387"
-readonly property color yellow: "#f9e2af"
-readonly property color green: "#a6e3a1"
-readonly property color sky: "#89dceb"
-readonly property color sapphire: "#74c7ec"
-readonly property color blue: "#89b4fa"
-readonly property color lavender: "#b4befe"
-readonly property color textFg: "#cdd6f4"
-readonly property color surface1: "#45475a"
-readonly property color base: "#1e1e2e"
-readonly property color crust: "#11111b"
+readonly property color flamingo: "#eebebe"
+readonly property color pink: "#f4b8e4"
+readonly property color mauve: "#ca9ee6"
+readonly property color red: "#e78284"
+readonly property color maroon: "#ea999c"
+readonly property color peach: "#ef9f76"
+readonly property color yellow: "#e5c890"
+readonly property color green:"#a6d189"
+readonly property color sky: "#99d1db"
+readonly property color sapphire: "#85c1dc"
+readonly property color blue: "#8caaee"
+readonly property color lavender: "#babbf1"
+readonly property color textFg: "#c6d0f5"
+readonly property color surface1: "#51576d"
+readonly property color base: "#303446"
+readonly property color crust: "#232634"
 
 // LoadingWindow
 readonly property color loadingBackground: base

@@ -22,6 +22,9 @@ readonly property int appliedLockInputFontSize: 22
 readonly property int appliedLockErrorFontSize: 14
 
 readonly property var palettes: ({
+CatppuccinFrappe: CatppuccinFrappe,
+CatppuccinLatte: CatppuccinLatte,
+CatppuccinMacchiato: CatppuccinMacchiato,
 CatppuccinMocha: CatppuccinMocha,
 GruvboxDark: GruvboxDark,
 GruvboxLight: GruvboxLight,

@@ -1,0 +1,10 @@
+layout {
+border {
+active-color "#b7bdf8"
+inactive-color "#494d64"
+urgent-color "#ed8796"
+}
+}
+window-rule {
+geometry-corner-radius 12
+}

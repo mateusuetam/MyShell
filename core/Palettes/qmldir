@@ -1,3 +1,6 @@
+singleton CatppuccinFrappe CatppuccinFrappe.qml
+singleton CatppuccinLatte CatppuccinLatte.qml
+singleton CatppuccinMacchiato CatppuccinMacchiato.qml
 singleton CatppuccinMocha CatppuccinMocha.qml
 singleton GruvboxDark GruvboxDark.qml
 singleton GruvboxLight GruvboxLight.qml
