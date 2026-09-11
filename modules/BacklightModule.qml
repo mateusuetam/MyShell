@@ -8,6 +8,7 @@ id: backlightModule
 
 required property var globalMenu
 required property var parentWindow
+required property var textPrompt
 
 property int brightnessPercent: 50
 property int targetTemp: 2500
@@ -21,15 +22,16 @@ command: ["sh", "-c", "brightnessctl -m | cut -d, -f4 | tr -d '%'"]
 stdout: StdioCollector {
 onStreamFinished: {
 var val = parseInt(this.text.trim());
-if (!isNaN(val)) {
-backlightModule.brightnessPercent = val;
-}
+if (!isNaN(val)) backlightModule.brightnessPercent = val;
 }
 }
 Component.onCompleted: readBrightness.running = true
 }
 
-Process { id: changeBrightness }
+Process {
+id: changeBrightness
+}
+
 Connections {
 target: changeBrightness
 function onExited() {
@@ -41,11 +43,17 @@ Process {
 id: checkGammastep
 command: ["pgrep", "-f", "gammastep"]
 }
+
 Connections {
 target: checkGammastep
 function onExited(exitCode) {
 backlightModule.updateMenu(exitCode === 0);
 }
+}
+
+Process {
+id: gammastepToggleCheck
+command: ["pgrep", "-f", "gammastep"]
 }
 
 Process {
@@ -58,10 +66,6 @@ id: gammastepStart
 command: ["sh", "-c", "notify-send -u low Gammastep 'Temperatura ajustada para 2500K' && gammastep -O 2500"]
 }
 
-Process {
-id: gammastepToggleCheck
-command: ["pgrep", "-f", "gammastep"]
-}
 Connections {
 target: gammastepToggleCheck
 function onExited(exitCode) {
@@ -77,6 +81,15 @@ Process {
 id: applyGammastepKill
 command: ["pkill", "-f", "gammastep"]
 }
+
+Process {
+id: applyGammastepRun
+}
+
+Process {
+id: applyNotifyRun
+}
+
 Connections {
 target: applyGammastepKill
 function onExited() {
@@ -87,8 +100,38 @@ applyNotifyRun.running = true;
 }
 }
 
-Process { id: applyGammastepRun }
-Process { id: applyNotifyRun }
+Process {
+id: errorNotifyRun
+command: ["notify-send", "-u", "critical", "Gammastep", "Valor inválido. Insira um número entre 1000 e 25000.", "-i", "dialog-warning"]
+}
+
+Timer {
+id: promptDelayTimer
+interval: 150
+repeat: false
+
+onTriggered: {
+if (!backlightModule.textPrompt) return;
+
+backlightModule.textPrompt.openPrompt("Temperatura (1000 a 25000):", backlightModule.parentWindow, false, (input) => {
+let trimmed = input.trim();
+
+if (/^\d+$/.test(trimmed)) {
+let temp = parseInt(trimmed, 10);
+
+if (temp >= 1000 && temp <= 25000) {
+backlightModule.applyTemperature(temp);
+backlightModule.textPrompt.closePrompt();
+return;
+}
+}
+
+errorNotifyRun.running = true;
+backlightModule.textPrompt.showError("Tente novamente:");
+}
+);
+}
+}
 
 function applyTemperature(temp) {
 backlightModule.targetTemp = temp;
@@ -99,39 +142,30 @@ function generateMenuModel(isRunning) {
 let menuModel = [];
 
 if (isRunning) {
-menuModel.push({
-text: "Desativar Filtro",
-onTrigger: () => {
+menuModel.push({ text: "Desativar Filtro", onTrigger: () => {
 gammastepKill.running = true;
+}});
 }
-});
-} else {
-menuModel.push({
-text: "Ativar Filtro (2500K)",
-onTrigger: () => {
+else {
+menuModel.push({ text: "Ativar Filtro (2500K)", onTrigger: () => {
 backlightModule.applyTemperature(2500);
+}});
 }
-});
-}
+
 menuModel.push({ type: "separator" });
 
-const tempPresets = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000];
-for (let i = 0; i < tempPresets.length; i++) {
-let temp = tempPresets[i];
-menuModel.push({
-text: `Temperatura: ${temp}K`,
-onTrigger: () => {
-backlightModule.applyTemperature(temp);
-}
-});
-}
+menuModel.push({ text: "Definir Temperatura", preventClose: true, onTrigger: () => {
+if (backlightModule.globalMenu) backlightModule.globalMenu.close(); promptDelayTimer.start();
+}});
 
 return menuModel;
 }
 
 function updateMenu(isRunning) {
 if (!backlightModule.globalMenu) return;
+
 let modelData = backlightModule.generateMenuModel(isRunning);
+
 backlightModule.globalMenu.showSearchInput = false;
 backlightModule.globalMenu.openMenu(backlightModule.parentWindow, backlightModule, modelData);
 }
@@ -143,6 +177,7 @@ acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
 let menu = backlightModule.globalMenu;
+
 mouse.accepted = true;
 
 if (menu && !menu.shouldOpenFor(backlightModule)) return;
@@ -158,7 +193,6 @@ onWheel: wheel => {
 let menu = backlightModule.globalMenu;
 
 if (menu && menu.visible && menu._currentAnchorItem === backlightModule) menu.close();
-
 if (changeBrightness.running) return;
 
 if (wheel.angleDelta.y > 0) {

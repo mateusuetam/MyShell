@@ -102,7 +102,7 @@ BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
 NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: textPromptInstance }
 Separator {}
-BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
+BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: textPromptInstance }
 Separator {}
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
