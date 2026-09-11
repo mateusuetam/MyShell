@@ -22,101 +22,65 @@ component AppDelegate: QtObject {
 required property DesktopEntry modelData
 }
 
-readonly property var customizationsMenuModel: [
-{
+function createBackItem(text, restoreSearch, fixedHeader) {
+return {
 type: "action",
-text: "< Menu de Apps",
+text: text,
 preventClose: true,
-__internalBackItem: true,
+__fixedHeader: fixedHeader === true,
 onTrigger: () => {
-if (startModule.globalMenu) {
-startModule.globalMenu.showSearchInput = true;
+if (!startModule.globalMenu) return;
+startModule.globalMenu.showSearchInput = restoreSearch;
 startModule.globalMenu.popMenu();
 }
+};
 }
-},
+
+function pushSubMenu(model, tag, showSearchInput) {
+if (!startModule.globalMenu) return;
+
+startModule.globalMenu.showSearchInput = showSearchInput;
+startModule.globalMenu.pushMenu(model, tag);
+}
+
+readonly property var customizationsMenuModel: [
+createBackItem("< Menu de Apps", true, false),
+
 { type: "separator" },
+
 {
 type: "action",
 text: "Trocar Wallpaper >",
 preventClose: true,
 onTrigger: () => {
 if (!startModule.globalMenu) return;
-
 const wallpaperMenuItems = startModule.wallpaperMenuStructure.map(item => ({
 type: item.type,
 text: item.text,
 preventClose: true,
-onTrigger: () => startModule.wallpaperChangeRequested(item.path)
-}));
+onTrigger: () => startModule.wallpaperChangeRequested(item.path) }));
+startModule.pushSubMenu([createBackItem("< Customizações", false, true)].concat(wallpaperMenuItems), "wallpapers", false);
+}
+},
 
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.pushMenu(
-[
-{
-type: "action",
-text: "< Customizações",
-preventClose: true,
-__internalBackItem: true,
-onTrigger: () => {
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.popMenu();
-}
-},
-{ type: "separator" }
-].concat(wallpaperMenuItems),
-"wallpapers"
-);
-}
-},
 {
 type: "action",
 text: "Trocar Tema >",
 preventClose: true,
 onTrigger: () => {
 if (!startModule.globalMenu) return;
-
 const themeMenuItems = ThemeEngine.menuStructure.map(item => ({
 type: item.type,
 text: item.text,
 preventClose: true,
-onTrigger: item.onTrigger
-}));
-
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.pushMenu(
-[
-{
-type: "action",
-text: "< Customizações",
-preventClose: true,
-__internalBackItem: true,
-onTrigger: () => {
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.popMenu();
-}
-},
-{ type: "separator" }
-].concat(themeMenuItems),
-"themes"
-);
+onTrigger: item.onTrigger }));
+startModule.pushSubMenu([createBackItem("< Customizações", false, true)].concat(themeMenuItems), "themes", false);
 }
 }
 ]
 
 readonly property var powerMenuModel: [
-{
-type: "action",
-text: "< Menu de Apps",
-preventClose: true,
-__internalBackItem: true,
-onTrigger: () => {
-if (startModule.globalMenu) {
-startModule.globalMenu.showSearchInput = true;
-startModule.globalMenu.popMenu();
-}
-}
-},
+createBackItem("< Menu de Apps", true, false),
 { type: "separator" },
 { type: "action", text: "Sair", onTrigger: () => Quickshell.execDetached(["niri", "msg", "action", "quit", "--skip-confirmation"]) },
 { type: "action", text: "Bloquear", onTrigger: () => Quickshell.execDetached(["quickshell", "ipc", "call", "lock_manager", "lock"]) },
@@ -129,10 +93,8 @@ startModule.globalMenu.popMenu();
 Instantiator {
 id: appsInstantiator
 model: DesktopEntries.applications
-
 onObjectAdded: startModule.cachedAppMenu = []
 onObjectRemoved: startModule.cachedAppMenu = []
-
 delegate: AppDelegate {}
 }
 
@@ -145,6 +107,7 @@ const item = appsInstantiator.objectAt(i) as AppDelegate;
 if (!item || !item.modelData) continue;
 
 const entry = item.modelData;
+
 if (entry.noDisplay || !entry.name) continue;
 
 processedModel.push({
@@ -157,27 +120,23 @@ onTrigger: () => entry.execute()
 processedModel.sort((a, b) => a.text.localeCompare(b.text));
 
 processedModel.push(
-{ type: "separator" },
 {
 type: "action",
 text: "Customizações >",
 preventClose: true,
+__fixedFooter: true,
 onTrigger: () => {
-if (startModule.globalMenu) {
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.pushMenu(startModule.customizationsMenuModel, "customizations");
-}
+startModule.pushSubMenu(startModule.customizationsMenuModel, "customizations", false);
 }
 },
+
 {
 type: "action",
 text: "Menu de Sessão >",
 preventClose: true,
+__fixedFooter: true,
 onTrigger: () => {
-if (startModule.globalMenu) {
-startModule.globalMenu.showSearchInput = false;
-startModule.globalMenu.pushMenu(startModule.powerMenuModel, "session");
-}
+startModule.pushSubMenu(startModule.powerMenuModel, "session", false);
 }
 }
 );
@@ -190,6 +149,7 @@ if (cachedAppMenu.length === 0) rebuildAppMenu();
 
 if (cachedAppMenu.length > 0 && startModule.globalMenu) {
 startModule.globalMenu.showSearchInput = true;
+
 startModule.globalMenu.openMenu(startModule.parentWindow, startModule, cachedAppMenu);
 }
 }
@@ -211,11 +171,13 @@ startModule.openAppMenu();
 
 Row {
 id: startRow
+
 anchors.verticalCenter: parent.verticalCenter
+
 Text {
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
-color: ThemeEngine.palette.startLabelColor;
+color: ThemeEngine.palette.startLabelColor
 text: "START"
 }
 }

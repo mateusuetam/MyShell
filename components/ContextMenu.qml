@@ -12,36 +12,27 @@ readonly property int separatorHeight: 8
 readonly property int verticalOffset: 5
 readonly property int menuMargins: 6
 readonly property int menuMaxHeight: 450
-
-property bool showSearchInput: false
+property int _pendingX: 0
+property int _pendingY: 0
 
 readonly property string filterText: searchInput.text
 
 property var menuModel: null
+property var menuStack: []
+property var _headerMenuModel: []
+property var _mainMenuModel: []
+property var _footerMenuModel: []
 property var _pendingWindow: null
 property var _pendingAnchorItem: null
 property var _currentAnchorItem: null
 property var _lastAnchorItem: null
-property int _pendingX: 0
-property int _pendingY: 0
+
 property bool _isAnchorMode: false
 property bool _isInternalReset: false
 property bool _isPreparing: false
+property bool showSearchInput: false
 readonly property bool isMenuFocused: visible || _isPreparing
 readonly property bool isClosing: closeAnim.running
-
-property var menuStack: []
-
-readonly property var backMenuItem: ({
-__internalBackItem: true,
-text: "Voltar",
-preventClose: true,
-onTrigger: () => menuPopup.popMenu()
-})
-
-readonly property var backSeparator: ({
-type: "separator"
-})
 
 color: "transparent"
 
@@ -62,6 +53,7 @@ return true;
 
 function _restoreFocus() {
 if (!visible) return;
+
 if (showSearchInput)
 searchInput.forceFocusNow();
 else
@@ -74,6 +66,7 @@ model: modelData,
 tag: tag || "",
 refreshFn: refreshFn || null
 });
+
 _updateMenuFromStack();
 _restoreFocus();
 }
@@ -104,32 +97,56 @@ entry.model = updated ?? [];
 _updateMenuFromStack();
 }
 
+function _splitMenuModel(modelData) {
+let headerItems = [];
+let mainItems = [];
+let footerItems = [];
+
+if (Array.isArray(modelData)) {
+for (const item of modelData) {
+if (!item) continue;
+
+if (item.__fixedHeader === true) {
+headerItems.push(item);
+} else if (item.__fixedFooter === true) {
+footerItems.push(item);
+} else {
+mainItems.push(item);
+}
+}
+} else {
+mainItems = modelData || [];
+}
+
+_headerMenuModel = headerItems;
+_mainMenuModel = mainItems;
+_footerMenuModel = footerItems;
+}
+
 function _updateMenuFromStack() {
 if (menuStack.length === 0) {
 menuPopup.menuModel = null;
+_headerMenuModel = [];
+_mainMenuModel = [];
+_footerMenuModel = [];
 return;
 }
 
 const topEntry = menuStack[menuStack.length - 1];
-let currentModel = topEntry.model;
-
-if (menuStack.length > 1 && Array.isArray(currentModel)) {
-const hasVoltar = currentModel.some(item => item && item.__internalBackItem === true);
-
-if (!hasVoltar) {
-currentModel = currentModel.concat([
-backSeparator,
-backMenuItem
-]);
-}
-}
+const currentModel = topEntry.model;
 
 menuPopup.menuModel = currentModel;
+
+_splitMenuModel(currentModel);
+_updateFilteredModel();
 }
 
 readonly property alias menuView: menuView
+
 readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function" || menuPopup.menuModel.count !== undefined)
-readonly property var _unfilteredModel: menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children
+
+readonly property var _unfilteredModel: menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children
+
 property var _currentFilteredModel: []
 
 onFilterTextChanged: _updateFilteredModel()
@@ -138,7 +155,9 @@ signal itemTriggered(var itemData)
 signal itemDataActionTriggered(string actionType, var data)
 
 implicitWidth: menuWidth
-implicitHeight: Math.min((menuPopup.showSearchInput ? searchInput.height + 4 : 0) + menuView.contentHeight + (menuMargins * 2), menuMaxHeight)
+
+implicitHeight: Math.min((menuPopup.showSearchInput ? searchInput.height + 4 : 0) + headerContainer.implicitHeight + menuView.contentHeight + footerContainer.implicitHeight + (menuMargins * 2), menuMaxHeight)
+
 grabFocus: true
 
 onVisibleChanged: {
@@ -148,6 +167,9 @@ menuView.currentIndex = -1;
 menuPopup.showSearchInput = false;
 menuPopup.menuModel = null;
 menuPopup.menuStack = [];
+menuPopup._headerMenuModel = [];
+menuPopup._mainMenuModel = [];
+menuPopup._footerMenuModel = [];
 menuPopup._currentFilteredModel = [];
 menuPopup._currentAnchorItem = null;
 menuPopup._pendingWindow = null;
@@ -172,18 +194,24 @@ visible = false;
 
 function openMenu(targetWindow, anchorItem, modelData, tag, refreshFn) {
 if (!anchorItem) return;
+
 _prepareToOpen(targetWindow, modelData, tag, refreshFn);
+
 _pendingAnchorItem = anchorItem;
 _isAnchorMode = true;
+
 Qt.callLater(_applyPositioning);
 }
 
 function openAtPosition(targetWindow, x, y, modelData, tag, refreshFn) {
 if (!targetWindow) return;
+
 _prepareToOpen(targetWindow, modelData, tag, refreshFn);
+
 _pendingX = x;
 _pendingY = y;
 _isAnchorMode = false;
+
 Qt.callLater(_applyPositioning);
 }
 
@@ -196,6 +224,9 @@ _pendingAnchorItem = null;
 _currentAnchorItem = null;
 
 menuPopup.menuModel = null;
+menuPopup._mainMenuModel = [];
+menuPopup._footerMenuModel = [];
+
 searchInput.text = "";
 
 _isInternalReset = true;
@@ -213,10 +244,14 @@ _pendingWindow = targetWindow;
 
 function handleItemTrigger(dataObj) {
 if (!dataObj || dataObj.enabled === false || dataObj.isSeparator || dataObj.type === "separator") return;
+
 itemTriggered(dataObj);
+
 if (dataObj.actionType !== undefined) itemDataActionTriggered(dataObj.actionType, dataObj.actionData);
+
 if (dataObj.onTrigger) dataObj.onTrigger();
 else if (dataObj.triggered) dataObj.triggered();
+
 if (dataObj.closeOnTrigger !== false && !dataObj.preventClose) close();
 }
 
@@ -227,6 +262,7 @@ return;
 }
 
 _updateMenuFromStack();
+
 menuPopup._dyn(menuPopup).anchor.window = _pendingWindow;
 
 if (_isAnchorMode) {
@@ -234,13 +270,18 @@ if (!_pendingAnchorItem) {
 _isPreparing = false;
 return;
 }
+
 const windowPos = _pendingAnchorItem.mapToItem(null, 0, _pendingAnchorItem.height);
+
 const newX = windowPos.x - (implicitWidth / 2) + (_pendingAnchorItem.width / 2);
 const newY = windowPos.y + verticalOffset;
+
 menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
+
 menuBackground.transformOrigin = Item.Top;
 } else {
 menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
+
 menuBackground.transformOrigin = Item.Center;
 }
 
@@ -250,6 +291,7 @@ menuBackground.opacity = 0.0;
 menuBackground.scale = 0.95;
 
 menuPopup.visible = true;
+
 openAnim.restart();
 
 _isPreparing = false;
@@ -276,7 +318,7 @@ _currentFilteredModel = [];
 return;
 }
 
-const rawSource = menuPopup._isDirectModel ? menuPopup.menuModel : menuOpener.children;
+const rawSource = menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children;
 
 if (!rawSource) {
 _currentFilteredModel = [];
@@ -293,14 +335,14 @@ _currentFilteredModel = filtered;
 }
 
 function focusListView() {
-if (menuView.currentIndex === -1 && menuView.count > 0) {
-menuView.currentIndex = 0;
-}
+if (menuView.currentIndex === -1 && menuView.count > 0) menuView.currentIndex = 0;
+
 menuView.forceActiveFocus();
 }
 
 ParallelAnimation {
 id: openAnim
+
 NumberAnimation {
 target: menuBackground
 property: "opacity"
@@ -309,6 +351,7 @@ duration: 150
 easing.type: Easing.OutBack
 easing.overshoot: 1.2
 }
+
 NumberAnimation {
 target: menuBackground
 property: "scale"
@@ -321,6 +364,7 @@ easing.overshoot: 1.2
 
 ParallelAnimation {
 id: closeAnim
+
 NumberAnimation {
 target: menuBackground
 property: "opacity"
@@ -328,6 +372,7 @@ to: 0.0
 duration: 120
 easing.type: Easing.OutCubic
 }
+
 NumberAnimation {
 target: menuBackground
 property: "scale"
@@ -335,12 +380,15 @@ to: 0.95
 duration: 120
 easing.type: Easing.OutCubic
 }
+
 onFinished: menuPopup._finalizeClose()
 }
 
 Rectangle {
 id: menuBackground
+
 anchors.fill: parent
+
 color: ThemeEngine.palette.backgroundColor
 border.color: ThemeEngine.dynamicBorderColor
 border.width: 1
@@ -353,7 +401,9 @@ scale: 0.95
 
 MouseArea {
 anchors.fill: parent
+
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
 menuBackground.forceActiveFocus();
 mouse.accepted = false;
@@ -366,12 +416,12 @@ case Qt.Key_Escape:
 menuPopup.close();
 event.accepted = true;
 break;
+
 case Qt.Key_Tab:
-if (menuPopup.showSearchInput) {
-searchInput.forceFocusNow();
-}
+if (menuPopup.showSearchInput) searchInput.forceFocusNow();
 event.accepted = true;
 break;
+
 case Qt.Key_Up:
 if (menuView.currentIndex <= 0) {
 menuView.currentIndex = menuView.count - 1;
@@ -380,6 +430,7 @@ menuView.decrementCurrentIndex();
 }
 event.accepted = true;
 break;
+
 case Qt.Key_Down:
 if (menuView.currentIndex === -1 || menuView.currentIndex === menuView.count - 1) {
 menuView.currentIndex = 0;
@@ -388,10 +439,12 @@ menuView.incrementCurrentIndex();
 }
 event.accepted = true;
 break;
+
 case Qt.Key_Return:
 case Qt.Key_Enter:
 if (menuView.currentIndex >= 0 && menuView.currentItem) {
 const dataObj = menuPopup._dyn(menuView.currentItem).itemData;
+
 if (dataObj) menuPopup.handleItemTrigger(dataObj);
 }
 event.accepted = true;
@@ -401,52 +454,174 @@ break;
 
 MenuSearchInput {
 id: searchInput
+
 anchors.top: parent.top
 anchors.left: parent.left
 anchors.right: parent.right
 anchors.margins: menuPopup.menuMargins
 anchors.bottomMargin: 0
+
 visible: menuPopup.showSearchInput
 enabled: visible
+
 itemHeight: menuPopup.itemHeight
 
 onNavigationDownRequested: menuPopup.focusListView()
+
 onActionTriggeredRequested: {
 if (menuView.count > 0) {
 const targetItem = menuView.currentItem ? menuView.currentItem : menuView.itemAtIndex(0);
+
 if (targetItem) {
 const dynTarget = menuPopup._dyn(targetItem);
+
 if (dynTarget.itemData) menuPopup.handleItemTrigger(dynTarget.itemData);
 }
 }
 }
 }
 
-ListView {
-id: menuView
-anchors.top: searchInput.visible ? searchInput.bottom : parent.top
-anchors.bottom: parent.bottom
+Item {
+id: headerContainer
+
+visible: menuPopup._headerMenuModel.length > 0
+
 anchors.left: parent.left
 anchors.right: parent.right
-anchors.margins: menuPopup.menuMargins
+
+anchors.top: searchInput.visible ? searchInput.bottom : parent.top
+
+anchors.leftMargin: menuPopup.menuMargins
+anchors.rightMargin: menuPopup.menuMargins
+
 anchors.topMargin: searchInput.visible ? 4 : menuPopup.menuMargins
+
+implicitHeight: headerColumn.implicitHeight
+
+Column {
+id: headerColumn
+
+width: parent.width
+spacing: 2
+
+Repeater {
+model: menuPopup._headerMenuModel
+
+delegate: MenuItemDelegate {
+required property var modelData
+
+width: headerColumn.width
+
+itemHeight: menuPopup.itemHeight
+separatorHeight: menuPopup.separatorHeight
+
+itemData: modelData
+
+onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
+}
+}
+
+Rectangle {
+width: parent.width
+height: 1
+
+color: ThemeEngine.dynamicBorderColor
+opacity: 0.7
+}
+}
+}
+
+ListView {
+id: menuView
+
+anchors.top: headerContainer.visible ? headerContainer.bottom : (searchInput.visible ? searchInput.bottom : parent.top)
+anchors.left: parent.left
+anchors.right: parent.right
+anchors.bottom: footerContainer.visible ? footerContainer.top : parent.bottom
+
+anchors.margins: menuPopup.menuMargins
+anchors.topMargin: headerContainer.visible ? 4 : (searchInput.visible ? 4 : menuPopup.menuMargins)
+anchors.bottomMargin: footerContainer.visible ? 4 : menuPopup.menuMargins
+
 highlightMoveDuration: 0
 spacing: 2
+
 interactive: true
 boundsBehavior: Flickable.StopAtBounds
 clip: true
+
 currentIndex: -1
-onModelChanged: currentIndex = -1
 highlightFollowsCurrentItem: true
-model: menuPopup.filterText.trim() === "" ? menuPopup._unfilteredModel : menuPopup._currentFilteredModel
+
+onModelChanged: currentIndex = -1
+
+model: menuPopup.filterText.trim() === "" ? menuPopup._mainMenuModel : menuPopup._currentFilteredModel
 
 delegate: MenuItemDelegate {
 required property var model
+
 width: menuView.width
+
 itemHeight: menuPopup.itemHeight
+
 separatorHeight: menuPopup.separatorHeight
+
 itemData: model.modelData !== undefined ? model.modelData : model
+
 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
+}
+}
+
+Item {
+id: footerContainer
+
+visible: menuPopup._footerMenuModel.length > 0
+
+anchors.left: parent.left
+anchors.right: parent.right
+anchors.bottom: parent.bottom
+
+anchors.leftMargin: menuPopup.menuMargins
+anchors.rightMargin: menuPopup.menuMargins
+anchors.bottomMargin: menuPopup.menuMargins
+
+implicitHeight: footerColumn.implicitHeight
+
+Column {
+id: footerColumn
+
+width: parent.width
+spacing: 2
+
+Rectangle {
+width: parent.width
+height: 1
+color: ThemeEngine.dynamicBorderColor
+opacity: 0.7
+}
+
+Item {
+width: 1
+height: 2
+}
+
+Repeater {
+model: menuPopup._footerMenuModel
+
+delegate: MenuItemDelegate {
+required property var modelData
+
+width: footerColumn.width
+
+itemHeight: menuPopup.itemHeight
+
+separatorHeight: menuPopup.separatorHeight
+
+itemData: modelData
+
+onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
+}
+}
 }
 }
 }

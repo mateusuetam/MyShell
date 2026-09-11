@@ -27,7 +27,25 @@ property bool startAgent: false
 
 property bool isRfkillBlocked: false
 
-Process { id: notifyProcess }
+function getBackButton(text) {
+return {
+text: text,
+preventClose: true,
+__fixedFooter: true,
+onTrigger: () => {
+if (bluetoothModule.globalMenu) bluetoothModule.globalMenu.popMenu();
+}
+};
+}
+
+function openDeviceSubMenu(dev) {
+if (!bluetoothModule.globalMenu || !dev) return;
+bluetoothModule.globalMenu.pushMenu(bluetoothModule.generateDeviceMenu(dev), "device_" + dev.address, () => bluetoothModule.generateDeviceMenu(dev));
+}
+
+Process {
+id: notifyProcess
+}
 
 function sendNotification(title, message, urgency) {
 notifyProcess.exec(["notify-send", "-u", urgency, title, message]);
@@ -39,19 +57,13 @@ command: ["bluetoothctl", "--agent", "NoInputNoOutput"]
 running: bluetoothModule.startAgent
 }
 
-function checkRfkill() {
-if (!rfkillCheckProcess.running) {
-rfkillCheckProcess.exec(rfkillCheckProcess.command);
-}
-}
-
 Process {
 id: rfkillCheckProcess
 command: ["sh", "-c", "for d in /sys/class/rfkill/rfkill*; do if [ -f \"$d/type\" ] && [ \"$(cat \"$d/type\")\" = \"bluetooth\" ]; then if [ \"$(cat \"$d/soft\")\" = \"1\" ] || [ \"$(cat \"$d/hard\")\" = \"1\" ]; then echo \"yes\"; exit 0; fi; fi; done; echo \"no\""]
 stdout: StdioCollector {
 onStreamFinished: {
-let output = this.text.trim().toLowerCase();
-bluetoothModule.isRfkillBlocked = (output === "yes");
+const output = this.text.trim().toLowerCase();
+bluetoothModule.isRfkillBlocked = output === "yes";
 bluetoothModule.updateMenu(false);
 }
 }
@@ -60,10 +72,12 @@ bluetoothModule.updateMenu(false);
 Process {
 id: rfkillToggleProcess
 onRunningChanged: {
-if (!running) {
-bluetoothModule.checkRfkill();
+if (!running) bluetoothModule.checkRfkill();
 }
 }
+
+function checkRfkill() {
+if (!rfkillCheckProcess.running) rfkillCheckProcess.exec(rfkillCheckProcess.command);
 }
 
 function toggleRfkill() {
@@ -73,11 +87,6 @@ rfkillToggleProcess.exec(["rfkill", "unblock", "bluetooth"]);
 rfkillToggleProcess.exec(["rfkill", "block", "bluetooth"]);
 bluetoothModule.sendNotification("Bluetooth", "Bluetooth bloqueado", "normal");
 }
-}
-
-Component.onCompleted: {
-bluetoothModule.startAgent = true;
-bluetoothModule.checkRfkill();
 }
 
 Timer {
@@ -109,10 +118,13 @@ interval: 60000
 repeat: false
 onTriggered: {
 const adapter = Bluetooth["defaultAdapter"];
-if (adapter && adapter["discovering"]) {
-adapter["discovering"] = false;
+if (adapter && adapter["discovering"]) adapter["discovering"] = false;
 }
 }
+
+Component.onCompleted: {
+bluetoothModule.startAgent = true;
+bluetoothModule.checkRfkill();
 }
 
 Instantiator {
@@ -122,6 +134,7 @@ onObjectRemoved: (index, object) => bluetoothModule.updateMenu(false)
 
 delegate: Connections {
 id: devConn
+
 required property var modelData
 target: devConn.modelData
 
@@ -137,12 +150,16 @@ return;
 if (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing") {
 if (!dev.connected) {
 pairingTimeoutTimer.stop();
+
 bluetoothModule.imunityAddress = dev.address;
 bluetoothModule.justPairedImunity = true;
+
 imunityTimer.restart();
+
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
+
 bluetoothModule.updateMenu(false);
 return;
 }
@@ -152,8 +169,10 @@ bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
 
-let devName = dev.name || dev.address;
+const devName = dev.name || dev.address;
+
 bluetoothModule.sendNotification("Bluetooth", (dev.connected ? "Conectado: " : "Desconectado: ") + devName, "normal");
+
 bluetoothModule.updateMenu(false);
 }
 
@@ -161,37 +180,45 @@ function onBondedChanged() {
 const dev = devConn.modelData;
 if (!dev) return;
 
-if (dev.bonded && !dev.trusted) {
-dev.trusted = true;
-}
+if (dev.bonded && !dev.trusted) dev.trusted = true;
 
 if (dev.bonded && bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing") {
 bluetoothModule.imunityAddress = dev.address;
 bluetoothModule.justPairedImunity = true;
+
 imunityTimer.restart();
 }
 
 bluetoothModule.updateMenu(false);
 }
 
-function onPairedChanged() { bluetoothModule.updateMenu(false); }
-function onTrustedChanged() { bluetoothModule.updateMenu(false); }
+function onPairedChanged() {
+bluetoothModule.updateMenu(false);
+}
+
+function onTrustedChanged() {
+bluetoothModule.updateMenu(false);
+}
 }
 }
 
 Connections {
 target: Bluetooth["defaultAdapter"] ? Bluetooth["defaultAdapter"] : null
+
 function onEnabledChanged() {
 bluetoothModule.updateMenu(false);
 bluetoothModule.checkRfkill();
 }
+
 function onDiscoveringChanged() {
 const adapter = Bluetooth["defaultAdapter"];
+
 if (adapter && adapter["discovering"]) {
 discoveryTimeoutTimer.restart();
 } else {
 discoveryTimeoutTimer.stop();
 }
+
 bluetoothModule.updateMenu(false);
 }
 }
@@ -199,22 +226,60 @@ bluetoothModule.updateMenu(false);
 function getConnectedDevice() {
 const devices = Bluetooth["devices"];
 const list = devices ? (devices["values"] ?? []) : [];
+
 for (let i = 0; i < list.length; ++i) {
 const dev = list[i];
+
 if (dev?.connected) return dev;
 }
+
 return null;
+}
+
+function getBluetoothState() {
+if (!bluetoothModule.isBluetoothOn) {
+const offText = bluetoothModule.isRfkillBlocked ? "off (B)" : "off";
+
+return {
+color: ThemeEngine.palette.bluetoothDisabledColor,
+text: offText
+};
+}
+
+const dev = bluetoothModule.getConnectedDevice();
+
+if (!dev) {
+return {
+color: ThemeEngine.palette.bluetoothDisconnectedColor,
+text: "idle"
+};
+}
+
+if (dev.batteryAvailable) {
+return {
+color: ThemeEngine.palette.bluetoothConnectedColor,
+text: `up ${Math.round(dev.battery * 100)}%`
+};
+}
+
+return {
+color: ThemeEngine.palette.bluetoothConnectedColor,
+text: "up"
+};
 }
 
 function generateMainMenu() {
 let menuModel = [];
+
 const adapter = Bluetooth["defaultAdapter"];
 
 if (!bluetoothModule.isBluetoothOn) {
 menuModel.push({
 text: "Ligar Bluetooth",
 enabled: !bluetoothModule.isRfkillBlocked,
-onTrigger: () => { if (adapter) adapter["enabled"] = true; }
+onTrigger: () => {
+if (adapter) adapter["enabled"] = true;
+}
 });
 
 menuModel.push({
@@ -222,10 +287,16 @@ text: bluetoothModule.isRfkillBlocked ? "Desbloquear Bluetooth" : "Bloquear Blue
 preventClose: true,
 onTrigger: () => bluetoothModule.toggleRfkill()
 });
+
 return menuModel;
 }
 
-menuModel.push({ text: "Desligar Bluetooth", onTrigger: () => { if (adapter) adapter["enabled"] = false; } });
+menuModel.push({
+text: "Desligar Bluetooth",
+onTrigger: () => {
+if (adapter) adapter["enabled"] = false;
+}
+});
 
 menuModel.push({
 text: "Bloquear Bluetooth",
@@ -236,51 +307,57 @@ onTrigger: () => bluetoothModule.toggleRfkill()
 menuModel.push({
 text: adapter && adapter["discovering"] ? "Parar Busca" : "Buscar Dispositivos",
 preventClose: true,
-onTrigger: () => { if (adapter) adapter["discovering"] = !adapter["discovering"]; }
+onTrigger: () => {
+if (adapter) adapter["discovering"] = !adapter["discovering"];
+}
 });
 
 const devices = Bluetooth["devices"];
 const list = devices ? (devices["values"] ?? []) : [];
+
 let pairedDevices = [];
 let newDevices = [];
 
-for (let i = 0; i < list.length; i++) {
-let mainDev = list[i];
-if (!mainDev) continue;
+for (let i = 0; i < list.length; ++i) {
+const dev = list[i];
 
-if (mainDev.bonded) {
-pairedDevices.push(mainDev);
+if (!dev) continue;
+
+if (dev.bonded) {
+pairedDevices.push(dev);
 } else if (adapter && adapter["discovering"]) {
-newDevices.push(mainDev);
+newDevices.push(dev);
 }
 }
 
 if (pairedDevices.length > 0) {
 menuModel.push({ type: "separator" });
-for (let j = 0; j < pairedDevices.length; j++) {
-let pDev = pairedDevices[j];
-let label = (pDev.connected ? "Conectado: " : "Desconectado: ") + (pDev.name || pDev.address);
 
-if (pDev.connected && pDev.batteryAvailable) {
-label += ` (${Math.round(pDev.battery * 100)}%)`;
-}
+for (let i = 0; i < pairedDevices.length; ++i) {
+const dev = pairedDevices[i];
+
+let label = (dev.connected ? "Conectado: " : "Desconectado: ") + (dev.name || dev.address);
+
+if (dev.connected && dev.batteryAvailable) label += ` (${Math.round(dev.battery * 100)}%)`;
 
 menuModel.push({
 text: label,
 preventClose: true,
-onTrigger: () => { bluetoothModule.openDeviceSubMenu(pDev); }
+onTrigger: () => bluetoothModule.openDeviceSubMenu(dev)
 });
 }
 }
 
 if (newDevices.length > 0) {
 menuModel.push({ type: "separator" });
-for (let k = 0; k < newDevices.length; k++) {
-let nDev = newDevices[k];
+
+for (let i = 0; i < newDevices.length; ++i) {
+const dev = newDevices[i];
+
 menuModel.push({
-text: (nDev.name || nDev.address),
+text: dev.name || dev.address,
 preventClose: true,
-onTrigger: () => { bluetoothModule.openDeviceSubMenu(nDev); }
+onTrigger: () => bluetoothModule.openDeviceSubMenu(dev)
 });
 }
 }
@@ -290,30 +367,36 @@ return menuModel;
 
 function generateDeviceMenu(dev) {
 let menuModel = [];
+
 if (!dev) return menuModel;
 
-let isConnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "connecting");
-let isDisconnecting = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "disconnecting");
-let isPairing = (bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing");
+const isConnecting = bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "connecting";
+const isDisconnecting = bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "disconnecting";
+const isPairing = bluetoothModule.pendingOpAddress === dev.address && bluetoothModule.pendingOpState === "pairing";
 
-menuModel.push({ text: `${dev.name || dev.address}`, enabled: false });
+menuModel.push({
+text: `${dev.name || dev.address}`,
+enabled: false
+});
 
 if (isPairing) {
 menuModel.push({
 text: "Pareando...",
-preventClose: true,
 enabled: false,
-onTrigger: () => {}
+preventClose: true
 });
 } else if (dev.bonded) {
 let connectText = dev.connected ? "Desconectar" : "Conectar";
+
 if (isConnecting) connectText = "Conectando...";
+
 if (isDisconnecting) connectText = "Desconectando...";
 
 menuModel.push({
 text: connectText,
 preventClose: true,
 enabled: !isConnecting && !isDisconnecting,
+
 onTrigger: () => {
 if (isConnecting || isDisconnecting) return;
 
@@ -321,12 +404,16 @@ bluetoothModule.pendingOpAddress = dev.address;
 bluetoothModule.pendingOpState = dev.connected ? "disconnecting" : "connecting";
 
 try {
-if (dev.connected) dev.disconnect();
-else dev.connect();
-} catch(e) {
+if (dev.connected){
+dev.disconnect();
+} else {
+dev.connect();
+}
+} catch (e) {
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
+
 Qt.callLater(() => bluetoothModule.updateMenu(false));
 }
 });
@@ -335,7 +422,9 @@ menuModel.push({
 text: "Desparear",
 preventClose: true,
 onTrigger: () => {
-try { dev.forget(); } catch(e) {}
+try {
+dev.forget();
+} catch (e) {}
 bluetoothModule.globalMenu.popMenu();
 }
 });
@@ -356,28 +445,25 @@ enabled: true,
 onTrigger: () => {
 bluetoothModule.pendingOpAddress = dev.address;
 bluetoothModule.pendingOpState = "pairing";
+
 pairingTimeoutTimer.restart();
 
-try { dev.pair(); } catch(e) {
+try {
+dev.pair();
+} catch (e) {
 pairingTimeoutTimer.stop();
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
+
 Qt.callLater(() => bluetoothModule.updateMenu(false));
 }
 });
 }
 
-return menuModel;
-}
+menuModel.push(bluetoothModule.getBackButton("< Bluetooth"));
 
-function openDeviceSubMenu(dev) {
-if (!bluetoothModule.globalMenu) return;
-bluetoothModule.globalMenu.pushMenu(
-bluetoothModule.generateDeviceMenu(dev),
-"device_" + dev.address,
-() => bluetoothModule.generateDeviceMenu(dev)
-);
+return menuModel;
 }
 
 function updateMenu(forceOpen) {
@@ -397,30 +483,8 @@ bluetoothModule.globalMenu.showSearchInput = false;
 if (bluetoothModule.globalMenu.visible && bluetoothModule.globalMenu._currentAnchorItem === bluetoothModule) {
 bluetoothModule.globalMenu.refresh();
 } else {
-bluetoothModule.globalMenu.openMenu(
-bluetoothModule.parentWindow,
-bluetoothModule,
-bluetoothModule.generateMainMenu(),
-"main",
-() => bluetoothModule.generateMainMenu()
-);
+bluetoothModule.globalMenu.openMenu(bluetoothModule.parentWindow, bluetoothModule, bluetoothModule.generateMainMenu(), "main", () => bluetoothModule.generateMainMenu());
 }
-}
-
-function getBluetoothState() {
-if (!bluetoothModule.isBluetoothOn) {
-let offText = bluetoothModule.isRfkillBlocked ? "off (B)" : "off";
-return { color: ThemeEngine.palette.bluetoothDisabledColor, text: offText };
-}
-
-const dev = bluetoothModule.getConnectedDevice();
-if (!dev) return { color: ThemeEngine.palette.bluetoothDisconnectedColor, text: "idle" };
-
-if (dev.batteryAvailable) {
-return { color: ThemeEngine.palette.bluetoothConnectedColor, text: `up ${Math.round(dev.battery * 100)}%` };
-}
-
-return { color: ThemeEngine.palette.bluetoothConnectedColor, text: "up" };
 }
 
 MouseArea {
@@ -430,6 +494,7 @@ acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
 let menu = bluetoothModule.globalMenu;
+
 mouse.accepted = true;
 
 if (menu && !menu.shouldOpenFor(bluetoothModule)) return;
@@ -440,7 +505,9 @@ if (mouse.button === Qt.LeftButton) {
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton) {
 const adapter = Bluetooth["defaultAdapter"];
-if (adapter) {
+
+if (!adapter) return;
+
 if (adapter["enabled"]) {
 adapter["enabled"] = false;
 } else if (!bluetoothModule.isRfkillBlocked) {
@@ -449,12 +516,14 @@ adapter["enabled"] = true;
 }
 }
 }
-}
 
 Row {
 id: bluetoothRow
+
 anchors.verticalCenter: parent.verticalCenter
-readonly property var btState: bluetoothModule.getBluetoothState()
+
+readonly property var btState:
+bluetoothModule.getBluetoothState()
 
 Text {
 font.family: ThemeEngine.appliedFontFamily
