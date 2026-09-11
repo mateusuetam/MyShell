@@ -99,21 +99,23 @@ return trayListModel;
 function updateMenu(forceOpen) {
 const menu = trayModule.globalMenu;
 if (!menu) return;
+
 if (!forceOpen && !menu.visible) return;
 
 const parentWin = trayModule.parentWindow;
 const trayListModel = trayModule.buildTrayModel();
 
+if (trayListModel.length === 0) {
+if (menu.visible && menu._currentAnchorItem === trayButton) menu.close();
+return;
+}
+
 menu.showSearchInput = false;
 
 if (menu.visible && menu._currentAnchorItem === trayButton) {
-if (trayListModel.length > 0) {
-menu.menuModel = trayListModel;
-} else {
-menu.close();
-}
-} else {
-if (forceOpen && trayListModel.length > 0) menu.openMenu(parentWin, trayButton, trayListModel);
+menu.refresh();
+} else if (forceOpen) {
+menu.openMenu(parentWin, trayButton, trayListModel, "tray", () => trayModule.buildTrayModel());
 }
 }
 

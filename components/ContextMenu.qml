@@ -114,8 +114,6 @@ footerItems.push(item);
 mainItems.push(item);
 }
 }
-} else {
-mainItems = modelData || [];
 }
 
 _headerMenuModel = headerItems;
@@ -143,7 +141,7 @@ _updateFilteredModel();
 
 readonly property alias menuView: menuView
 
-readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function" || menuPopup.menuModel.count !== undefined)
+readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function")
 
 readonly property var _unfilteredModel: menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children
 
@@ -555,7 +553,7 @@ highlightFollowsCurrentItem: true
 
 onModelChanged: currentIndex = -1
 
-model: menuPopup.filterText.trim() === "" ? menuPopup._mainMenuModel : menuPopup._currentFilteredModel
+model: menuPopup.filterText.trim() === "" ? (menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children) : menuPopup._currentFilteredModel
 
 delegate: MenuItemDelegate {
 required property var model
