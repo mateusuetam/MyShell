@@ -5,3 +5,6 @@ inactive-color "#d5c4a1"
 urgent-color "#cc241d"
 }
 }
+window-rule {
+geometry-corner-radius 4
+}

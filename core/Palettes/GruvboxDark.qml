@@ -29,7 +29,7 @@ readonly property color menuHoverColor: bright_orange
 readonly property color menuErrorColor: bright_red
 
 // Shell
-readonly property int shellRadius: 0
+readonly property int shellRadius: 4
 readonly property color backgroundColor: dark0
 readonly property color borderColor: dark2
 readonly property color borderLowColor: bright_green

@@ -5,6 +5,3 @@ inactive-color "#bfbfbf"
 urgent-color "#ffffff"
 }
 }
-window-rule {
-geometry-corner-radius 20
-}

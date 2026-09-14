@@ -22,7 +22,7 @@ readonly property color menuHoverColor: fg
 readonly property color menuErrorColor: fg4
 
 // Shell
-readonly property int shellRadius: 20
+readonly property int shellRadius: 0
 readonly property color backgroundColor: bg
 readonly property color borderColor: fg
 readonly property color borderLowColor: fg2
