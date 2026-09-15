@@ -8,40 +8,44 @@ PopupWindow {
 id: textPopup
 
 property var targetWindow: null
+property var acceptCallback: null
+property bool isPasswordMode: false
 property string statusState: "input"
 property string promptMessage: ""
 readonly property string defaultErrorMessage: "Tente novamente:"
 property string errorMessage: defaultErrorMessage
 property string processingMessage: "Processando..."
-property bool isPasswordMode: false
-property var acceptCallback: null
 
 color: "transparent"
 
 implicitWidth: 440
 implicitHeight: 40
+
 grabFocus: true
 
-onVisibleChanged: {
-if (visible) {
+function _resetInputState() {
 textPopup.statusState = "input";
-inputField.text = "";
-Qt.callLater(() => {
-inputField.forceActiveFocus();
-});
-} else {
+textPopup.errorMessage = textPopup.defaultErrorMessage;
 textPopup.acceptCallback = null;
-}
+inputField.text = "";
 }
 
-function _dyn(obj) { return obj; }
+onVisibleChanged: {
+if (visible) Qt.callLater(() => {inputField.forceActiveFocus();});
+else textPopup.acceptCallback = null;
+}
+
+function _dyn(obj) {
+return obj;
+}
 
 function openPrompt(message, parentWin, isPassword, onAccept, processingMsg = "Processando...") {
 if (!parentWin) return;
 
+_resetInputState();
+
 textPopup.promptMessage = message;
 textPopup.processingMessage = processingMsg;
-textPopup.errorMessage = textPopup.defaultErrorMessage;
 textPopup.targetWindow = parentWin;
 textPopup.isPasswordMode = isPassword;
 textPopup.acceptCallback = onAccept;
@@ -51,7 +55,6 @@ let pY = parentWin.height + 6;
 
 textPopup._dyn(textPopup).anchor.window = parentWin;
 textPopup._dyn(textPopup).anchor.rect = Qt.rect(pX, pY, 1, 1);
-
 textPopup.visible = true;
 }
 
@@ -80,11 +83,11 @@ spacing: 10
 
 Text {
 id: promptLabel
+
 Layout.alignment: Qt.AlignVCenter
 font.family: ThemeEngine.appliedFontFamily
 font.pixelSize: ThemeEngine.appliedFontSize
 color: textPopup.statusState === "error" ? ThemeEngine.palette.menuErrorColor : ThemeEngine.palette.menuTextColor
-
 text: {
 if (textPopup.statusState === "error") return textPopup.errorMessage;
 if (textPopup.statusState === "processing") return textPopup.processingMessage;
@@ -94,6 +97,7 @@ return textPopup.promptMessage;
 
 TextInput {
 id: inputField
+
 Layout.alignment: Qt.AlignVCenter
 Layout.fillWidth: true
 font.family: ThemeEngine.appliedFontFamily
@@ -111,11 +115,8 @@ event.accepted = true;
 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
 if (inputField.text.length > 0) {
 textPopup.statusState = "processing";
-if (textPopup.acceptCallback) {
-textPopup.acceptCallback(inputField.text);
-} else {
-textPopup.closePrompt();
-}
+if (textPopup.acceptCallback) textPopup.acceptCallback(inputField.text);
+else textPopup.closePrompt();
 } else {
 textPopup.closePrompt();
 }
