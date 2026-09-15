@@ -210,17 +210,12 @@ easing.type: Easing.OutQuad
 MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
+acceptedButtons: Qt.LeftButton
+
 onPressed: mouse => {
-let menu = root.globalMenu;
-if (menu) {
-menu.close();
-}
 mouse.accepted = true;
-if (mouse.button === Qt.LeftButton) {
-root.sendNiriAction(JSON.stringify({
-Action: { FocusWorkspace: { reference: { Index: wsDot.modelData.idx } } }
-}));
-}
+if (root.globalMenu) root.globalMenu.close();
+if (mouse.button === Qt.LeftButton) root.sendNiriAction(JSON.stringify({Action: {FocusWorkspace: {reference: {Index: wsDot.modelData.idx}}}}));
 }
 }
 }

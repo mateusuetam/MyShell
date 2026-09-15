@@ -28,29 +28,17 @@ anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
-onPressed: {
+onPressed: mouse => {
+mouse.accepted = true;
 if (volumeModule.globalMenu) volumeModule.globalMenu.close();
-
-const node = volumeModule.audioNode;
-if (node) {
-node.muted = !node.muted;
-}
+if (volumeModule.audioNode) volumeModule.audioNode.muted = !volumeModule.audioNode.muted;
 }
 
 onWheel: wheel => {
 if (volumeModule.globalMenu) volumeModule.globalMenu.close();
-
-const node = volumeModule.audioNode;
-if (!node || wheel.angleDelta.y === 0) return;
-
-const step = 0.01;
-const currentVolume = node.volume;
-
-if (wheel.angleDelta.y > 0) {
-node.volume = Math.min(1.0, currentVolume + step);
-} else {
-node.volume = Math.max(0.0, currentVolume - step);
-}
+if (!volumeModule.audioNode || wheel.angleDelta.y === 0) return;
+if (wheel.angleDelta.y > 0) volumeModule.audioNode.volume = Math.min(1.0, volumeModule.audioNode.volume + 0.01);
+else volumeModule.audioNode.volume = Math.max(0.0, volumeModule.audioNode.volume - 0.01);
 }
 }
 

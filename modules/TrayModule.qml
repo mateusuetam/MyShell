@@ -126,11 +126,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-let menu = trayModule.globalMenu;
 mouse.accepted = true;
-
-if (menu && !menu.shouldOpenFor(trayButton)) return;
-
+if (trayModule.globalMenu && !trayModule.globalMenu.shouldOpenFor(trayButton)) return;
 Qt.callLater(() => trayModule.updateMenu(true));
 }
 }

@@ -114,9 +114,12 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
+
 onPressed: mouse => {
-if (mouse.button === Qt.RightButton) clockDateModule.showFullDate = !clockDateModule.showFullDate;
-else if (mouse.button === Qt.LeftButton) clockDateModule.toggleCalendar();
+mouse.accepted = true;
+if (clockDateModule.globalMenu && !clockDateModule.globalMenu.shouldOpenFor(clockDateModule)) return;
+if (mouse.button === Qt.LeftButton) clockDateModule.toggleCalendar();
+else if (mouse.button === Qt.RightButton) clockDateModule.showFullDate = !clockDateModule.showFullDate;
 }
 }
 

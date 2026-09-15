@@ -160,11 +160,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-let menu = startModule.globalMenu;
 mouse.accepted = true;
-
-if (menu && !menu.shouldOpenFor(startModule)) return;
-
+if (startModule.globalMenu && !startModule.globalMenu.shouldOpenFor(startModule)) return;
 startModule.openAppMenu();
 }
 }

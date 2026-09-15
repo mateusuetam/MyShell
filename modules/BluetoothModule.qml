@@ -493,26 +493,16 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-let menu = bluetoothModule.globalMenu;
-
 mouse.accepted = true;
-
-if (menu && !menu.shouldOpenFor(bluetoothModule)) return;
-
+if (bluetoothModule.globalMenu && !bluetoothModule.globalMenu.shouldOpenFor(bluetoothModule)) return;
 bluetoothModule.checkRfkill();
-
 if (mouse.button === Qt.LeftButton) {
 Qt.callLater(() => bluetoothModule.updateMenu(true));
 } else if (mouse.button === Qt.RightButton) {
 const adapter = Bluetooth["defaultAdapter"];
-
 if (!adapter) return;
-
-if (adapter["enabled"]) {
-adapter["enabled"] = false;
-} else if (!bluetoothModule.isRfkillBlocked) {
-adapter["enabled"] = true;
-}
+if (adapter["enabled"]) adapter["enabled"] = false;
+else if (!bluetoothModule.isRfkillBlocked) adapter["enabled"] = true;
 }
 }
 }

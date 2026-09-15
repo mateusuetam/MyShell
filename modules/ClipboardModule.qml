@@ -94,16 +94,10 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-let menu = clipboardModule.globalMenu;
 mouse.accepted = true;
-
-if (menu && !menu.shouldOpenFor(clipboardModule)) return;
-
-if (mouse.button === Qt.LeftButton) {
-clipboardModule.refreshClipboardList();
-} else if (mouse.button === Qt.RightButton) {
-clipboardModule.clearClipboardHistory();
-}
+if (clipboardModule.globalMenu && !clipboardModule.globalMenu.shouldOpenFor(clipboardModule)) return;
+if (mouse.button === Qt.LeftButton) clipboardModule.refreshClipboardList();
+else if (mouse.button === Qt.RightButton) clipboardModule.clearClipboardHistory();
 }
 }
 

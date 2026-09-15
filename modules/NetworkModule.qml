@@ -381,18 +381,13 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-let menu = networkModule.globalMenu;
 mouse.accepted = true;
-
-if (menu && !menu.shouldOpenFor(networkModule)) return;
-
+if (networkModule.globalMenu && !networkModule.globalMenu.shouldOpenFor(networkModule)) return;
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
 networkModule.updateMenu(true);
 } else if (mouse.button === Qt.RightButton) {
-if (!networkModule.isRfkillBlocked) {
-Networking.wifiEnabled = !isWifiOn;
-}
+if (!networkModule.isRfkillBlocked) Networking.wifiEnabled = !isWifiOn;
 }
 }
 }

@@ -24,15 +24,11 @@ MouseArea {
 anchors.fill: parent
 cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
+
 onPressed: mouse => {
-let menu = idleModule.globalMenu;
-if (menu) {
-menu.close();
-}
 mouse.accepted = true;
-if (mouse.button === Qt.LeftButton) {
-inhibitor.enabled = !inhibitor.enabled;
-}
+if (idleModule.globalMenu) idleModule.globalMenu.close();
+if (mouse.button === Qt.LeftButton) inhibitor.enabled = !inhibitor.enabled;
 }
 }
 
