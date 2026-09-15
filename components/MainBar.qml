@@ -31,7 +31,6 @@ WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMe
 (textPromptInstance && textPromptInstance.visible)) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
 TextPrompt { id: textPromptInstance }
-CalendarManager { id: calendarManager; globalMenu: barWindow.globalMenu }
 
 // --- SEPARADOR ---
 component Separator: Item {
@@ -61,11 +60,7 @@ color: ThemeEngine.dynamicBorderColor
 MouseArea {
 anchors.fill: parent
 acceptedButtons: Qt.LeftButton | Qt.RightButton
-onPressed: {
-if (barWindow.globalMenu) {
-barWindow.globalMenu.close();
-}
-}
+onPressed: if (barWindow.globalMenu) barWindow.globalMenu.close();
 }
 
 RowLayout {
@@ -83,9 +78,7 @@ Separator {}
 MprisModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 
 // <<< ESPAÇADOR >>>
-Item {
-Layout.fillWidth: true
-}
+Item { Layout.fillWidth: true }
 
 // >>> LADO DIREITO >>>
 TrayModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
@@ -106,7 +99,7 @@ BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; tex
 Separator {}
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
-ClockModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; onRequestCalendar: anchorItem => calendarManager.toggleCalendar(barWindow, anchorItem) }
+ClockDateModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 }
 }
 }
