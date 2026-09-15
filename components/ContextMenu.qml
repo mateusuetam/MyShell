@@ -6,14 +6,15 @@ import "../core"
 PopupWindow {
 id: menuPopup
 
+property int _pendingX: 0
+property int _pendingY: 0
+
 readonly property int menuWidth: 200
 readonly property int itemHeight: 26
 readonly property int separatorHeight: 8
 readonly property int verticalOffset: 5
 readonly property int menuMargins: 6
 readonly property int menuMaxHeight: 450
-property int _pendingX: 0
-property int _pendingY: 0
 
 readonly property string filterText: searchInput.text
 
@@ -22,6 +23,7 @@ property var menuStack: []
 property var _headerMenuModel: []
 property var _mainMenuModel: []
 property var _footerMenuModel: []
+property var _currentFilteredModel: []
 property var _pendingWindow: null
 property var _pendingAnchorItem: null
 property var _currentAnchorItem: null
@@ -31,8 +33,15 @@ property bool _isAnchorMode: false
 property bool _isInternalReset: false
 property bool _isPreparing: false
 property bool showSearchInput: false
+
 readonly property bool isMenuFocused: visible || _isPreparing
 readonly property bool isClosing: closeAnim.running
+readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function")
+
+readonly property alias menuView: menuView
+
+signal itemTriggered(var itemData)
+signal itemDataActionTriggered(string actionType, var data)
 
 color: "transparent"
 
@@ -45,28 +54,18 @@ if (visible && _currentAnchorItem === anchorItem) {
 close();
 return false;
 }
-
 if (isClosing && _lastAnchorItem === anchorItem) return false;
-
 return true;
 }
 
 function _restoreFocus() {
 if (!visible) return;
-
-if (showSearchInput)
-searchInput.forceFocusNow();
-else
-menuBackground.forceActiveFocus();
+if (showSearchInput) searchInput.forceFocusNow();
+else menuBackground.forceActiveFocus();
 }
 
 function pushMenu(modelData, tag, refreshFn) {
-menuStack.push({
-model: modelData,
-tag: tag || "",
-refreshFn: refreshFn || null
-});
-
+menuStack.push({model: modelData, tag: tag || "", refreshFn: refreshFn || null});
 _updateMenuFromStack();
 _restoreFocus();
 }
@@ -82,8 +81,7 @@ close();
 }
 
 function refresh() {
-if (!visible)
-return;
+if (!visible) return;
 
 for (let i = 0; i < menuStack.length; ++i) {
 const entry = menuStack[i];
@@ -93,14 +91,21 @@ const updated = entry.refreshFn();
 entry.model = updated ?? [];
 }
 }
-
 _updateMenuFromStack();
 }
 
-function _splitMenuModel(modelData) {
-let headerItems = [];
-let mainItems = [];
-let footerItems = [];
+function _itemText(item) {
+if (!item) return "";
+if (typeof item === "string") return item;
+return item.text ?? item.name ?? item.label ?? item.modelData?.text ?? "";
+}
+
+function _rebuildMenuModels(modelData) {
+const headerItems = [];
+const mainItems = [];
+const footerItems = [];
+const filteredItems = [];
+const search = menuPopup.filterText.toLowerCase().trim();
 
 if (Array.isArray(modelData)) {
 for (const item of modelData) {
@@ -108,17 +113,41 @@ if (!item) continue;
 
 if (item.__fixedHeader === true) {
 headerItems.push(item);
-} else if (item.__fixedFooter === true) {
-footerItems.push(item);
-} else {
-mainItems.push(item);
+continue;
 }
+
+if (item.__fixedFooter === true) {
+footerItems.push(item);
+continue;
+}
+
+mainItems.push(item);
+
+if (search !== "" && _itemText(item).toLowerCase().includes(search)) filteredItems.push(item);
 }
 }
 
 _headerMenuModel = headerItems;
 _mainMenuModel = mainItems;
 _footerMenuModel = footerItems;
+
+if (search === "") {
+_currentFilteredModel = [];
+return;
+}
+
+if (Array.isArray(modelData)) {
+_currentFilteredModel = filteredItems;
+return;
+}
+
+const nativeFiltered = [];
+
+for (const item of menuOpener.children) {
+if (_itemText(item).toLowerCase().includes(search)) nativeFiltered.push(item);
+}
+
+_currentFilteredModel = nativeFiltered;
 }
 
 function _updateMenuFromStack() {
@@ -127,6 +156,7 @@ menuPopup.menuModel = null;
 _headerMenuModel = [];
 _mainMenuModel = [];
 _footerMenuModel = [];
+_currentFilteredModel = [];
 return;
 }
 
@@ -134,26 +164,19 @@ const topEntry = menuStack[menuStack.length - 1];
 const currentModel = topEntry.model;
 
 menuPopup.menuModel = currentModel;
-
-_splitMenuModel(currentModel);
-_updateFilteredModel();
+_rebuildMenuModels(currentModel);
 }
 
-readonly property alias menuView: menuView
+onFilterTextChanged: {
+if (!menuPopup.menuModel) {
+_currentFilteredModel = [];
+return;
+}
 
-readonly property bool _isDirectModel: menuPopup.menuModel !== null && (Array.isArray(menuPopup.menuModel) || typeof menuPopup.menuModel.rowCount === "function")
-
-readonly property var _unfilteredModel: menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children
-
-property var _currentFilteredModel: []
-
-onFilterTextChanged: _updateFilteredModel()
-
-signal itemTriggered(var itemData)
-signal itemDataActionTriggered(string actionType, var data)
+_rebuildMenuModels(menuPopup.menuModel);
+}
 
 implicitWidth: menuWidth
-
 implicitHeight: Math.min((menuPopup.showSearchInput ? searchInput.height + 4 : 0) + headerContainer.implicitHeight + menuView.contentHeight + footerContainer.implicitHeight + (menuMargins * 2), menuMaxHeight)
 
 grabFocus: true
@@ -192,64 +215,45 @@ visible = false;
 
 function openMenu(targetWindow, anchorItem, modelData, tag, refreshFn) {
 if (!anchorItem) return;
-
 _prepareToOpen(targetWindow, modelData, tag, refreshFn);
-
 _pendingAnchorItem = anchorItem;
 _isAnchorMode = true;
-
 Qt.callLater(_applyPositioning);
 }
 
 function openAtPosition(targetWindow, x, y, modelData, tag, refreshFn) {
 if (!targetWindow) return;
-
 _prepareToOpen(targetWindow, modelData, tag, refreshFn);
-
 _pendingX = x;
 _pendingY = y;
 _isAnchorMode = false;
-
 Qt.callLater(_applyPositioning);
 }
 
 function _prepareToOpen(targetWindow, modelData, tag, refreshFn) {
 _isPreparing = true;
-
 closeAnim.stop();
-
 _pendingAnchorItem = null;
 _currentAnchorItem = null;
-
 menuPopup.menuModel = null;
+menuPopup._headerMenuModel = [];
 menuPopup._mainMenuModel = [];
 menuPopup._footerMenuModel = [];
-
+menuPopup._currentFilteredModel = [];
 searchInput.text = "";
-
 _isInternalReset = true;
 visible = false;
 _isInternalReset = false;
-
-menuPopup.menuStack = [{
-model: modelData,
-tag: tag || "main",
-refreshFn: refreshFn || null
-}];
-
+menuPopup.menuStack = [{model: modelData, tag: tag || "main", refreshFn: refreshFn || null}];
 _pendingWindow = targetWindow;
 }
 
 function handleItemTrigger(dataObj) {
 if (!dataObj || dataObj.enabled === false || dataObj.isSeparator || dataObj.type === "separator") return;
-
 itemTriggered(dataObj);
-
 if (dataObj.actionType !== undefined) itemDataActionTriggered(dataObj.actionType, dataObj.actionData);
-
 if (dataObj.onTrigger) dataObj.onTrigger();
 else if (dataObj.triggered) dataObj.triggered();
-
 if (dataObj.closeOnTrigger !== false && !dataObj.preventClose) close();
 }
 
@@ -270,16 +274,14 @@ return;
 }
 
 const windowPos = _pendingAnchorItem.mapToItem(null, 0, _pendingAnchorItem.height);
-
 const newX = windowPos.x - (implicitWidth / 2) + (_pendingAnchorItem.width / 2);
 const newY = windowPos.y + verticalOffset;
 
 menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(newX, newY, _pendingAnchorItem.width, 1);
-
 menuBackground.transformOrigin = Item.Top;
+
 } else {
 menuPopup._dyn(menuPopup).anchor.rect = Qt.rect(_pendingX, _pendingY, 1, 1);
-
 menuBackground.transformOrigin = Item.Center;
 }
 
@@ -302,39 +304,8 @@ id: menuOpener
 menu: menuPopup._isDirectModel ? null : menuPopup.menuModel
 }
 
-function _itemText(item) {
-if (!item) return "";
-if (typeof item === "string") return item;
-return item.text ?? item.name ?? item.label ?? item.modelData?.text ?? "";
-}
-
-function _updateFilteredModel() {
-const search = menuPopup.filterText.toLowerCase().trim();
-
-if (search === "") {
-_currentFilteredModel = [];
-return;
-}
-
-const rawSource = menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children;
-
-if (!rawSource) {
-_currentFilteredModel = [];
-return;
-}
-
-const filtered = [];
-
-for (const item of rawSource) {
-if (_itemText(item).toLowerCase().includes(search)) filtered.push(item);
-}
-
-_currentFilteredModel = filtered;
-}
-
 function focusListView() {
 if (menuView.currentIndex === -1 && menuView.count > 0) menuView.currentIndex = 0;
-
 menuView.forceActiveFocus();
 }
 
@@ -390,6 +361,7 @@ anchors.fill: parent
 color: ThemeEngine.palette.backgroundColor
 border.color: ThemeEngine.dynamicBorderColor
 border.width: 1
+
 focus: true
 radius: ThemeEngine.palette.shellRadius
 clip: true
@@ -410,6 +382,7 @@ mouse.accepted = false;
 
 Keys.onPressed: event => {
 switch (event.key) {
+
 case Qt.Key_Escape:
 menuPopup.close();
 event.accepted = true;
@@ -421,20 +394,14 @@ event.accepted = true;
 break;
 
 case Qt.Key_Up:
-if (menuView.currentIndex <= 0) {
-menuView.currentIndex = menuView.count - 1;
-} else {
-menuView.decrementCurrentIndex();
-}
+if (menuView.currentIndex <= 0) menuView.currentIndex = menuView.count - 1;
+else menuView.decrementCurrentIndex();
 event.accepted = true;
 break;
 
 case Qt.Key_Down:
-if (menuView.currentIndex === -1 || menuView.currentIndex === menuView.count - 1) {
-menuView.currentIndex = 0;
-} else {
-menuView.incrementCurrentIndex();
-}
+if (menuView.currentIndex === -1 || menuView.currentIndex === menuView.count - 1) menuView.currentIndex = 0;
+else menuView.incrementCurrentIndex();
 event.accepted = true;
 break;
 
@@ -442,7 +409,6 @@ case Qt.Key_Return:
 case Qt.Key_Enter:
 if (menuView.currentIndex >= 0 && menuView.currentItem) {
 const dataObj = menuPopup._dyn(menuView.currentItem).itemData;
-
 if (dataObj) menuPopup.handleItemTrigger(dataObj);
 }
 event.accepted = true;
@@ -456,14 +422,13 @@ id: searchInput
 anchors.top: parent.top
 anchors.left: parent.left
 anchors.right: parent.right
+
 anchors.margins: menuPopup.menuMargins
 anchors.bottomMargin: 0
 
 visible: menuPopup.showSearchInput
 enabled: visible
-
 itemHeight: menuPopup.itemHeight
-
 onNavigationDownRequested: menuPopup.focusListView()
 
 onActionTriggeredRequested: {
@@ -486,12 +451,10 @@ visible: menuPopup._headerMenuModel.length > 0
 
 anchors.left: parent.left
 anchors.right: parent.right
-
 anchors.top: searchInput.visible ? searchInput.bottom : parent.top
 
 anchors.leftMargin: menuPopup.menuMargins
 anchors.rightMargin: menuPopup.menuMargins
-
 anchors.topMargin: searchInput.visible ? 4 : menuPopup.menuMargins
 
 implicitHeight: headerColumn.implicitHeight
@@ -507,14 +470,10 @@ model: menuPopup._headerMenuModel
 
 delegate: MenuItemDelegate {
 required property var modelData
-
 width: headerColumn.width
-
 itemHeight: menuPopup.itemHeight
 separatorHeight: menuPopup.separatorHeight
-
 itemData: modelData
-
 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
 }
 }
@@ -522,7 +481,6 @@ onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
 Rectangle {
 width: parent.width
 height: 1
-
 color: ThemeEngine.dynamicBorderColor
 opacity: 0.7
 }
@@ -543,29 +501,20 @@ anchors.bottomMargin: footerContainer.visible ? 4 : menuPopup.menuMargins
 
 highlightMoveDuration: 0
 spacing: 2
-
 interactive: true
 boundsBehavior: Flickable.StopAtBounds
 clip: true
-
 currentIndex: -1
 highlightFollowsCurrentItem: true
-
 onModelChanged: currentIndex = -1
-
 model: menuPopup.filterText.trim() === "" ? (menuPopup._isDirectModel ? menuPopup._mainMenuModel : menuOpener.children) : menuPopup._currentFilteredModel
 
 delegate: MenuItemDelegate {
-required property var model
-
+required property var modelData
 width: menuView.width
-
 itemHeight: menuPopup.itemHeight
-
 separatorHeight: menuPopup.separatorHeight
-
-itemData: model.modelData !== undefined ? model.modelData : model
-
+itemData: modelData
 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
 }
 }
@@ -605,18 +554,12 @@ height: 2
 
 Repeater {
 model: menuPopup._footerMenuModel
-
 delegate: MenuItemDelegate {
 required property var modelData
-
 width: footerColumn.width
-
 itemHeight: menuPopup.itemHeight
-
 separatorHeight: menuPopup.separatorHeight
-
 itemData: modelData
-
 onTriggered: dataObj => menuPopup.handleItemTrigger(dataObj)
 }
 }

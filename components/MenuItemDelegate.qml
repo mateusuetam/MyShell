@@ -5,13 +5,9 @@ import "../core"
 Item {
 id: delegateRoot
 
-required property var itemData
 property int itemHeight: 26
 property int separatorHeight: 8
-
-signal triggered(var dataObj)
-
-readonly property var safeData: delegateRoot.itemData || ({})
+readonly property var safeData: delegateRoot.itemData ?? ({})
 readonly property bool isSeparator: !!safeData.isSeparator || safeData.type === "separator"
 readonly property bool isGridRow: safeData.type === "gridRow"
 readonly property bool isSplitAction: safeData.type === "splitAction"
@@ -19,6 +15,8 @@ readonly property bool isInteractiveDefault: safeData.enabled !== false && !isSe
 readonly property bool isEnabled: safeData.enabled !== false && !isSeparator
 readonly property bool isCurrentKeyboardItem: !!delegateRoot.ListView.isCurrentItem
 readonly property bool isHighlighted: isInteractiveDefault && (mouseArea.containsMouse || isCurrentKeyboardItem)
+required property var itemData
+signal triggered(var dataObj)
 
 width: ListView.view ? ListView.view.width : 0
 height: isSeparator ? separatorHeight : itemHeight
@@ -34,6 +32,7 @@ opacity: 0.6
 
 Rectangle {
 id: actionVisual
+
 anchors.fill: parent
 visible: !delegateRoot.isSeparator && !delegateRoot.isGridRow && !delegateRoot.isSplitAction
 opacity: delegateRoot.isEnabled ? 1.0 : 0.5
@@ -55,6 +54,7 @@ elide: delegateRoot.safeData.align === "center" ? Text.ElideNone : Text.ElideRig
 
 MouseArea {
 id: mouseArea
+
 anchors.fill: parent
 enabled: delegateRoot.isInteractiveDefault
 hoverEnabled: delegateRoot.isInteractiveDefault
@@ -141,9 +141,7 @@ id: splitMouse
 anchors.fill: parent
 hoverEnabled: true
 cursorShape: Qt.PointingHandCursor
-onPressed: {
-if (actionDelegate.modelData?.onTrigger) actionDelegate.modelData.onTrigger();
-}
+onPressed: if (actionDelegate.modelData?.onTrigger) actionDelegate.modelData.onTrigger();
 }
 }
 }
