@@ -11,6 +11,15 @@ id: bluetoothModule
 required property var globalMenu
 required property var parentWindow
 
+property string imunityAddress: ""
+property string pendingOpState: ""
+property string pendingOpAddress: ""
+property string pendingRfkillAction: ""
+
+property bool justPairedImunity: false
+property bool startAgent: false
+property bool isRfkillBlocked: false
+
 readonly property bool isBluetoothOn: (() => {
 const adapter = Bluetooth["defaultAdapter"];
 return adapter ? adapter["enabled"] : false;
@@ -18,14 +27,6 @@ return adapter ? adapter["enabled"] : false;
 
 implicitWidth: bluetoothRow.implicitWidth
 implicitHeight: bluetoothModule.parentWindow ? bluetoothModule.parentWindow.barHeight : 30
-
-property string pendingOpAddress: ""
-property string pendingOpState: ""
-property string imunityAddress: ""
-property bool justPairedImunity: false
-property bool startAgent: false
-
-property bool isRfkillBlocked: false
 
 function getBackButton(text) {
 return {
@@ -64,7 +65,11 @@ stdout: StdioCollector {
 onStreamFinished: {
 const output = this.text.trim().toLowerCase();
 bluetoothModule.isRfkillBlocked = output === "yes";
-bluetoothModule.updateMenu(false);
+const action = bluetoothModule.pendingRfkillAction;
+bluetoothModule.pendingRfkillAction = "";
+if (action === "open") bluetoothModule.updateMenu(true);
+else if (action === "toggle") bluetoothModule.toggleAdapter();
+else bluetoothModule.updateMenu(false);
 }
 }
 }
@@ -76,7 +81,8 @@ if (!running) bluetoothModule.checkRfkill();
 }
 }
 
-function checkRfkill() {
+function checkRfkill(action = "") {
+if (action) bluetoothModule.pendingRfkillAction = action;
 if (!rfkillCheckProcess.running) rfkillCheckProcess.exec(rfkillCheckProcess.command);
 }
 
@@ -87,6 +93,13 @@ rfkillToggleProcess.exec(["rfkill", "unblock", "bluetooth"]);
 rfkillToggleProcess.exec(["rfkill", "block", "bluetooth"]);
 bluetoothModule.sendNotification("Bluetooth", "Bluetooth bloqueado", "normal");
 }
+}
+
+function toggleAdapter() {
+const adapter = Bluetooth["defaultAdapter"];
+if (!adapter) return;
+if (adapter["enabled"]) adapter["enabled"] = false;
+else if (!bluetoothModule.isRfkillBlocked) adapter["enabled"] = true;
 }
 
 Timer {
@@ -495,15 +508,8 @@ acceptedButtons: Qt.LeftButton | Qt.RightButton
 onPressed: mouse => {
 mouse.accepted = true;
 if (bluetoothModule.globalMenu && !bluetoothModule.globalMenu.shouldOpenFor(bluetoothModule)) return;
-bluetoothModule.checkRfkill();
-if (mouse.button === Qt.LeftButton) {
-Qt.callLater(() => bluetoothModule.updateMenu(true));
-} else if (mouse.button === Qt.RightButton) {
-const adapter = Bluetooth["defaultAdapter"];
-if (!adapter) return;
-if (adapter["enabled"]) adapter["enabled"] = false;
-else if (!bluetoothModule.isRfkillBlocked) adapter["enabled"] = true;
-}
+if (mouse.button === Qt.LeftButton) bluetoothModule.checkRfkill("open");
+else if (mouse.button === Qt.RightButton) bluetoothModule.checkRfkill("toggle");
 }
 }
 
