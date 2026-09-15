@@ -21,10 +21,15 @@ ContextMenu {
 id: sharedContextMenu
 }
 
+TextPrompt {
+id: sharedTextPrompt
+}
+
 MainBar {
 id: mainBarWindow
 screen: Quickshell.screens[0]
 globalMenu: sharedContextMenu
+textPrompt: sharedTextPrompt
 startModule.wallpaperMenuStructure: shellWallpaper.menuStructure
 startModule.onWallpaperChangeRequested: function(path) {
 shellWallpaper.requestWallpaperChange(path)

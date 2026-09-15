@@ -10,11 +10,13 @@ PanelWindow {
 id: barWindow
 
 property var globalMenu: null
-property alias startModule: startModuleInstance
+property var textPrompt: null
 
 readonly property int barHeight: 30
 readonly property int layoutSpacing: 8
 readonly property int sideMargins: 5
+
+property alias startModule: startModuleInstance
 
 WlrLayershell.layer: WlrLayer.Top
 WlrLayershell.namespace: "mainbar"
@@ -27,10 +29,7 @@ left: true
 
 implicitHeight: barWindow.barHeight
 exclusionMode: ExclusionMode.Auto
-WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMenuFocused && barWindow.globalMenu._pendingWindow === barWindow) ||
-(textPromptInstance && textPromptInstance.visible)) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-
-TextPrompt { id: textPromptInstance }
+WlrLayershell.keyboardFocus: ((barWindow.globalMenu && barWindow.globalMenu.isMenuFocused && barWindow.globalMenu._pendingWindow === barWindow) || (barWindow.textPrompt && barWindow.textPrompt.visible)) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
 // --- SEPARADOR ---
 component Separator: Item {
@@ -93,9 +92,9 @@ VolumeModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
 BluetoothModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
-NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: textPromptInstance }
+NetworkModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: barWindow.textPrompt }
 Separator {}
-BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: textPromptInstance }
+BacklightModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu; textPrompt: barWindow.textPrompt }
 Separator {}
 BatteryModule { parentWindow: barWindow; globalMenu: barWindow.globalMenu }
 Separator {}
