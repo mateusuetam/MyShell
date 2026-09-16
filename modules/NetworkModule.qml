@@ -188,10 +188,11 @@ if (wifiDev && wifiDev.scannerEnabled) wifiDev.scannerEnabled = false;
 
 function isScanMenuOpen() {
 const menu = networkModule.globalMenu;
-if (!menu || !menu.visible) return false;
-if (menu._currentAnchorItem !== networkModule) return false;
+if (!menu || !menu.isOpenFor(networkModule)) return false;
+
 const stack = menu.menuStack;
 if (!stack || stack.length === 0) return false;
+
 return stack[stack.length - 1].tag === "scan";
 }
 
@@ -343,13 +344,14 @@ return;
 
 networkModule.stopWifiScan();
 
-if (net.known || net.security === WifiSecurityType.Open) net.connect();
-else {
-networkModule.globalMenu.close();
+if (net.known || net.security === WifiSecurityType.Open) {
+net.connect();
+} else {
 networkModule.pendingNetworkForAuth = net;
 promptDelayTimer.start();
 }
-}});
+}
+});
 }
 }
 menuModel.push(networkModule.getScanBackButton());
@@ -389,22 +391,15 @@ return menuModel;
 }
 
 function updateMenu(forceOpen) {
-if (!networkModule.globalMenu) return;
-if (!forceOpen && !networkModule.globalMenu.visible) return;
+const menu = networkModule.globalMenu;
+if (!menu) return;
 
-networkModule.globalMenu.showSearchInput = false;
+if (!forceOpen && !menu.visible) return;
 
-if (networkModule.globalMenu.visible && networkModule.globalMenu._currentAnchorItem === networkModule) {
-networkModule.globalMenu.refresh();
-} else {
-networkModule.globalMenu.openMenu(
-networkModule.parentWindow,
-networkModule,
-networkModule.generateMainMenu(),
-"main",
-() => networkModule.generateMainMenu()
-);
-}
+menu.showSearchInput = false;
+
+if (menu.isOpenFor(networkModule)) menu.refresh();
+else menu.openMenu(networkModule.parentWindow, networkModule, networkModule.generateMainMenu(), "main", () => networkModule.generateMainMenu());
 }
 
 function getNetworkState() {
@@ -427,8 +422,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (networkModule.globalMenu && !networkModule.globalMenu.shouldOpenFor(networkModule)) return;
+mouse.accepted = networkModule.globalMenu ? networkModule.globalMenu.handleModulePress(networkModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) {
 networkModule.forgottenNetworks = [];
 networkModule.updateMenu(true);

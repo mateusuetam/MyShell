@@ -26,8 +26,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (idleModule.globalMenu) idleModule.globalMenu.close();
+mouse.accepted = idleModule.globalMenu ? idleModule.globalMenu.handleModulePress(idleModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) inhibitor.enabled = !inhibitor.enabled;
 }
 }

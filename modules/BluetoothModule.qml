@@ -480,24 +480,20 @@ return menuModel;
 }
 
 function updateMenu(forceOpen) {
-if (!bluetoothModule.globalMenu) return;
+const menu = bluetoothModule.globalMenu;
+if (!menu) return;
 
-if (forceOpen && !bluetoothModule.globalMenu.visible) {
+if (forceOpen && !menu.visible) {
 bluetoothModule.pendingOpAddress = "";
 bluetoothModule.pendingOpState = "";
 }
 
-if (!forceOpen) {
-if (!bluetoothModule.globalMenu.visible || bluetoothModule.globalMenu._currentAnchorItem !== bluetoothModule) return;
-}
+if (!forceOpen && !menu.isOpenFor(bluetoothModule)) return;
 
-bluetoothModule.globalMenu.showSearchInput = false;
+menu.showSearchInput = false;
 
-if (bluetoothModule.globalMenu.visible && bluetoothModule.globalMenu._currentAnchorItem === bluetoothModule) {
-bluetoothModule.globalMenu.refresh();
-} else {
-bluetoothModule.globalMenu.openMenu(bluetoothModule.parentWindow, bluetoothModule, bluetoothModule.generateMainMenu(), "main", () => bluetoothModule.generateMainMenu());
-}
+if (menu.isOpenFor(bluetoothModule)) menu.refresh();
+else menu.openMenu(bluetoothModule.parentWindow, bluetoothModule, bluetoothModule.generateMainMenu(), "main", () => bluetoothModule.generateMainMenu());
 }
 
 MouseArea {
@@ -506,8 +502,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (bluetoothModule.globalMenu && !bluetoothModule.globalMenu.shouldOpenFor(bluetoothModule)) return;
+mouse.accepted = bluetoothModule.globalMenu ? bluetoothModule.globalMenu.handleModulePress(bluetoothModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) bluetoothModule.checkRfkill("open");
 else if (mouse.button === Qt.RightButton) bluetoothModule.checkRfkill("toggle");
 }

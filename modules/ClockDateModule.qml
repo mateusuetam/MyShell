@@ -22,11 +22,6 @@ precision: SystemClock.Minutes
 }
 
 function toggleCalendar() {
-if (clockDateModule.globalMenu && clockDateModule.globalMenu.visible && clockDateModule.globalMenu._currentAnchorItem === clockDateModule) {
-clockDateModule.globalMenu.close();
-return;
-}
-
 const today = new Date();
 
 _calMonth = today.getMonth();
@@ -116,8 +111,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (clockDateModule.globalMenu && !clockDateModule.globalMenu.shouldOpenFor(clockDateModule)) return;
+mouse.accepted = clockDateModule.globalMenu ? clockDateModule.globalMenu.handleModulePress(clockDateModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) clockDateModule.toggleCalendar();
 else if (mouse.button === Qt.RightButton) clockDateModule.showFullDate = !clockDateModule.showFullDate;
 }

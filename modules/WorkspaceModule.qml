@@ -213,8 +213,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (root.globalMenu) root.globalMenu.close();
+mouse.accepted = root.globalMenu ? root.globalMenu.handleModulePress(root, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) root.sendNiriAction(JSON.stringify({Action: {FocusWorkspace: {reference: {Index: wsDot.modelData.idx}}}}));
 }
 }

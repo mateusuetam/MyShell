@@ -154,20 +154,21 @@ backlightModule.applyTemperature(2500);
 
 menuModel.push({ type: "separator" });
 
-menuModel.push({ text: "Definir Temperatura", preventClose: true, onTrigger: () => {
-if (backlightModule.globalMenu) backlightModule.globalMenu.close(); promptDelayTimer.start();
+menuModel.push({text: "Definir Temperatura", preventClose: true, onTrigger: () => {
+promptDelayTimer.start();
 }});
 
 return menuModel;
 }
 
 function updateMenu(isRunning) {
-if (!backlightModule.globalMenu) return;
+const menu = backlightModule.globalMenu;
+if (!menu) return;
 
-let modelData = backlightModule.generateMenuModel(isRunning);
+const modelData = backlightModule.generateMenuModel(isRunning);
 
-backlightModule.globalMenu.showSearchInput = false;
-backlightModule.globalMenu.openMenu(backlightModule.parentWindow, backlightModule, modelData);
+menu.showSearchInput = false;
+menu.openMenu(backlightModule.parentWindow, backlightModule, modelData);
 }
 
 MouseArea {
@@ -176,14 +177,14 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (backlightModule.globalMenu && !backlightModule.globalMenu.shouldOpenFor(backlightModule)) return;
+mouse.accepted = backlightModule.globalMenu ? backlightModule.globalMenu.handleModulePress(backlightModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (mouse.button === Qt.LeftButton) checkGammastep.running = true;
 else if (mouse.button === Qt.RightButton) gammastepToggleCheck.running = true;
 }
 
 onWheel: wheel => {
-if (backlightModule.globalMenu && backlightModule.globalMenu.visible && backlightModule.globalMenu._currentAnchorItem === backlightModule) backlightModule.globalMenu.close();
+if (backlightModule.globalMenu) backlightModule.globalMenu.handleModuleWheel();
 if (changeBrightness.running) return;
 if (wheel.angleDelta.y > 0) changeBrightness.command = ["brightnessctl", "set", "+1%"];
 else changeBrightness.command = ["brightnessctl", "set", "1%-"];

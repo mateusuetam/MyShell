@@ -23,6 +23,14 @@ implicitHeight: 40
 
 grabFocus: true
 
+Component.onCompleted: {
+PopupCoordinator.textPrompt = textPopup;
+}
+
+Component.onDestruction: {
+if (PopupCoordinator.textPrompt === textPopup) PopupCoordinator.textPrompt = null;
+}
+
 function _resetInputState() {
 textPopup.statusState = "input";
 textPopup.errorMessage = textPopup.defaultErrorMessage;
@@ -42,8 +50,9 @@ return obj;
 function openPrompt(message, parentWin, isPassword, onAccept, processingMsg = "Processando...") {
 if (!parentWin) return;
 
-_resetInputState();
+PopupCoordinator.claimTextPrompt();
 
+_resetInputState();
 textPopup.promptMessage = message;
 textPopup.processingMessage = processingMsg;
 textPopup.targetWindow = parentWin;
@@ -67,6 +76,11 @@ inputField.forceActiveFocus();
 
 function closePrompt() {
 textPopup.visible = false;
+}
+
+function closeImmediate() {
+visible = false;
+acceptCallback = null;
 }
 
 Rectangle {

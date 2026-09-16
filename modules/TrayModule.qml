@@ -106,17 +106,14 @@ const parentWin = trayModule.parentWindow;
 const trayListModel = trayModule.buildTrayModel();
 
 if (trayListModel.length === 0) {
-if (menu.visible && menu._currentAnchorItem === trayButton) menu.close();
+if (menu.isOpenFor(trayButton)) menu.close();
 return;
 }
 
 menu.showSearchInput = false;
 
-if (menu.visible && menu._currentAnchorItem === trayButton) {
-menu.refresh();
-} else if (forceOpen) {
-menu.openMenu(parentWin, trayButton, trayListModel, "tray", () => trayModule.buildTrayModel());
-}
+if (menu.isOpenFor(trayButton)) menu.refresh();
+else if (forceOpen) menu.openMenu(parentWin, trayButton, trayListModel, "tray", () => trayModule.buildTrayModel());
 }
 
 MouseArea {
@@ -126,8 +123,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (trayModule.globalMenu && !trayModule.globalMenu.shouldOpenFor(trayButton)) return;
+mouse.accepted = trayModule.globalMenu ? trayModule.globalMenu.handleModulePress(trayButton, mouse.button) : false;
+if (mouse.accepted) return;
 Qt.callLater(() => trayModule.updateMenu(true));
 }
 }

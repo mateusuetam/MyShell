@@ -97,8 +97,8 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (mprisModule.globalMenu) mprisModule.globalMenu.close();
+mouse.accepted = mprisModule.globalMenu ? mprisModule.globalMenu.handleModulePress(mprisModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (!mprisModule.activePlayer) return;
 if (mouse.button === Qt.LeftButton && mprisModule.activePlayer.canTogglePlaying) mprisModule.activePlayer.togglePlaying();
 else if (mouse.button === Qt.RightButton && mprisModule.activePlayer.canGoNext) mprisModule.activePlayer.next();

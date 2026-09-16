@@ -29,13 +29,13 @@ cursorShape: Qt.PointingHandCursor
 acceptedButtons: Qt.LeftButton
 
 onPressed: mouse => {
-mouse.accepted = true;
-if (micModule.globalMenu) micModule.globalMenu.close();
+mouse.accepted = micModule.globalMenu ? micModule.globalMenu.handleModulePress(micModule, mouse.button) : false;
+if (mouse.accepted) return;
 if (micModule.micNode) micModule.micNode.muted = !micModule.micNode.muted;
 }
 
 onWheel: wheel => {
-if (micModule.globalMenu) micModule.globalMenu.close();
+if (micModule.globalMenu) micModule.globalMenu.handleModuleWheel();
 if (!micModule.micNode || wheel.angleDelta.y === 0) return;
 if (wheel.angleDelta.y > 0) micModule.micNode.volume = Math.min(1.0, micModule.micNode.volume + 0.01);
 else micModule.micNode.volume = Math.max(0.0, micModule.micNode.volume - 0.01);
