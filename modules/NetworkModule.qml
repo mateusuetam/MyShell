@@ -11,8 +11,10 @@ required property var globalMenu
 required property var parentWindow
 required property var textPrompt
 
-property var forgottenNetworks: []
+property var wifiDevice: null
+property var wifiNetworkModel: null
 property var pendingNetworkForAuth: null
+property var forgottenNetworks: []
 
 property string lastStatus: ""
 property string pendingStatus: ""
@@ -45,20 +47,35 @@ networkModule.updateMenu(false);
 
 Connections {
 target: Networking
+
 function onWifiEnabledChanged() {
-if (isWifiOn) {
-networkModule.isManualBlock = false;
-}
+networkModule.syncWifiDevice();
+if (isWifiOn) networkModule.isManualBlock = false;
 networkModule.updateMenu(false);
 }
+
 function onWifiHardwareEnabledChanged() {
+networkModule.syncWifiDevice();
 networkModule.updateMenu(false);
 }
 }
 
 Component.onCompleted: {
+networkModule.syncWifiDevice();
 lastStatus = getNetworkState().text;
 Qt.callLater(() => { isReady = true; });
+}
+
+Connections {
+target: Networking.devices
+
+function onObjectInsertedPost() {
+networkModule.syncWifiDevice();
+}
+
+function onObjectRemovedPost() {
+networkModule.syncWifiDevice();
+}
 }
 
 Process { id: notifyProcess }
@@ -66,23 +83,25 @@ Process { id: notifyProcess }
 Connections {
 target: networkModule.pendingNetworkForAuth
 ignoreUnknownSignals: true
+
 function onConnectedChanged() {
 if (networkModule.pendingNetworkForAuth?.connected) {
-networkAuthWatchdog.stop();
 networkModule.textPrompt.closePrompt();
 networkModule.pendingNetworkForAuth = null;
 }
 }
+
+function onConnectionFailed(reason) {
+const net = networkModule.pendingNetworkForAuth;
+if (!net) return;
+
+if (reason === ConnectionFailReason.NoSecrets) {
+net.forget();
+networkModule.textPrompt.showError("Senha incorreta. Tente novamente:");
+return;
 }
 
-Timer {
-id: networkAuthWatchdog
-interval: 5000
-repeat: false
-onTriggered: {
-if (networkModule.pendingNetworkForAuth && !networkModule.pendingNetworkForAuth.connected) {
 networkModule.textPrompt.showError("Falha na conexão. Tente novamente:");
-}
 }
 }
 
@@ -93,10 +112,7 @@ repeat: false
 onTriggered: {
 if (networkModule.pendingNetworkForAuth) {
 let netName = networkModule.pendingNetworkForAuth.name;
-
-networkModule.textPrompt.openPrompt(`Senha para ${netName}:`, networkModule.parentWindow, true,
-(inputText) => {networkModule.pendingNetworkForAuth.connectWithPsk(inputText); networkAuthWatchdog.start();},
-`Conectando a ${netName}...`);
+networkModule.textPrompt.openPrompt(`Senha para ${netName}:`, networkModule.parentWindow, true, inputText => {networkModule.pendingNetworkForAuth.connectWithPsk(inputText);}, `Conectando a ${netName}...`);
 }
 }
 }
@@ -105,9 +121,14 @@ Timer {
 id: stabilizationTimer
 interval: 150
 repeat: false
-onTriggered: {
-networkModule.processFinalStateChange(networkModule.pendingStatus);
+onTriggered: networkModule.processFinalStateChange(networkModule.pendingStatus);
 }
+
+Timer {
+id: scanRefreshTimer
+interval: 75
+repeat: false
+onTriggered: networkModule.refreshScanMenu()
 }
 
 function sendNotification(title, message, urgency) {
@@ -133,19 +154,13 @@ function processFinalStateChange(stableText) {
 if (lastStatus === stableText) return;
 
 switch (stableText) {
-case "up":
-sendNotification("Network", "Conexão estabelecida", "normal");
+case "up": sendNotification("Network", "Conexão estabelecida", "normal");
 break;
-case "off":
-sendNotification("Network", "Wifi desligado", "normal");
+case "off": sendNotification("Network", "Wifi desligado", "normal");
 break;
-case "off (B)":
-sendNotification("Network", "Wifi bloqueado", "normal");
+case "off (B)": sendNotification("Network", "Wifi bloqueado", "normal");
 break;
-case "down":
-if (isWifiOn && lastStatus === "up") {
-sendNotification("Network", "Sem sinal...", "critical");
-}
+case "down": if (isWifiOn && lastStatus === "up") sendNotification("Network", "Sem sinal...", "critical");
 break;
 }
 
@@ -158,6 +173,58 @@ if (!devicesList) return null;
 return devicesList.find(dev => dev && (dev.name.includes("wlan") || dev.name.includes("wlp") || dev.type === DeviceType.Wifi)) || null;
 }
 
+function syncWifiDevice() {
+const dev = networkModule.getWifiDevice();
+if (dev === networkModule.wifiDevice) return;
+networkModule.wifiDevice = dev;
+networkModule.wifiNetworkModel = dev ? dev.networks : null;
+}
+
+function stopWifiScan() {
+scanRefreshTimer.stop();
+const wifiDev = networkModule.wifiDevice;
+if (wifiDev && wifiDev.scannerEnabled) wifiDev.scannerEnabled = false;
+}
+
+function isScanMenuOpen() {
+const menu = networkModule.globalMenu;
+if (!menu || !menu.visible) return false;
+if (menu._currentAnchorItem !== networkModule) return false;
+const stack = menu.menuStack;
+if (!stack || stack.length === 0) return false;
+return stack[stack.length - 1].tag === "scan";
+}
+
+function scheduleNetworkRefresh() {
+const menu = networkModule.globalMenu;
+if (!menu || !menu.visible) return;
+if (networkModule.isScanMenuOpen()) scanRefreshTimer.restart();
+else menu.refresh();
+}
+
+function refreshScanMenu() {
+if (!networkModule.isScanMenuOpen()) return;
+networkModule.globalMenu.refresh();
+}
+
+Instantiator {
+model: networkModule.wifiNetworkModel
+onObjectAdded: networkModule.scheduleNetworkRefresh();
+onObjectRemoved: networkModule.scheduleNetworkRefresh();
+
+delegate: Connections {
+id: netConn
+
+required property var modelData
+target: netConn.modelData
+
+function onConnectedChanged() {networkModule.scheduleNetworkRefresh();}
+function onKnownChanged() {networkModule.scheduleNetworkRefresh();}
+function onStateChanged() {networkModule.scheduleNetworkRefresh();}
+function onNameChanged() {networkModule.scheduleNetworkRefresh();}
+}
+}
+
 function getActiveDevice() {
 const devicesList = Networking.devices?.values;
 if (!devicesList) return null;
@@ -166,10 +233,22 @@ return devicesList.find(dev => dev?.connected) || null;
 
 function getBackButton() {
 return {
-text: "< Menu de redes",
+text: "< Network",
 preventClose: true,
 __fixedFooter: true,
 onTrigger: () => {
+if (networkModule.globalMenu) networkModule.globalMenu.popMenu();
+}
+};
+}
+
+function getScanBackButton() {
+return {
+text: "< Sair da Busca",
+preventClose: true,
+__fixedFooter: true,
+onTrigger: () => {
+networkModule.stopWifiScan();
 if (networkModule.globalMenu) networkModule.globalMenu.popMenu();
 }
 };
@@ -194,21 +273,11 @@ if (isWifiOn) {
 menuModel.push({
 text: "Buscar Redes",
 preventClose: true,
-onTrigger: () => {
-if (networkModule.globalMenu) {
-networkModule.globalMenu.pushMenu(
-networkModule.generateScanMenu(),
-"scan",
-() => networkModule.generateScanMenu()
-);
-}
-}
-});
+onTrigger: () => {if (networkModule.globalMenu) networkModule.globalMenu.pushMenu(networkModule.generateScanMenu(), "scan", () => networkModule.generateScanMenu());}});
 
 menuModel.push({ type: "separator" });
 
-let wifiDev = networkModule.getWifiDevice();
-let nets = wifiDev?.networks?.values;
+const nets = networkModule.wifiNetworkModel?.values;
 
 if (nets) {
 for (let i = 0; i < nets.length; i++) {
@@ -222,16 +291,7 @@ let prefix = net.connected ? "Conectado: " : "Desconectado: ";
 menuModel.push({
 text: prefix + net.name,
 preventClose: true,
-onTrigger: () => {
-if (networkModule.globalMenu) {
-networkModule.globalMenu.pushMenu(
-networkModule.generateActionMenu(net),
-"action_" + net.name,
-() => networkModule.generateActionMenu(net)
-);
-}
-}
-});
+onTrigger: () => {if (networkModule.globalMenu) networkModule.globalMenu.pushMenu(networkModule.generateActionMenu(net), "action_" + net.name, () => networkModule.generateActionMenu(net));}});
 }
 }
 }
@@ -243,36 +303,20 @@ return menuModel;
 Connections {
 target: networkModule.globalMenu
 function onVisibleChanged() {
-if (!networkModule.globalMenu?.visible) {
-let wifiDev = networkModule.getWifiDevice();
-if (wifiDev && wifiDev.scannerEnabled) {
-wifiDev.scannerEnabled = false;
-}
-}
+if (!networkModule.globalMenu?.visible) networkModule.stopWifiScan();
 }
 }
 
 function generateScanMenu() {
 let menuModel = [];
-let wifiDev = networkModule.getWifiDevice();
+const wifiDev = networkModule.wifiDevice;
 
 if (wifiDev) wifiDev.scannerEnabled = true;
 
-menuModel.push({
-text: "Atualizar Busca",
-preventClose: true,
-__fixedHeader: true,
-onTrigger: () => {
-const dev = networkModule.getWifiDevice();
-if (dev) {
-dev.scannerEnabled = false;
-dev.scannerEnabled = true;
-}
-networkModule.updateMenu(false);
-}
-});
+menuModel.push({text: "Buscando redes...", enabled: false, __fixedHeader: true});
 
-let nets = wifiDev?.networks?.values;
+const nets = networkModule.wifiNetworkModel?.values;
+
 if (nets) {
 let sortedNets = nets.slice().sort((a, b) => b.signalStrength - a.signalStrength);
 
@@ -282,6 +326,7 @@ let net = sortedNets[i];
 if (!net.name || networkModule.forgottenNetworks.includes(net.name)) continue;
 
 let signalIcon = "2";
+
 if (net.signalStrength >= 0.8) signalIcon = "8";
 else if (net.signalStrength >= 0.6) signalIcon = "6";
 else if (net.signalStrength >= 0.4) signalIcon = "4";
@@ -291,20 +336,23 @@ let secIcon = net.security === WifiSecurityType.Open ? "NOPWD" : "PWD";
 menuModel.push({
 text: `${net.name} | ${secIcon} | ${signalIcon}`,
 onTrigger: () => {
-if (net.known || net.security === WifiSecurityType.Open) {
-net.connect();
-} else {
+if (net.connected) {
+networkModule.sendNotification("Network", `Você já está conectado a ${net.name}`, "normal");
+return;
+}
+
+networkModule.stopWifiScan();
+
+if (net.known || net.security === WifiSecurityType.Open) net.connect();
+else {
 networkModule.globalMenu.close();
 networkModule.pendingNetworkForAuth = net;
 promptDelayTimer.start();
 }
+}});
 }
-});
 }
-}
-
-menuModel.push(networkModule.getBackButton());
-
+menuModel.push(networkModule.getScanBackButton());
 return menuModel;
 }
 
@@ -329,16 +377,14 @@ text: "Esquecer",
 preventClose: true,
 onTrigger: () => {
 let netName = net.name;
-if (!networkModule.forgottenNetworks.includes(netName)) {
-networkModule.forgottenNetworks.push(netName);
-}
+if (!networkModule.forgottenNetworks.includes(netName)) networkModule.forgottenNetworks.push(netName);
 net.forget();
 networkModule.globalMenu.popMenu();
+networkModule.globalMenu.refresh();
 }
 });
 
 menuModel.push(networkModule.getBackButton());
-
 return menuModel;
 }
 
