@@ -12,7 +12,7 @@ property var palette: GruvboxDark
 property string currentTheme: defaultTheme
 readonly property string defaultTheme: "GruvboxDark"
 
-readonly property string appliedFontFamily: "Ubuntu Sans"
+readonly property string appliedFontFamily: "Noto Sans"
 readonly property int appliedLoadingClockFontSize: 96
 readonly property int appliedLoadingGreetingsFontSize: 40
 readonly property int appliedFontSize: 14
