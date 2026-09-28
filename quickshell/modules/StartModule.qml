@@ -98,6 +98,20 @@ onObjectRemoved: startModule.cachedAppMenu = []
 delegate: AppDelegate {}
 }
 
+function launchApp(entry) {
+if (!entry || !entry.command || entry.command.length === 0) return;
+
+const appPath = Quickshell.env("QUICKSHELL_APP_PATH") || "";
+const currentPath = Quickshell.env("PATH") || "";
+const applicationPath = [appPath, currentPath].filter(Boolean).join(":");
+
+Quickshell.execDetached({
+command: ["sh", "-c", 'exec "$@"', "sh", ...entry.command],
+workingDirectory: entry.workingDirectory,
+environment: {PATH: applicationPath}
+});
+}
+
 function rebuildAppMenu() {
 let processedModel = [];
 let totalApps = appsInstantiator.count;
@@ -113,7 +127,7 @@ if (entry.noDisplay || !entry.name) continue;
 processedModel.push({
 type: "action",
 text: entry.name,
-onTrigger: () => entry.execute()
+onTrigger: () => startModule.launchApp(entry)
 });
 }
 

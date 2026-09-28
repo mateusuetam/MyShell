@@ -112,6 +112,7 @@ return false;
 }
 
 if (selectedPalette === palette) {
+applyExternalTemplates(themeName);
 return true;
 }
 
