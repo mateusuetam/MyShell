@@ -48,6 +48,12 @@ dev.enable = lib.mkEnableOption "Ferramentas para desenvolvimento com Quickshell
 };
 
 config = lib.mkIf qs.enable {
+assertions = [
+{
+assertion = config.my.homemanager.enable;
+message = "O bundle quickshell requer my.homemanager.enable.";
+}
+];
 
 my.homemanager.extraDotfiles = [
 {
