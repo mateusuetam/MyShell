@@ -13,17 +13,35 @@ id: lockRoot
 property string currentText: ""
 property bool unlockInProgress: false
 property bool showFailure: false
+property int pamPromptCount: 0
+signal clearPasswordRequested()
+
+function clearPassword() {
+currentText = "";
+clearPasswordRequested();
+}
+
+function failUnlock() {
+clearPassword();
+unlockInProgress = false;
+showFailure = true;
+}
 
 function activateLock() {
-currentText = "";
+validationDelay.stop();
+if (pam.active) pam.abort();
+clearPassword();
+unlockInProgress = false;
 showFailure = false;
 sessionLock.locked = true;
 }
 
 function tryUnlock(password) {
-if (password === "") return;
-lockRoot.currentText = password;
-lockRoot.unlockInProgress = true;
+if (password === "" || unlockInProgress || pam.active || !sessionLock.secure) return;
+currentText = password;
+showFailure = false;
+unlockInProgress = true;
+pamPromptCount = 0;
 validationDelay.restart();
 }
 
@@ -31,22 +49,39 @@ Timer {
 id: validationDelay
 interval: 300
 repeat: false
-onTriggered: pam.start()
+onTriggered: {
+if (!lockRoot.unlockInProgress) return;
+if (!sessionLock.secure) {
+lockRoot.failUnlock();
+return;
+}
+if (!pam.start()) lockRoot.failUnlock();
+}
 }
 
 PamContext {
 id: pam
 configDirectory: "../core"
 config: "password.conf"
-onPamMessage: if (this.responseRequired) this.respond(lockRoot.currentText)
+onPamMessage: {
+if (!pam.responseRequired) return;
+if (pam.responseVisible || lockRoot.pamPromptCount >= 1 || lockRoot.currentText === "") {
+pam.abort();
+lockRoot.failUnlock();
+return;
+}
+lockRoot.pamPromptCount++;
+pam.respond(lockRoot.currentText);
+}
 onCompleted: result => {
-if (result === PamResult.Success) {
+if (!lockRoot.unlockInProgress) return;
+if (result === PamResult.Success && sessionLock.secure) {
+lockRoot.clearPassword();
+lockRoot.unlockInProgress = false;
 sessionLock.locked = false;
 } else {
-lockRoot.currentText = "";
-lockRoot.showFailure = true;
+lockRoot.failUnlock();
 }
-lockRoot.unlockInProgress = false;
 }
 }
 
@@ -81,7 +116,7 @@ id: passwordBox
 implicitWidth: 320
 implicitHeight: 42
 focus: true
-enabled: !lockRoot.unlockInProgress
+enabled: sessionLock.secure && !lockRoot.unlockInProgress
 echoMode: TextInput.Password
 horizontalAlignment: TextInput.AlignHCenter
 font.family: ThemeEngine.appliedFontFamily
@@ -117,14 +152,17 @@ border.color: lockRoot.showFailure ? ThemeEngine.palette.lockErrorColor : ThemeE
 opacity: lockRoot.showFailure ? 1.0 : 0.65
 }
 
-onTextChanged: if (lockRoot.showFailure) lockRoot.showFailure = false;
-onAccepted: lockRoot.tryUnlock(passwordBox.text);
+onTextChanged: {
+if (lockRoot.showFailure) lockRoot.showFailure = false;
+}
+onAccepted: {
+lockRoot.tryUnlock(passwordBox.text);
+}
 
 Connections {
 target: lockRoot
-
-function onCurrentTextChanged() {
-if (lockRoot.currentText === "") passwordBox.text = "";
+function onClearPasswordRequested() {
+passwordBox.text = "";
 }
 }
 }
@@ -169,7 +207,9 @@ Timer {
 running: lockRoot.showFailure
 repeat: true
 interval: 400
-onTriggered: parent.opacity = parent.opacity === 1.0 ? 0.3 : 1.0
+onTriggered: {
+parent.opacity = parent.opacity === 1.0 ? 0.3 : 1.0;
+}
 }
 }
 }
